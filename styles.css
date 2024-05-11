@@ -10,7 +10,7 @@ body {
 }
 
 /* Text and Section Styling */
-h1, h2 {
+h1, h2, h3 {
     font-weight: 300; /* Lighter font-weight for headings */
 }
 

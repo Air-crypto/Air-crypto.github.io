@@ -1,11 +1,27 @@
 /* General Body Styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', 'Arial', sans-serif; /* Updated font family for a more modern look */
     margin: 0;
     padding: 0;
     color: #333;
     background: url('astronaut-in-space.jpg') no-repeat center center fixed;
     background-size: cover; /* Cover the entire page */
+    line-height: 1.6; /* Improved line spacing for better readability */
+}
+
+/* Text and Section Styling */
+h1, h2 {
+    font-weight: 300; /* Lighter font-weight for headings */
+}
+
+p, li {
+    font-size: 16px; /* Standard text size for better readability */
+}
+
+/* List styles for nested lists in Experience section */
+ul ul {
+    list-style-type: circle; /* Different list style for sub-items */
+    margin-left: 20px;
 }
 
 /* Header Styles */

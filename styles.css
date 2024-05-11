@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 0;
     color: #333;
-    background: url('astronaut-in-space.jpg.jpg') no-repeat center center fixed;
+    background: url('astronaut-in-space.jpg') no-repeat center center fixed;
     background-size: cover; /* Cover the entire page */
 }
 

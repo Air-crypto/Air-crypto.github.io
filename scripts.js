@@ -15,10 +15,10 @@ function closeModal() {
 // Function to toggle the display of timeline event details
 function toggleTimelineDetail(eventId) {
     var content = document.getElementById(eventId);
-    // Check if the content is currently visible
     if (content.style.display === 'block') {
-        content.style.display = 'none';  // Hide the content if it's visible
+        content.style.display = 'none';
     } else {
-        content.style.display = 'block'; // Show the content if it's hidden
+        content.style.display = 'block';
     }
 }
+

@@ -1,39 +1,19 @@
-.flex-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin: 20px;
-}
-
-.flex-child {
-    flex: 1;
-    margin: 10px;
-    padding: 20px;
-    text-align: center;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 5px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
 /* General Body Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
     color: #333;
+    background: url('background-image.jpg') no-repeat center center fixed;
+    background-size: cover; /* Cover the entire page */
 }
 
 /* Header Styles */
 header {
-    background: url('astronaut-in-space.jpg') no-repeat center center/cover;
     color: white;
     padding: 20px 10%;
     text-align: center;
+    background: rgba(0, 0, 0, 0.5); /* Optional: Adds a dark overlay to make text stand out */
 }
 
 /* Navigation Styles */
@@ -60,14 +40,14 @@ nav ul li a {
 section {
     margin: 20px 10%;
     padding: 20px;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.8); /* Light background for sections for better readability */
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
 
 /* Footer Styles */
 footer {
-    background-color: #333;
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
     text-align: center;
     padding: 20px 10%;
@@ -76,10 +56,10 @@ footer {
 /* Image Styles */
 img {
     width: 100%;
-    max-width: 400px;
+    max-width: 400px;  // Adjust size as necessary
     height: auto;
-    border-radius: 8px;
-    margin-top: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive Image Background */

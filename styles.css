@@ -1,11 +1,27 @@
 /* General Body Styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', 'Arial', sans-serif; /* Updated font family for a more modern look */
     margin: 0;
     padding: 0;
     color: #333;
     background: url('astronaut-in-space.jpg') no-repeat center center fixed;
-    background-size: cover;
+    background-size: cover; /* Cover the entire page */
+    line-height: 1.6; /* Improved line spacing for better readability */
+}
+
+/* Text and Section Styling */
+h1, h2 {
+    font-weight: 300; /* Lighter font-weight for headings */
+}
+
+p, li {
+    font-size: 16px; /* Standard text size for better readability */
+}
+
+/* List styles for nested lists in Experience section */
+ul ul {
+    list-style-type: circle; /* Different list style for sub-items */
+    margin-left: 20px;
 }
 
 /* Header Styles */
@@ -13,7 +29,7 @@ header {
     color: white;
     padding: 20px 10%;
     text-align: center;
-    background: rgba(0, 0, 0, 0.5); /* Adds a dark overlay to make text stand out */
+    background: rgba(0, 0, 0, 0.5); /* Optional: Adds a dark overlay to make text stand out */
 }
 
 /* Navigation Styles */
@@ -36,65 +52,26 @@ nav ul li a {
     border-radius: 5px;
 }
 
-/* Flex Container for About Me Section */
+/* Flex Container for side-by-side layout */
 .flex-container {
     display: flex;
     align-items: center;
     justify-content: space-around;
     margin: 20px;
-    padding: 20px;
 }
 
 .flex-child {
     flex: 1;
     margin: 10px;
-    text-align: justify;
-}
-
-.flex-child img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 5px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Timeline Styles */
-.timeline-container {
-    position: relative;
-    padding-left: 40px;
-    margin: 20px 0;
-}
-
-.timeline-block {
-    position: relative;
-    margin: 20px 0;
-}
-
-.timeline-dot {
-    position: absolute;
-    left: 0;
-    width: 20px;
-    height: 20px;
-    background-color: #555;
-    border-radius: 50%;
-    top: 10px;
-    cursor: pointer; /* Indicates that the dot is clickable */
-}
-
-.timeline-content {
-    display: none; /* Initially hides content */
-    margin-left: 30px;
-    padding: 10px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: justify; /* Justify text for better alignment */
 }
 
 /* Section Styles */
 section {
     margin: 20px 10%;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white for readability */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background for sections for better readability */
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
@@ -107,13 +84,20 @@ footer {
     padding: 20px 10%;
 }
 
-/* Media Queries for Responsive Design */
-@media (max-width: 768px) {
-    .flex-container {
-        flex-direction: column;
-    }
+/* Image Styles */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
 
+/* Responsive Image Background */
+@media (max-width: 600px) {
     header, footer {
         padding: 20px;
+    }
+    .flex-container {
+        flex-direction: column; /* Stack elements vertically on small screens */
     }
 }

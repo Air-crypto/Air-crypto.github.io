@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 0;
     color: #333;
-    background: url('astronaut-in-space.jpg') no-repeat center center fixed;
+    background: url('astronaut-in-space.jpg.jpg') no-repeat center center fixed;
     background-size: cover; /* Cover the entire page */
 }
 
@@ -36,6 +36,21 @@ nav ul li a {
     border-radius: 5px;
 }
 
+/* Flex Container for side-by-side layout */
+.flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin: 20px;
+}
+
+.flex-child {
+    flex: 1;
+    margin: 10px;
+    padding: 20px;
+    text-align: justify; /* Justify text for better alignment */
+}
+
 /* Section Styles */
 section {
     margin: 20px 10%;
@@ -55,8 +70,7 @@ footer {
 
 /* Image Styles */
 img {
-    width: 100%;
-    max-width: 400px;  
+    max-width: 100%;
     height: auto;
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
@@ -64,7 +78,10 @@ img {
 
 /* Responsive Image Background */
 @media (max-width: 600px) {
-    header {
+    header, footer {
         padding: 20px;
+    }
+    .flex-container {
+        flex-direction: column; /* Stack elements vertically on small screens */
     }
 }

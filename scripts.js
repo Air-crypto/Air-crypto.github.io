@@ -1,13 +1,14 @@
-// Function to open a modal with the image source set to the clicked image
-function openModal(src) {
-    var modal = document.getElementById('lightbox-modal');
-    var modalImg = document.getElementById('lightbox-image');
-    modal.style.display = 'flex';
-    modalImg.src = src;
-}
-
-// Function to close the modal
-function closeModal() {
-    var modal = document.getElementById('lightbox-modal');
-    modal.style.display = 'none';
+function expandImage(img) {
+    // Check if the image is already expanded
+    if (img.classList.contains('expanded')) {
+        img.classList.remove('expanded'); // Click again to minimize
+    } else {
+        // Minimize any currently expanded image
+        const expandedImages = document.querySelectorAll('.expanded');
+        for (let expanded of expandedImages) {
+            expanded.classList.remove('expanded');
+        }
+        // Expand the clicked image
+        img.classList.add('expanded');
+    }
 }

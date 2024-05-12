@@ -116,23 +116,24 @@ a:focus, button:focus {
 /* IceHockey/Gallery Image Styles */
 .gallery-container {
     display: flex;
-    flex-wrap: wrap; /* Allows images to wrap onto the next line */
-    justify-content: space-around; /* Centers images and maintains space around them */
-    align-items: center; /* Aligns images vertically */
+    justify-content: space-around;
+    overflow-x: auto; /* Allows horizontal scrolling */
+    white-space: nowrap; /* Keeps all images on one line */
 }
 
 .gallery-container img {
-    width: 20%; /* Sets each image's width to 40% of the container's width */
-    height: auto; /* Keeps the image height proportional to its width */
-    margin: 5% 5%; /* Adds space around each image */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Optional: adds a shadow for depth */
+    width: 10%; /* Initial size of each image */
+    transition: transform 0.3s ease; /* Smooth transition for scaling */
+    cursor: pointer; /* Indicates that an image can be clicked */
 }
 
-@media (max-width: 800px) {
-    .gallery-container img {
-        width: 90%; /* Increase width for smaller screens to maintain better visibility */
-        margin: 5% auto; /* Center images vertically and maintain margin */
-    }
+.expanded {
+    width: 100%; /* Full screen when expanded */
+    position: fixed; /* Fixed position over other content */
+    top: 0;
+    left: 0;
+    z-index: 10; /* Ensures the image is on top */
+    object-fit: cover; /* Covers the viewport without distortion */
 }
 
 

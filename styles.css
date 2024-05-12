@@ -122,7 +122,7 @@ a:focus, button:focus {
 }
 
 .gallery-container img, video {
-    width: 10%; /* Initial size of each image */
+    width: 20%; /* Initial size of each image */
     transition: transform 0.3s ease; /* Smooth transition for scaling */
     cursor: pointer; /* Indicates that an image can be clicked */
 }

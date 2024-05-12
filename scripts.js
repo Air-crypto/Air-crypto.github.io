@@ -9,18 +9,20 @@ class ImageExpander {
         this.container.addEventListener('click', event => {
             const target = event.target;
             if (target.tagName === 'IMG') {
-                if (target === this.currentlyExpanded) {
-                    this.closeExpandedImages(); // Minimize if the same image is clicked
-                } else {
-                    this.expandImage(target); // Expand new image
-                }
-                event.stopPropagation(); // Prevent the event from bubbling to document
+                this.expandImage(target);
             }
         });
 
         // Event listener for clicks on the document to close expanded images
         document.addEventListener('click', event => {
-            this.closeExpandedImages();
+            if (!this.container.contains(event.target)) {
+                this.closeExpandedImages();
+            }
+        });
+
+        // Stop propagation to prevent document listener from firing when clicking on an image
+        this.container.addEventListener('click', event => {
+            event.stopPropagation();
         });
     }
 

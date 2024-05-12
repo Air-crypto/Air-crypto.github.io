@@ -10,7 +10,7 @@ function expandImage(img) {
     }
 
     // Check if the image is too small and scale it up
-    if (img.naturalWidth < window.innerWidth * 0.5 || img.naturalHeight < window.innerHeight * 0.5) {
+    if (img.naturalWidth < window.innerWidth || img.naturalHeight < window.innerHeight) {
         img.style.width = img.naturalWidth * 2 + 'px';  // Scale up by double
         img.style.height = img.naturalHeight * 2 + 'px';  // Maintain aspect ratio
     }

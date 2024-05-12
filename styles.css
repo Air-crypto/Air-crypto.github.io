@@ -1,29 +1,29 @@
 /* General Body Styles */
 body {
-    font-family: 'Segoe UI', 'Arial', sans-serif; /* Updated font family for a more modern look */
+    font-family: 'Segoe UI', 'Arial', sans-serif; 
     margin: 0;
     padding: 0;
     color: #333;
     background: url('astronaut-in-space.jpg') no-repeat center center fixed;
-    background-size: cover; /* Cover the entire page */
-    line-height: 1.6; /* Improved line spacing for better readability */
+    background-size: cover; 
+    line-height: 1.6; 
 }
 
 /* Text and Section Styling */
 h1 {
-    font-size: 24px; /* Larger size for main titles */
+    font-size: 24px; 
 }
 h2 {
-    font-size: 18px; /* Slightly larger than current setting */
+    font-size: 18px; 
 }
 
 p, li {
-    font-size: 16px; /* Standard text size for better readability */
+    font-size: 16px; 
 }
 
 /* List styles for nested lists in Experience section */
 ul ul {
-    list-style-type: circle; /* Different list style for sub-items */
+    list-style-type: circle; 
     margin-left: 20px;
 }
 
@@ -32,7 +32,7 @@ header {
     color: white;
     padding: 20px 10%;
     text-align: center;
-    background: rgba(0, 0, 0, 0.5); /* Optional: Adds a dark overlay to make text stand out */
+    background: rgba(0, 0, 0, 0.5); 
 }
 
 /* Navigation Styles */
@@ -67,7 +67,7 @@ nav ul li a {
     flex: 1;
     margin: 10px;
     padding: 20px;
-    text-align: justify; /* Justify text for better alignment */
+    text-align: justify; 
 }
 
 /* Section Styles */
@@ -97,7 +97,7 @@ img {
 
 /* Accessibility Improvements */
 a, button {
-    outline: none; /* Remove default outline */
+    outline: none; 
 }
 a:focus, button:focus {
     outline: 2px solid white; /* Custom outline for focused elements */

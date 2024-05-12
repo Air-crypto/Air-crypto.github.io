@@ -10,16 +10,14 @@ class MediaManager {
         this.containers.forEach(container => {
             container.addEventListener('click', event => {
                 const target = event.target;
-                if (target.tagName === 'IMG') {
+                if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
                     if (target === MediaManager.currentlyActive) {
-                        this.closeMedia(); // Minimize if the same image is clicked
+                        this.closeMedia(); // Minimize if the same media is clicked
                     } else {
-                        this.expandMedia(target); // Expand new image
+                        this.expandMedia(target); // Expand new media
                     }
-                } else if (target.tagName === 'VIDEO') {
-                    this.toggleVideo(target);
+                    event.stopPropagation(); // Prevent the event from bubbling to document
                 }
-                event.stopPropagation(); // Prevent the event from bubbling to document
             });
         });
 
@@ -33,17 +31,12 @@ class MediaManager {
         // Close any previously active media
         this.closeMedia();
 
-        // Add 'expanded' or similar class to clicked media and set it as currently active globally
+        // Add 'expanded' class to clicked media and set it as currently active globally
         media.classList.add('expanded');
-        MediaManager.currentlyActive = media;
-    }
-
-    toggleVideo(video) {
-        if (video.paused || video.ended) {
-            video.play();
-        } else {
-            video.pause();
+        if (media.tagName === 'VIDEO') {
+            media.play(); // Autoplay when expanded
         }
+        MediaManager.currentlyActive = media;
     }
 
     closeMedia() {

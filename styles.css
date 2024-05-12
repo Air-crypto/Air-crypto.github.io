@@ -55,12 +55,6 @@ nav ul li a {
     border-radius: 5px;
 }
 
-/* Navigation Link Hover Effects */
-nav ul li a:hover, nav ul li a:focus {
-    background-color: rgba(255, 255, 255, 0.8); /* Lighter background on hover */
-    color: #000; /* Dark text color for contrast */
-}
-
 /* Flex Container for side-by-side layout */
 .flex-container {
     display: flex;
@@ -117,4 +111,11 @@ a:focus, button:focus {
     .flex-container {
         flex-direction: column; /* Stack elements vertically on small screens */
     }
+}
+
+/* Navigation Link Hover Effects */
+nav ul li a:hover, nav ul li a:focus {
+    background-color: #ffffff; /* Lighter background on hover */
+    color: #333; /* Dark text color for contrast */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
 }

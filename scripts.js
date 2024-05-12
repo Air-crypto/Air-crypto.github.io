@@ -1,14 +1,13 @@
 function expandImage(img) {
-    // Check if the image is already expanded
-    if (img.classList.contains('expanded')) {
-        img.classList.remove('expanded'); // Click again to minimize
-    } else {
-        // Minimize any currently expanded image
-        const expandedImages = document.querySelectorAll('.expanded');
-        for (let expanded of expandedImages) {
-            expanded.classList.remove('expanded');
-        }
-        // Expand the clicked image
-        img.classList.add('expanded');
+    // Remove any previously expanded images
+    document.querySelectorAll('.expanded').forEach(el => el.classList.remove('expanded'));
+
+    // Add 'expanded' class to clicked image
+    img.classList.add('expanded');
+
+    // Check if the image is too small and scale it up
+    if (img.naturalWidth < window.innerWidth * 0.5 || img.naturalHeight < window.innerHeight * 0.5) {
+        img.style.width = img.naturalWidth * 2 + 'px';  // Scale up by double
+        img.style.height = img.naturalHeight * 2 + 'px';  // Maintain aspect ratio
     }
 }

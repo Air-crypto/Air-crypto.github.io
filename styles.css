@@ -113,9 +113,26 @@ a:focus, button:focus {
     }
 }
 
-/* Navigation Link Hover Effects */
-nav ul li a:hover, nav ul li a:focus {
-    background-color: #ffffff; /* Lighter background on hover */
-    color: #333; /* Dark text color for contrast */
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+.gallery-container {
+    display: flex;
+    justify-content: space-around; /* This will space out the images evenly */
+    margin: 20px 0; /* Adds vertical spacing between rows */
+}
+
+.gallery-container img {
+    width: 30%; /* Adjust width as necessary */
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+    .gallery-container {
+        flex-direction: column; /* Stack images vertically on small screens */
+        align-items: center; /* Center-align the images */
+    }
+
+    .gallery-container img {
+        width: 90%; /* Makes images larger on smaller screens */
+    }
 }

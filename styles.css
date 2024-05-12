@@ -120,7 +120,7 @@ a:focus, button:focus {
 }
 
 .gallery-container img {
-    width: 30%; /* Adjust width as necessary */
+    width: auto; /* Adjust width as necessary */
     height: auto;
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);

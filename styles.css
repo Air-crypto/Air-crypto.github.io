@@ -131,7 +131,7 @@ a:focus, button:focus {
     position: fixed; /* Fixed position to cover the viewport */
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
-    min-width: 50%;
+    min-width: 50%; /* Min size params */
     min-height: 50vh;
     width: 5000px; /* Auto width for natural image size */
     height: auto; /* Auto height for natural image size */

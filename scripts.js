@@ -8,10 +8,4 @@ function expandImage(img) {
         }
         img.classList.add('expanded');
     }
-
-    // Check if the image is too small and scale it up
-    if (img.naturalWidth < window.innerWidth || img.naturalHeight < window.innerHeight) {
-        img.style.width = img.naturalWidth * 2 + 'px';  // Scale up by double
-        img.style.height = img.naturalHeight * 2 + 'px';  // Maintain aspect ratio
-    }
 }

@@ -8,7 +8,11 @@ class ImageExpander {
         // Event listener for images within the container
         this.container.addEventListener('click', event => {
             const target = event.target;
+            if (this === target) {
+                this.closeExpandedImages();
+            }
             if (target.tagName === 'IMG') {
+                this.closeExpandedImages();
                 this.expandImage(target);
             }
         });

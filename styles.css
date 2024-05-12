@@ -12,7 +12,6 @@ body {
 /* Text and Section Styling */
 h1, h2 {
     font-weight: 300; /* Lighter font-weight for headings */
-    font-size: 20px;
 }
 
 p, li {

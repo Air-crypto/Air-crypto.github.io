@@ -1,6 +1,6 @@
 class ImageExpander {
-    constructor(containerSelector) {
-        this.container = document.querySelector(containerSelector);
+    constructor(containerElement) {
+        this.container = containerElement;
         this.initEvents();
     }
 
@@ -45,7 +45,9 @@ class ImageExpander {
     }
 }
 
-// Usage
 document.addEventListener('DOMContentLoaded', () => {
-    const expander = new ImageExpander('.gallery-container');
+    const galleries = document.querySelectorAll('.gallery-container');
+    galleries.forEach(gallery => {
+        new ImageExpander(gallery);
+    });
 });

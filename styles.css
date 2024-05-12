@@ -133,9 +133,9 @@ a:focus, button:focus {
     left: 50%; /* Center horizontally */
     width: auto; /* Auto width for natural image size */
     height: auto; /* Auto height for natural image size */
-    max-width: 100%; /* Limit width to prevent overflow */
-    max-height: 100vh; /* Limit height to prevent overflow */
-    object-fit: contain; /* Ensures entire image is visible, might add space around */
+    max-width: 80%; /* Up to 80% of the viewport width */
+    max-height: 80vh; /* Up to 80% of the viewport height */
+    object-fit: contain; /* Ensures entire image is visible */
     transform: translate(-50%, -50%); /* Adjust position to center the image exactly */
     z-index: 1000; /* Ensures the image is on top of other content */
     cursor: zoom-out; /* Indicates clicking again will minimize */

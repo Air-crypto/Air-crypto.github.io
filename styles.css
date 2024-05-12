@@ -10,9 +10,11 @@ body {
 }
 
 /* Text and Section Styling */
-h1, h2 {
-    font-weight: 300; /* Lighter font-weight for headings */
-    font-size: 18px;
+h1 {
+    font-size: 24px; /* Larger size for main titles */
+}
+h2 {
+    font-size: 18px; /* Slightly larger than current setting */
 }
 
 p, li {
@@ -53,6 +55,12 @@ nav ul li a {
     border-radius: 5px;
 }
 
+/* Navigation Link Hover Effects */
+nav ul li a:hover, nav ul li a:focus {
+    background-color: rgba(255, 255, 255, 0.8); /* Lighter background on hover */
+    color: #000; /* Dark text color for contrast */
+}
+
 /* Flex Container for side-by-side layout */
 .flex-container {
     display: flex;
@@ -91,6 +99,14 @@ img {
     height: auto;
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Accessibility Improvements */
+a, button {
+    outline: none; /* Remove default outline */
+}
+a:focus, button:focus {
+    outline: 2px solid white; /* Custom outline for focused elements */
 }
 
 /* Responsive Image Background */

@@ -121,7 +121,7 @@ a:focus, button:focus {
     white-space: nowrap; /* Keeps all images on one line */
 }
 
-.gallery-container img {
+.gallery-container img, video {
     width: 10%; /* Initial size of each image */
     transition: transform 0.3s ease; /* Smooth transition for scaling */
     cursor: pointer; /* Indicates that an image can be clicked */

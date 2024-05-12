@@ -1,3 +1,4 @@
+<script>
 function expandImage(img) {
     // Check if the image is already expanded
     if (img.classList.contains('expanded')) {
@@ -12,3 +13,4 @@ function expandImage(img) {
         img.classList.add('expanded');
     }
 }
+</script>

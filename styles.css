@@ -115,25 +115,26 @@ a:focus, button:focus {
 
 /* IceHockey/Gallery Image Styles */
 .gallery-container {
-    display: flex;
-    justify-content: space-around;
+    position: relative; /* Establishes a positioning context for absolute positioning inside */
     overflow-x: auto; /* Allows horizontal scrolling */
     white-space: nowrap; /* Keeps all images on one line */
 }
 
 .gallery-container img {
     width: 10%; /* Initial size of each image */
-    transition: transform 0.3s ease; /* Smooth transition for scaling */
-    cursor: pointer; /* Indicates that an image can be clicked */
+    transition: transform 0.3s ease; /* Ensures smooth scaling */
+    cursor: pointer; /* Indicates the image can be clicked */
 }
 
 .expanded {
-    width: 100%; /* Full screen when expanded */
-    position: fixed; /* Fixed position over other content */
+    position: fixed; /* Fixed position to cover the viewport */
     top: 0;
     left: 0;
-    z-index: 10; /* Ensures the image is on top */
-    object-fit: cover; /* Covers the viewport without distortion */
+    width: 100%; /* Full width of the viewport */
+    height: 100vh; /* Full height of the viewport */
+    object-fit: cover; /* Cover the viewport without distorting aspect ratio */
+    z-index: 1000; /* Ensures the image is on top of other content */
+    cursor: zoom-out; /* Indicates clicking again will minimize */
 }
 
 

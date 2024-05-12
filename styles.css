@@ -113,7 +113,7 @@ a:focus, button:focus {
     }
 }
 
-/* IceHockey/Gallery Image Styles */
+/* Gallery Image Styles */
 .gallery-container {
     display: flex;
     justify-content: space-around;
@@ -131,6 +131,8 @@ a:focus, button:focus {
     position: fixed; /* Fixed position to cover the viewport */
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
+    min-width: 50%;
+    min-height: 50vh;
     width: 5000px; /* Auto width for natural image size */
     height: auto; /* Auto height for natural image size */
     max-width: 80%; /* Up to 80% of the viewport width */

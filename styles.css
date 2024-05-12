@@ -120,11 +120,18 @@ a:focus, button:focus {
 }
 
 .gallery-container img {
-    width: 30%; /* Adjust width as necessary */
+    width: auto; /* Adjust width as necessary */
     height: auto;
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
+
+.gallery-container + p {
+    margin-top: 10px; /* Adds space between the images and the description paragraph */
+    text-align: center; /* Optionally centers the text if it fits your design better */
+    padding: 0 10%; /* Adds padding on both sides for better readability on wider screens */
+}
+
 
 @media (max-width: 600px) {
     .gallery-container {
@@ -136,3 +143,4 @@ a:focus, button:focus {
         width: 90%; /* Makes images larger on smaller screens */
     }
 }
+

@@ -128,7 +128,7 @@ a:focus, button:focus {
 
 @media (max-width: 600px) {
     .gallery-container {
-        flex-direction: column; /* Stack images vertically on small screens */
+        flex-direction: row; /* Stack images vertically on small screens */
         align-items: center; /* Center-align the images */
     }
 

@@ -113,32 +113,25 @@ a:focus, button:focus {
     }
 }
 
+/* IceHockey/Gallery Image Styles */
 .gallery-container {
     display: flex;
-    flex-wrap: wrap; /* Allows items to wrap onto the next line as needed */
-    justify-content: space-around; /* Evenly spaces the images with space at the edges */
-    align-items: center; /* Aligns images in case they are of different heights */
-    padding: 10px 0; /* Adds vertical padding for breathing room */
+    flex-wrap: wrap; /* Allows images to wrap onto the next line */
+    justify-content: space-around; /* Centers images and maintains space around them */
+    align-items: center; /* Aligns images vertically */
 }
 
 .gallery-container img {
-    flex: 0 0 22%; /* Each image will take roughly 22% of the container's width */
-    max-width: 100%; /* Ensures image is responsive and does not overflow its container */
-    height: auto; /* Maintains the aspect ratio */
-    margin: 10px; /* Provides space between images */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Optional: adds shadow for better visual separation */
+    width: 40%; /* Sets each image's width to 40% of the container's width */
+    height: auto; /* Keeps the image height proportional to its width */
+    margin: 5% 5%; /* Adds space around each image */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Optional: adds a shadow for depth */
 }
 
 @media (max-width: 800px) {
     .gallery-container img {
-        flex: 0 0 48%; /* Switch to two images per row on smaller screens */
-        margin: 5px; /* Smaller margin on smaller screens */
-    }
-}
-
-@media (max-width: 500px) {
-    .gallery-container img {
-        flex: 0 0 100%; /* One image per row on very small screens */
+        width: 90%; /* Increase width for smaller screens to maintain better visibility */
+        margin: 5% auto; /* Center images vertically and maintain margin */
     }
 }
 

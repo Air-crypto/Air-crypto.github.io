@@ -120,7 +120,7 @@ a:focus, button:focus {
 }
 
 .gallery-container img {
-    width: auto; /* Adjust width as necessary */
+    width: 30%; /* Adjust width as necessary */
     height: auto;
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
@@ -128,7 +128,7 @@ a:focus, button:focus {
 
 @media (max-width: 600px) {
     .gallery-container {
-        flex-direction: row; /* Stack images vertically on small screens */
+        flex-direction: column; /* Stack images vertically on small screens */
         align-items: center; /* Center-align the images */
     }
 

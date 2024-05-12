@@ -1,57 +1,51 @@
 class ImageExpander {
-    constructor(containerElement) {
-        this.container = containerElement;
+    static currentlyExpanded = null; // Shared across all instances
+
+    constructor(containerSelector) {
+        this.containers = document.querySelectorAll(containerSelector);
         this.initEvents();
     }
 
     initEvents() {
-        // Event listener for images within the container
-        this.container.addEventListener('click', event => {
-            const target = event.target;
-            if (this === target) {
-                this.closeExpandedImages();
-            }
-            if (target.tagName === 'IMG') {
-                this.closeExpandedImages();
-                this.expandImage(target);
-            }
+        // Apply event listeners to each container
+        this.containers.forEach(container => {
+            container.addEventListener('click', event => {
+                const target = event.target;
+                if (target.tagName === 'IMG') {
+                    if (target === ImageExpander.currentlyExpanded) {
+                        this.closeExpandedImages(); // Minimize if the same image is clicked
+                    } else {
+                        this.expandImage(target); // Expand new image
+                    }
+                    event.stopPropagation(); // Prevent the event from bubbling to document
+                }
+            });
         });
 
-        // Event listener for clicks on the document to close expanded images
-        document.addEventListener('click', event => {
-            if (!this.container.contains(event.target)) {
-                this.closeExpandedImages();
-            }
-        });
-
-        // Stop propagation to prevent document listener from firing when clicking on an image
-        this.container.addEventListener('click', event => {
-            event.stopPropagation();
+        // Global click listener to close expanded images
+        document.addEventListener('click', () => {
+            this.closeExpandedImages();
         });
     }
 
     expandImage(img) {
-        // First close any previously expanded images
+        // Close any previously expanded images
         this.closeExpandedImages();
 
-        // Add 'expanded' class to clicked image if it's not already expanded
-        if (!img.classList.contains('expanded')) {
-            img.classList.add('expanded');
-        }
+        // Add 'expanded' class to clicked image and set it as currently expanded globally
+        img.classList.add('expanded');
+        ImageExpander.currentlyExpanded = img;
     }
 
     closeExpandedImages() {
-        // Remove 'expanded' class from all images
-        const expandedImages = this.container.querySelectorAll('.expanded');
-        expandedImages.forEach(img => {
-            img.classList.remove('expanded');
-        });
+        // If an image is expanded, remove the class and reset the currently expanded image
+        if (ImageExpander.currentlyExpanded) {
+            ImageExpander.currentlyExpanded.classList.remove('expanded');
+            ImageExpander.currentlyExpanded = null;
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const galleries = document.querySelectorAll('.gallery-container');
-    galleries.forEach(gallery => {
-        new ImageExpander(gallery);
-    });
+    new ImageExpander('.gallery-container');
 });

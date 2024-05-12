@@ -128,10 +128,15 @@ a:focus, button:focus {
 }
 
 .expanded {
-    width: 100%; /* Full screen when expanded */
-    position: fixed; /* Fixed position over other content */
-    top: 0;
-    left: 0;
-    z-index: 10; /* Ensures the image is on top */
-    object-fit: cover; /* Covers the viewport without distortion */
+    position: fixed; /* Fixed position to cover the viewport */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    width: auto; /* Auto width for natural image size */
+    height: auto; /* Auto height for natural image size */
+    max-width: 100%; /* Limit width to prevent overflow */
+    max-height: 100vh; /* Limit height to prevent overflow */
+    object-fit: contain; /* Ensures entire image is visible, might add space around */
+    transform: translate(-50%, -50%); /* Adjust position to center the image exactly */
+    z-index: 1000; /* Ensures the image is on top of other content */
+    cursor: zoom-out; /* Indicates clicking again will minimize */
 }

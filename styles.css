@@ -116,9 +116,9 @@ a:focus, button:focus {
 /* Gallery Image Styles */
 .gallery-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     overflow-x: auto; /* Allows horizontal scrolling */
-    white-space: nowrap; /* Keeps all images on one line */
 }
 
 .gallery-container img, video {

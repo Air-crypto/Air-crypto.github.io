@@ -10,7 +10,7 @@ class MediaManager {
         this.containers.forEach(container => {
             container.addEventListener('click', event => {
                 const target = event.target;
-                if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
+                if (target.tagName === 'IMG') {
                     if (target === MediaManager.currentlyActive) {
                         this.closeMedia(); // Minimize if the same media is clicked
                     } else {
@@ -33,9 +33,6 @@ class MediaManager {
 
         // Add 'expanded' class to clicked media and set it as currently active globally
         media.classList.add('expanded');
-        //if (media.tagName === 'VIDEO') {
-            //media.play(); // Autoplay when expanded
-        //}
         MediaManager.currentlyActive = media;
     }
 

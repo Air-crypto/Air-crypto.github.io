@@ -16,7 +16,7 @@ class MediaManager {
                     } else {
                         this.expandMedia(target); // Expand new media
                     }
-                    event.stopPropagation(); // Prevent the event from bubbling to document
+                    event.stopPropagation(); 
                 }
             });
         });
@@ -33,14 +33,13 @@ class MediaManager {
 
         // Add 'expanded' class to clicked media and set it as currently active globally
         media.classList.add('expanded');
-        if (media.tagName === 'VIDEO') {
-            media.play(); // Autoplay when expanded
-        }
+        //if (media.tagName === 'VIDEO') {
+            //media.play(); // Autoplay when expanded
+        //}
         MediaManager.currentlyActive = media;
     }
 
     closeMedia() {
-        // If media is active, remove the class and reset the currently active media
         if (MediaManager.currentlyActive) {
             if (MediaManager.currentlyActive.tagName === 'VIDEO' && !MediaManager.currentlyActive.paused) {
                 MediaManager.currentlyActive.pause();
@@ -52,5 +51,5 @@ class MediaManager {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new MediaManager('.gallery-container'); // Assume video and images are in the same container
+    new MediaManager('.gallery-container'); 
 });

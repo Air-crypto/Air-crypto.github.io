@@ -21,29 +21,27 @@
     <section>
         <h2>FPGA-Based eBike Controller - System Synthesis and Design</h2>
         <div class="gallery-container">
-            <img src="projects/ebike_controller_1.jpg" alt="FPGA eBike Controller Implementation" onclick="expandMedia(this)">
-            <img src="projects/ebike_controller_2.jpg" alt="eBike Controller Hardware Setup" onclick="expandMedia(this)">
+            <img src="projects/ebike_synth_test.jpg" alt="2am working version of ebike system after synthesis" onclick="expandMedia(this)">
+            <img src="projects/ebike_controller_vid.mp4" alt="eBike Controller Hardware Setup" onclick="expandMedia(this)">
         </div>
         <p>Developed a high performance, battery efficient, digital eBike controller using System Verilog, integrating PID-based motor drive logic, SPI communication interfaces, exponential averaging filters, inertial sensor fusion, and UART telemetry for real-time sensor data transmission.</p>
         <p>Integrated pipeline stages and synthesis optimizations to meet a 400 MHz clock requirement, while achieving a 0.3ns setup slack margin. Reduced synthesized hardware area from 20k μm² to 13k μm² through logic and synthesis script optimizations.</p>
         <p>Designed testbenches using constrained random verification, and compiled it onto an FPGA mounted on a bike to demonstrate real-world functionality.</p>
+        <p>First picture is when our synthesized scripts passed our post synthesis tests for the first time (at 2am). The video is our working synthesized implementation on a FPGA testbench.</p>
     </section>
     <section>
         <h2>Quantum Computing Error Mitigation using Graph Neural Networks - System Architecture for Quantum Computers</h2>
         <div class="gallery-container">
-            <img src="projects/quantum_gnn_1.jpg" alt="Graph Neural Network Architecture" onclick="expandMedia(this)">
-            <img src="projects/quantum_gnn_2.jpg" alt="Quantum Circuit Error Analysis" onclick="expandMedia(this)">
+            <img src="projects/GNN_histogram.jpg" alt="Graph Neural Network Architecture" onclick="expandMedia(this)">
+            <img src="projects/GNN_scatter.jpg" alt="Quantum Circuit Error Analysis" onclick="expandMedia(this)">
         </div>
         <p>Designed and implemented a Graph Neural Network model with JAX trained on a diverse dataset of over 6,800 quantum circuits on Google TPUs. The dataset comprises 1,800 fuzzed MQT benchmark quantum circuits and 5,000 random QAOA quantum circuits.</p>
         <p>This model achieved a 267% error reduction on structurally different quantum circuits compared to the training set, demonstrating strong generalization capabilities across various quantum computing architectures.</p>
         <p>Paper publication currently in process, showcasing novel approaches to quantum error mitigation through machine learning.</p>
+        <p>First picture shows a histogram of the errors of different simulated quantum circuits. Green is ours, red is uncorrected. Ideally everything is centered at 0. The second image is a scatterplot of the errors - the line y=x represents the true outcome of the simulated circuit without noise. Even after adding noise, our corrected values match this expectation very well.</p>
     </section>
     <section>
         <h2>Multithreaded Kernel Scheduler - Operating Systems</h2>
-        <div class="gallery-container">
-            <img src="projects/kernel_scheduler_1.jpg" alt="Stride Scheduler Implementation" onclick="expandMedia(this)">
-            <img src="projects/kernel_scheduler_2.jpg" alt="xv6 Kernel Modifications" onclick="expandMedia(this)">
-        </div>
         <p>Implemented a stride scheduler in C with the xv6 kernel to address CPU allocation fairness challenges between I/O-heavy and CPU-intensive processes using ticket-based priority management.</p>
         <p>Utilized semaphores for thread-safe shared resource protection and developed custom system calls enabling dynamic ticket allocation adjustments during runtime.</p>
         <p>Achieved balanced process execution where I/O-heavy processes maintained quick responsiveness while preventing CPU-bound process starvation, demonstrating advanced kernel-level scheduling algorithms and concurrent programming techniques.</p>

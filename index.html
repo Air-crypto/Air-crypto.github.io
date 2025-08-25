@@ -35,31 +35,101 @@
     </section>
     <section>
         <h3>Experience</h3>
-        <h2>January 2024 - Present : Undergraduate Researcher at MIMRTL</h2>
-        <p>Since January 2024, I have been actively involved as an undergraduate researcher at the <a href="https://mimrtl.radiology.wisc.edu/mimrtl-research/" target="_blank" rel="noopener noreferrer">Molecular Imaging / Magnetic Resonance Technology Lab</a> at the University of Wisconsin-Madison. My research primarily involves performing model surgery on the LLaVA model to develop cross-modal machine learning applications. I also focus on running model training algorithms at the Center for High Throughput Computing, where I utilize 80GB A100 GPUs to effectively retrain LLMs (such as GPT4) on new datasets while preserving knowledge from previous data. Utilizing Docker, I containerize model dependencies to facilitate collaboration and ensure consistent environment setups among my team members. This role has been instrumental in advancing my skills in innovative machine learning solutions and contributing to the broader field of cross-model machine and transfer learning.</p>
+        
+        <h2>May 2025 - August 2025: AI/ML Intern at AMD (Advanced Micro Devices)</h2>
+        <p><strong>Developing AI Frameworks and Models to Accelerate Hardware Design Efficiency</strong></p>
+        <p>Designed and implemented an AI pipeline for root-cause analysis of hardware traces, revolutionizing failure analysis by clustering failures by root causes rather than just error signatures. Achieved 82% accuracy compared to 28% for state-of-the-art systems, reducing verification time and resources by 30x.</p>
+        <p>Built a scalable data pipeline from a Dremio data lake to GPU cluster that processed 97,000 transactions/second on a 3.5B-trace corpus at almost linear scale. Redesigned LLM architecture from hierarchical full attention to sliding-window attention, boosting memory efficiency from exponential to linear for long sequences while preserving causality and recent-event focus.</p>
+        <p>Implemented QLoRA quantization for 4-bit training through extensive ablation tests, achieving 22x context window growth (from 512 to 11,000 tokens) resulting in a 54% accuracy boost. Developed fine-tuning with layer freezing, enabling quick adaptation to new CPU/GPU chip families with minimal training data while maintaining low reconstruction loss and sharp cluster separation.</p>
+        <p>First author of a paper published at AMD's Global Technical Authors Conference, highlighting superior results from quantized models leveraging sliding window attention.</p>
+
+        <h2>November 2024 - Present: Researcher at Applied Research Laboratory for Intelligence and Security (ARLIS)</h2>
+        <p><strong>Building a Multimodal Search Engine using LLMs and RAG for the Department of Defense</strong></p>
+        <p>Lead developer working with the DoD via the ARLIS institute on novel context-aware multi-modal retrieval systems integrating LLMs with Retrieval Augmented Generation (RAG). This search engine unifies information retrieval across diverse input data types (text, images, audio, and video) for naval assets, declassification workflows, and other defense use cases.</p>
+        <p>Architected and trained a PyTorch-based model that aligns heterogeneous data embeddings into a unified semantic space, enabling cross-modal retrieval. Designed specialized contrastive loss functions with regularization and implemented novel cross-attention mechanisms to enhance correlation between projected image, audio, video, and text features.</p>
+        <p>Achieved breakthrough performance metrics: 94.53% accuracy, 99.93% Top-5 accuracy, and 0.9703 Mean Reciprocal Rank (MRR), significantly outperforming state-of-the-art models such as CLIP (35.78% accuracy) on image-caption retrieval tasks.</p>
+
+        <h2>January 2024 - Present: Undergraduate Researcher at Molecular Imaging/Magnetic Resonance Technology Lab</h2>
+        <p><strong>Driving AI Innovations in Medicine Through Novel Work in Multimodal LLMs</strong></p>
+        <p>Collaborating with researchers at Microsoft to improve medical image retrieval by utilizing expertise in embedding transformations to better align CT and MRI scans for use in multimodal LLMs, enhancing diagnostic accuracy and decision-making critical for patient diagnoses.</p>
+        <p>Developed a custom multi-modal Projection Model using PyTorch to translate pseudocode embeddings to C code embeddings, improving retrieval accuracy by 58.2% compared to state-of-the-art models and algorithms (e.g., BM25 and Sentence Transformers). Published a paper as primary author, with UW-Madison filing a patent for this innovation.</p>
+        <p>Addressed critical memory limitations during LLaVA model fine-tuning by implementing distributed training across multiple 80GB A100 GPUs, gradient checkpointing, and automatic mixed precision training. Achieved a 41.6% reduction in memory footprint (from 212 GB to 124 GB), enabling training of larger models and batch sizes while accelerating the R&D pipeline.</p>
+
+        <h2>June 2024 - December 2024: Software Developer Intern at Theom Inc.</h2>
+        <p><strong>Built High-Performance Fine-Grained Access Control for LLMs with Vector Search and Data Lineage Tracking</strong></p>
+        <p>Designed and implemented a Flask-based RAG service with fine-grained access control, integrating multiple vector databases (Pinecone, OpenSearch, Milvus, Chroma, MongoDB) to enable identity and context-aware similarity searches for LLM applications. Engineered novel algorithms for creating, updating, and deleting vector embeddings across multiple databases with batch processing capabilities.</p>
+        <p>Developed permission-based filtering mechanisms that allow the vector system to filter results based on the querier's access policies, context, and identity. Utilized LangChain and LlamaIndex to scale deployment to customers through generalized scalable solutions.</p>
+        <p>Implemented a semantic search algorithm using C++, SQL, and AWS OpenSearch that identified similar data, significantly outperforming fuzzy hashing approaches. Achieved 10x runtime performance improvement in data classification and enhanced data traceability by 572%.</p>
+
+        <h2>September 2023 - Present: Team Member at Wisconsin Robotics</h2>
+        <p><strong>Enhancing Autonomous Vehicle Navigation through Sensor Fusion</strong></p>
+        <p>Developed sensor-fusion trajectory models combining LiDAR and camera data to address navigation accuracy challenges in autonomous vehicles operating on real-time systems. Reduced navigation errors by 34% and enhanced path-planning efficiency by 26% through innovative multi-sensor integration techniques.</p>
+        <p>Leveraged Docker and GitHub alongside ROS to containerize applications and facilitate seamless communication between software systems and robots, demonstrating effective robotics software architecture in autonomous vehicle systems.</p>
     </section>
     <section id="timeline">
-        <h3>Passion Projects - For Details Head to the <a href="projects.html">Projects Tab</a></h3>
+        <h3>Projects - For Details Head to the <a href="projects.html">Projects Tab</a></h3>
         <div class="timeline-container">
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>August 2023 - Violence Detection Project</h2>
-                    <p>Developed a Violence Detection System using AI to classify content in videos based on behavior. Used CNNs and LSTMs, implemented with Python.</p>
+                    <h2>February 2025 - May 2025: FPGA-Based eBike Controller</h2>
+                    <p>Developed a high performance, battery efficient, digital eBike controller using System Verilog with PID-based motor control and achieved 400 MHz clock frequency.</p>
                 </div>
             </div>
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>August 2023 - Acoustic Keylogger Project</h2>
-                    <p>Developed an Acoustic Keylogger using AI to detect keystrokes from audio input. Used CNNs and spectrograms, implemented with Python.</p>
+                    <h2>March 2025 - May 2025: Quantum Computing Error Mitigation using Graph Neural Networks</h2>
+                    <p>Designed a Graph Neural Network model with JAX trained on 6,800+ quantum circuits, achieving 267% error reduction on unseen circuit structures.</p>
                 </div>
             </div>
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>February 2022 - ASL Translator Project</h2>
-                    <p>Created the Real-time American Sign Language to Text Translator using gesture recognition. Used CNNs and Google's Mediapipe model, implemented with Javascript and Python.</p>
+                    <h2>October 2024 - November 2024: Multithreaded Kernel Scheduler</h2>
+                    <p>Implemented a stride scheduler in the xv6 kernel with semaphores and dynamic priority adjustment through custom system calls.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>May 2024: LED Controller</h2>
+                    <p>Built a circuit with potentiometer, button, and switch to control LED flashing frequency and color mixing with oscilloscope timing analysis.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>February 2024 - April 2024: Verilog Guitar Tuner on FPGA</h2>
+                    <p>Designed a real-time guitar tuner in Verilog with pipeline optimizations, achieving frequency detection and pitch analysis on FPGA hardware.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>March 2024: Least Squares Classifier Training</h2>
+                    <p>Implemented gradient descent from scratch for a binary least squares classifier with custom gradient calculations and training algorithms.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>August 2023: Violence Detection Project</h2>
+                    <p>Developed a Violence Detection System using CNNs and LSTMs to classify video content based on behavioral analysis.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>August 2023: Acoustic Keylogger Project</h2>
+                    <p>Created an AI-powered acoustic keylogger using CNNs and spectrograms to detect keystrokes from audio input.</p>
+                </div>
+            </div>
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>February 2022: ASL Translator Project</h2>
+                    <p>Built a real-time American Sign Language to Text Translator using CNNs and Google's Mediapipe for gesture recognition.</p>
                 </div>
             </div>
         </div>

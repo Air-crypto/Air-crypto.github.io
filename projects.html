@@ -19,6 +19,36 @@
         </nav>
     </header>
     <section>
+        <h2>FPGA-Based eBike Controller - System Synthesis and Design</h2>
+        <div class="gallery-container">
+            <img src="projects/ebike_controller_1.jpg" alt="FPGA eBike Controller Implementation" onclick="expandMedia(this)">
+            <img src="projects/ebike_controller_2.jpg" alt="eBike Controller Hardware Setup" onclick="expandMedia(this)">
+        </div>
+        <p>Developed a high performance, battery efficient, digital eBike controller using System Verilog, integrating PID-based motor drive logic, SPI communication interfaces, exponential averaging filters, inertial sensor fusion, and UART telemetry for real-time sensor data transmission.</p>
+        <p>Integrated pipeline stages and synthesis optimizations to meet a 400 MHz clock requirement, while achieving a 0.3ns setup slack margin. Reduced synthesized hardware area from 20k μm² to 13k μm² through logic and synthesis script optimizations.</p>
+        <p>Designed testbenches using constrained random verification, and compiled it onto an FPGA mounted on a bike to demonstrate real-world functionality.</p>
+    </section>
+    <section>
+        <h2>Quantum Computing Error Mitigation using Graph Neural Networks - System Architecture for Quantum Computers</h2>
+        <div class="gallery-container">
+            <img src="projects/quantum_gnn_1.jpg" alt="Graph Neural Network Architecture" onclick="expandMedia(this)">
+            <img src="projects/quantum_gnn_2.jpg" alt="Quantum Circuit Error Analysis" onclick="expandMedia(this)">
+        </div>
+        <p>Designed and implemented a Graph Neural Network model with JAX trained on a diverse dataset of over 6,800 quantum circuits on Google TPUs. The dataset comprises 1,800 fuzzed MQT benchmark quantum circuits and 5,000 random QAOA quantum circuits.</p>
+        <p>This model achieved a 267% error reduction on structurally different quantum circuits compared to the training set, demonstrating strong generalization capabilities across various quantum computing architectures.</p>
+        <p>Paper publication currently in process, showcasing novel approaches to quantum error mitigation through machine learning.</p>
+    </section>
+    <section>
+        <h2>Multithreaded Kernel Scheduler - Operating Systems</h2>
+        <div class="gallery-container">
+            <img src="projects/kernel_scheduler_1.jpg" alt="Stride Scheduler Implementation" onclick="expandMedia(this)">
+            <img src="projects/kernel_scheduler_2.jpg" alt="xv6 Kernel Modifications" onclick="expandMedia(this)">
+        </div>
+        <p>Implemented a stride scheduler in C with the xv6 kernel to address CPU allocation fairness challenges between I/O-heavy and CPU-intensive processes using ticket-based priority management.</p>
+        <p>Utilized semaphores for thread-safe shared resource protection and developed custom system calls enabling dynamic ticket allocation adjustments during runtime.</p>
+        <p>Achieved balanced process execution where I/O-heavy processes maintained quick responsiveness while preventing CPU-bound process starvation, demonstrating advanced kernel-level scheduling algorithms and concurrent programming techniques.</p>
+    </section>
+    <section>
         <h2>Verilog Guitar Tuner on an FPGA - Digital System Fundamentals</h2>
         <div class="gallery-container">
             <video muted controls onclick="expandMedia(this)">
@@ -28,6 +58,8 @@
             <img src="projects/IMG_0003.jpg" alt="pipelining design" onclick="expandMedia(this)">
             <img src="projects/IMG_7214.jpg" alt="ordering dominoes picture" onclick="expandMedia(this)">
         </div>
+        <p>Designed and implemented a real-time guitar tuner on DE2-115 FPGA using Verilog, integrating FSM-based frequency detection, pushbutton synchronizers, and subtraction circuits for accurate string pitch analysis.</p>
+        <p>Applied strategic pipelining techniques by inserting pipeline flip-flops at critical path bottlenecks, breaking combinational logic into optimized stages to maximize throughput. Reduced maximum combinational delay from 17ns to 9ns and increased operating frequency from 50MHz to 83.33MHz (67% improvement).</p>
         <p>Testing our guitar tuner - which was written in Verilog - on an FPGA board. Got it working at 4am.</p>
         <p>The first image is our multiplier function with a pipeline register to allow for higher frequencies and throughput.</p>
         <p>The second image is one of my friends picking up Dominoes pizza at 2am :]</p>
@@ -39,7 +71,8 @@
             <img src="projects/IMG_7169.jpg" alt="grad descent picture" onclick="expandMedia(this)">
             <img src="projects/IMG_7168.jpg" alt="grad descent picture" onclick="expandMedia(this)">
         </div>
-        <p>Solved for gradients and wrote the gradient descent fuction from scratch for a binary least squares classifier.</p>
+        <p>Solved for gradients and wrote the gradient descent function from scratch for a binary least squares classifier, implementing custom mathematical derivations and optimization algorithms.</p>
+        <p>Developed the entire training pipeline including cost function computation, gradient calculation, and parameter updates without using pre-built machine learning libraries.</p>
         <p>First image was when I forgot a negative sign which I found funny. Second image is the fully trained finished result.</p>
     </section>
     <section>
@@ -80,7 +113,7 @@
         <p><a href="https://github.com/Air-crypto/Air-crypto.github.io" target="_blank" rel="noopener noreferrer">Website Source Code</a></p>
     </section>
     <footer>
-        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a></p>
+        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="nonoopener noreferrer">LinkedIn Profile</a></p>
     </footer>
     <script src="scripts.js"></script>
 </body>

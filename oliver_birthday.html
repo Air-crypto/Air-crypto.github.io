@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sun-color: #FFD700;
+            --earth-color: #4A90D9;
+            --space-bg: #0a0a1a;
+            --star-color: #fff;
+            --cake-base: #8B4513;
+            --frosting: #FFB6C1;
+            --candle-flame: #FF6B35;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 100%);
+        }
+
+        /* Starfield */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Shooting stars */
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, white, transparent);
+            border-radius: 2px;
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateX(500px) translateY(300px); opacity: 0; }
+        }
+
+        /* Image Frames */
+        .image-frame {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 325px;
+            height: 250px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 3px solid rgba(255, 215, 0, 0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            z-index: 30;
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.2),
+                inset 0 0 30px rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .image-frame:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 
+                0 0 50px rgba(255, 215, 0, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .image-frame.left {
+            left: 40px;
+        }
+
+        .image-frame.right {
+            right: 40px;
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
+        }
+
+        .image-placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        /* Solar System Container */
+        .solar-system {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            z-index: 10;
+            transition: all 1s ease;
+        }
+
+        .solar-system.minimized {
+            transform: translate(-50%, -50%) scale(0.3);
+            top: 15%;
+            left: 50%;
+            opacity: 0.7;
+        }
+
+        /* Sun */
+        .sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fff7a8, #ffd700 40%, #ff8c00 70%, #ff4500);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px #ffd700,
+                0 0 100px #ff8c00,
+                0 0 150px rgba(255, 140, 0, 0.5),
+                inset -10px -10px 30px rgba(255, 69, 0, 0.4);
+            animation: pulse-sun 4s ease-in-out infinite;
+        }
+
+        .sun::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: corona 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-sun {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes corona {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* Earth Orbit Path */
+        .orbit-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        /* Earth Container - 2s is 100% faster than 4s */
+        .earth-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 350px;
+            height: 350px;
+            margin-left: -175px;
+            margin-top: -175px;
+            animation: orbit 0.75s linear infinite;
+            transform-origin: center center;
+        }
+
+        .earth-orbit.paused {
+            animation-play-state: paused;
+        }
+
+        @keyframes orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .earth {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 36px;
+            background: radial-gradient(circle at 30% 30%, #87ceeb, #4a90d9 40%, #1e4d2b 70%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px rgba(74, 144, 217, 0.5),
+                inset -5px -5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .earth:hover {
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .earth::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            width: 12px;
+            height: 8px;
+            background: rgba(34, 139, 34, 0.6);
+            border-radius: 50%;
+            transform: rotate(-20deg);
+        }
+
+        .earth::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            width: 10px;
+            height: 6px;
+            background: rgba(34, 139, 34, 0.5);
+            border-radius: 50%;
+        }
+
+        /* Moon */
+        .moon-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 55px;
+            height: 55px;
+            margin-left: -27.5px;
+            margin-top: -27.5px;
+            animation: moon-orbit 1s linear infinite;
+        }
+
+        @keyframes moon-orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .moon {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle at 30% 30%, #f5f5f5, #c0c0c0);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Orbit Counter */
+        .orbit-counter {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .counter-number {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD700, #FF6B35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .counter-label {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+
+        /* Cake */
+        .cake-container {
+            position: fixed;
+            bottom: -350px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            transition: bottom 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .cake-container.visible {
+            bottom: 40px;
+        }
+
+        .cake {
+            position: relative;
+            width: 280px;
+            height: 180px;
+        }
+
+        .cake-layer {
+            position: absolute;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #FFB6C1 0%, #FF69B4 50%, #8B4513 51%, #654321 100%);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .cake-layer.bottom {
+            bottom: 0;
+            left: 0;
+            width: 280px;
+            height: 80px;
+        }
+
+        .cake-layer.middle {
+            bottom: 70px;
+            left: 30px;
+            width: 220px;
+            height: 60px;
+        }
+
+        .cake-layer.top {
+            bottom: 120px;
+            left: 60px;
+            width: 160px;
+            height: 50px;
+        }
+
+        /* Frosting drips */
+        .drip {
+            position: absolute;
+            background: #FFB6C1;
+            border-radius: 0 0 10px 10px;
+            animation: drip 3s ease-in-out infinite;
+        }
+
+        @keyframes drip {
+            0%, 100% { height: 15px; }
+            50% { height: 25px; }
+        }
+
+        /* Number Candles */
+        .candles-container {
+            position: absolute;
+            bottom: 165px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .number-candle {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .number-candle:hover {
+            transform: scale(1.1);
+        }
+
+        .number-candle svg {
+            width: 50px;
+            height: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .candle-body {
+            fill: url(#candleGradient);
+        }
+
+        .candle-stripe {
+            fill: rgba(255, 255, 255, 0.3);
+        }
+
+        .wick {
+            fill: #333;
+        }
+
+        .flame-group {
+            transform-origin: center bottom;
+            animation: flicker 0.3s ease-in-out infinite alternate;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .number-candle.blown .flame-group {
+            opacity: 0;
+            transform: translateY(-10px) scale(0);
+        }
+
+        .flame-outer {
+            fill: #FF6B35;
+        }
+
+        .flame-inner {
+            fill: #FFD700;
+        }
+
+        .flame-core {
+            fill: #FFF8DC;
+        }
+
+        .number-candle.blown .smoke {
+            opacity: 1;
+            animation: smoke-rise 2s ease-out forwards;
+        }
+
+        .smoke {
+            opacity: 0;
+            fill: rgba(150, 150, 150, 0.6);
+        }
+
+        @keyframes smoke-rise {
+            0% { opacity: 0.6; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); }
+            100% { transform: scale(1.05) rotate(2deg); }
+        }
+
+        /* Present Boxes */
+        .present {
+            position: fixed;
+            cursor: pointer;
+            z-index: 40;
+            transition: transform 0.3s;
+        }
+
+        .present:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .present-box {
+            width: 80px;
+            height: 60px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .present-lid {
+            position: absolute;
+            top: -15px;
+            left: -5px;
+            width: 90px;
+            height: 20px;
+            border-radius: 5px;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .present:hover .present-lid {
+            transform: translateY(-20px) rotate(-10deg);
+        }
+
+        .present-ribbon-v {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.3));
+        }
+
+        .present-ribbon-h {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.3));
+        }
+
+        .bow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 20px;
+        }
+
+        .bow::before, .bow::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 20px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        }
+
+        .bow::before {
+            left: 0;
+            transform: rotate(-30deg);
+        }
+
+        .bow::after {
+            right: 0;
+            transform: rotate(30deg);
+        }
+
+        /* Party Horn */
+        .party-horn {
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            width: 120px;
+            height: 60px;
+            cursor: pointer;
+            z-index: 60;
+            transition: transform 0.2s;
+        }
+
+        .party-horn:hover {
+            transform: scale(1.1);
+        }
+
+        .party-horn:active {
+            transform: scale(0.95);
+        }
+
+        .horn-body {
+            width: 100px;
+            height: 30px;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B35);
+            border-radius: 0 50px 50px 0;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .horn-body::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 30px;
+            height: 20px;
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            border-radius: 50%;
+        }
+
+        .horn-stripes {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 10px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 10px,
+                rgba(255, 255, 255, 0.3) 10px,
+                rgba(255, 255, 255, 0.3) 15px
+            );
+            border-radius: 0 50px 50px 0;
+        }
+
+        .horn-tip {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 20px solid #FF6B35;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* Firework */
+        .firework {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        /* Nebula background effects */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--space-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 1s, visibility 1s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-rocket {
+            width: 60px;
+            height: 60px;
+            animation: rocket-launch 2s ease-in-out infinite;
+        }
+
+        @keyframes rocket-launch {
+            0%, 100% { transform: translateY(0) rotate(-45deg); }
+            50% { transform: translateY(-30px) rotate(-45deg); }
+        }
+
+        /* Interactive hint */
+        .hint {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            animation: fade-hint 3s ease-in-out infinite;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @keyframes fade-hint {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.2; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .image-frame {
+                width: 150px;
+                height: 200px;
+            }
+            .image-frame.left {
+                left: 10px;
+            }
+            .image-frame.right {
+                right: 10px;
+            }
+            .solar-system {
+                width: 350px;
+                height: 350px;
+            }
+            .orbit-path {
+                width: 250px;
+                height: 250px;
+            }
+            .earth-orbit {
+                width: 250px;
+                height: 250px;
+                margin-left: -125px;
+                margin-top: -125px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading">
+        <svg class="loading-rocket" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 4C32 4 20 16 20 32C20 40 24 48 32 56C40 48 44 40 44 32C44 16 32 4 32 4Z" fill="#E8E8E8" stroke="#333" stroke-width="2"/>
+            <circle cx="32" cy="28" r="6" fill="#4A90D9"/>
+            <path d="M20 32L12 44L20 40V32Z" fill="#FF6B35"/>
+            <path d="M44 32L52 44L44 40V32Z" fill="#FF6B35"/>
+            <path d="M28 56L32 64L36 56H28Z" fill="#FF6B35"/>
+            <ellipse cx="32" cy="60" rx="4" ry="8" fill="#FFD700" opacity="0.8"/>
+        </svg>
+    </div>
+
+    <!-- Stars Background -->
+    <div class="stars-container" id="stars"></div>
+
+    <!-- Nebula Effects -->
+    <div class="nebula" style="top: 10%; left: 20%; width: 400px; height: 400px; background: radial-gradient(circle, #ff00ff, transparent);"></div>
+    <div class="nebula" style="top: 60%; left: 70%; width: 300px; height: 300px; background: radial-gradient(circle, #00ffff, transparent);"></div>
+    <div class="nebula" style="top: 40%; left: 10%; width: 250px; height: 250px; background: radial-gradient(circle, #ffff00, transparent);"></div>
+
+    <!-- Image Frames -->
+    <div class="image-frame left">
+        <img src="oliver_one.jpg" alt="Photo 1">
+    </div>
+
+    <div class="image-frame right">
+        <img src="oliver_two.jpg" alt="Photo 2">
+    </div>
+
+    <!-- Orbit Counter -->
+    <div class="orbit-counter">
+        <span class="counter-label">year</span>
+        <span class="counter-number" id="counter">0</span>
+        <span class="counter-label">of 21</span>
+    </div>
+
+    <!-- Solar System -->
+    <div class="solar-system" id="solar-system">
+        <div class="orbit-path"></div>
+        <div class="sun"></div>
+        <div class="earth-orbit" id="earth-orbit">
+            <div class="earth" id="earth" title="Click me!">
+                <div class="moon-orbit">
+                    <div class="moon"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cake -->
+    <div class="cake-container" id="cake-container">
+        <div class="cake">
+            <div class="cake-layer bottom">
+                <div class="drip" style="left: 20px; width: 8px;"></div>
+                <div class="drip" style="left: 60px; width: 10px; animation-delay: 0.5s;"></div>
+                <div class="drip" style="left: 120px; width: 7px; animation-delay: 1s;"></div>
+                <div class="drip" style="left: 180px; width: 9px; animation-delay: 0.3s;"></div>
+                <div class="drip" style="left: 230px; width: 8px; animation-delay: 0.8s;"></div>
+            </div>
+            <div class="cake-layer middle">
+                <div class="drip" style="left: 30px; width: 6px; animation-delay: 0.2s;"></div>
+                <div class="drip" style="left: 90px; width: 8px; animation-delay: 0.7s;"></div>
+                <div class="drip" style="left: 160px; width: 7px; animation-delay: 0.4s;"></div>
+            </div>
+            <div class="cake-layer top"></div>
+            <div class="candles-container" id="candles">
+                <!-- Number 2 Candle -->
+                <div class="number-candle" id="candle-2">
+                    <svg viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="candleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#FFE4B5"/>
+                                <stop offset="50%" style="stop-color:#FFA500"/>
+                                <stop offset="100%" style="stop-color:#FFE4B5"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Candle body - Number 2 shape -->
+                        <path class="candle-body" d="M10 75 L10 65 Q10 55 20 50 L30 45 Q40 40 40 30 Q40 20 25 20 Q10 20 10 30 L10 35 L5 35 L5 28 Q5 15 25 15 Q45 15 45 30 Q45 45 30 50 L18 56 Q10 60 10 70 L10 75 L40 75 L40 80 L5 80 L5 75 Z"/>
+                        <path class="candle-stripe" d="M15 75 L15 68 Q15 62 22 58 L32 52 Q38 48 38 38 L35 38 Q35 45 30 48 L20 54 Q12 58 12 68 L12 75 Z" opacity="0.3"/>
+                        <!-- Wick -->
+                        <rect class="wick" x="22" y="10" width="3" height="8" rx="1"/>
+                        <!-- Flame group -->
+                        <g class="flame-group">
+                            <ellipse class="flame-outer" cx="23.5" cy="5" rx="6" ry="10"/>
+                            <ellipse class="flame-inner" cx="23.5" cy="6" rx="4" ry="7"/>
+                            <ellipse class="flame-core" cx="23.5" cy="7" rx="2" ry="4"/>
+                        </g>
+                        <!-- Smoke (hidden until blown) -->
+                        <ellipse class="smoke" cx="23.5" cy="0" rx="3" ry="6"/>
+                    </svg>
+                </div>
+                
+                <!-- Number 1 Candle -->
+                <div class="number-candle" id="candle-1">
+                    <svg viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="candleGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#FFB6C1"/>
+                                <stop offset="50%" style="stop-color:#FF69B4"/>
+                                <stop offset="100%" style="stop-color:#FFB6C1"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Candle body - Number 1 shape -->
+                        <path class="candle-body" d="M20 75 L20 25 L15 30 L12 26 L25 15 L30 15 L30 75 L40 75 L40 80 L10 80 L10 75 Z" fill="url(#candleGradient2)"/>
+                        <path class="candle-stripe" d="M23 75 L23 28 L25 26 L27 26 L27 75 Z" opacity="0.3"/>
+                        <!-- Wick -->
+                        <rect class="wick" x="23" y="8" width="3" height="8" rx="1"/>
+                        <!-- Flame group -->
+                        <g class="flame-group">
+                            <ellipse class="flame-outer" cx="24.5" cy="3" rx="6" ry="10"/>
+                            <ellipse class="flame-inner" cx="24.5" cy="4" rx="4" ry="7"/>
+                            <ellipse class="flame-core" cx="24.5" cy="5" rx="2" ry="4"/>
+                        </g>
+                        <!-- Smoke (hidden until blown) -->
+                        <ellipse class="smoke" cx="24.5" cy="-2" rx="3" ry="6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Party Horn -->
+    <div class="party-horn" id="party-horn" title="Click for confetti!">
+        <div class="horn-body">
+            <div class="horn-stripes"></div>
+            <div class="horn-tip"></div>
+        </div>
+    </div>
+
+    <!-- Hint -->
+    <div class="hint" id="hint">tap anywhere</div>
+
+    <script>
+        // Configuration
+        const TARGET_ORBITS = 21;
+        let orbitCount = 0;
+        let lastAngle = 0;
+        let cakeVisible = false;
+
+        // DOM Elements
+        const earthOrbit = document.getElementById('earth-orbit');
+        const counter = document.getElementById('counter');
+        const solarSystem = document.getElementById('solar-system');
+        const cakeContainer = document.getElementById('cake-container');
+        const partyHorn = document.getElementById('party-horn');
+        const loading = document.getElementById('loading');
+        const hint = document.getElementById('hint');
+
+        // Initialize stars
+        function createStars() {
+            const container = document.getElementById('stars');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                container.appendChild(star);
+            }
+
+            // Shooting stars
+            for (let i = 0; i < 3; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.top = Math.random() * 50 + '%';
+                shootingStar.style.left = Math.random() * 50 + '%';
+                shootingStar.style.animationDelay = (Math.random() * 10 + i * 5) + 's';
+                shootingStar.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                container.appendChild(shootingStar);
+            }
+        }
+
+        // Initialize number candles
+        function initCandles() {
+            const candles = document.querySelectorAll('.number-candle');
+            candles.forEach(candle => {
+                candle.addEventListener('mouseenter', () => blowCandle(candle));
+                candle.addEventListener('click', () => blowCandle(candle));
+            });
+        }
+
+        // Blow out candle
+        function blowCandle(candle) {
+            if (!candle.classList.contains('blown')) {
+                candle.classList.add('blown');
+                checkAllCandlesBlown();
+            }
+        }
+
+        // Check if all candles are blown
+        function checkAllCandlesBlown() {
+            const candles = document.querySelectorAll('.number-candle');
+            const allBlown = Array.from(candles).every(c => c.classList.contains('blown'));
+            if (allBlown) {
+                setTimeout(() => {
+                    launchFireworks(10);
+                    createMassiveConfetti();
+                }, 500);
+            }
+        }
+
+        // Create presents
+        function createPresents() {
+            const presentColors = [
+                { box: '#FF6B6B', lid: '#EE4040', ribbon: '#FFD700' },
+                { box: '#4ECDC4', lid: '#2EAD9F', ribbon: '#FF69B4' },
+                { box: '#FFE66D', lid: '#F0C400', ribbon: '#9B59B6' },
+                { box: '#9B59B6', lid: '#8E44AD', ribbon: '#2ECC71' }
+            ];
+
+            const positions = [
+                { left: '3%', bottom: '10%' },
+                { right: '3%', bottom: '15%' },
+                { left: '8%', bottom: '5%' },
+                { right: '8%', bottom: '8%' }
+            ];
+
+            positions.forEach((pos, i) => {
+                const present = document.createElement('div');
+                present.className = 'present';
+                Object.assign(present.style, pos);
+
+                const colors = presentColors[i % presentColors.length];
+                present.innerHTML = `
+                    <div class="bow" style="background: ${colors.ribbon};">
+                        <style>
+                            .present:nth-child(${i + 1}) .bow::before,
+                            .present:nth-child(${i + 1}) .bow::after {
+                                background: ${colors.ribbon};
+                            }
+                        </style>
+                    </div>
+                    <div class="present-lid" style="background: ${colors.lid};"></div>
+                    <div class="present-box" style="background: ${colors.box};">
+                        <div class="present-ribbon-v" style="background: ${colors.ribbon};"></div>
+                        <div class="present-ribbon-h" style="background: ${colors.ribbon};"></div>
+                    </div>
+                `;
+
+                present.addEventListener('click', () => {
+                    createConfettiBurst(
+                        present.getBoundingClientRect().left + 40,
+                        present.getBoundingClientRect().top + 30,
+                        30
+                    );
+                });
+
+                document.body.appendChild(present);
+            });
+        }
+
+        // Confetti burst
+        function createConfettiBurst(x, y, count) {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#AA96DA', '#F38181', '#FF69B4', '#00D4FF'];
+            const shapes = ['square', 'circle', 'triangle'];
+            
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'triangle') {
+                    confetti.style.width = '0';
+                    confetti.style.height = '0';
+                    confetti.style.borderLeft = '5px solid transparent';
+                    confetti.style.borderRight = '5px solid transparent';
+                    confetti.style.borderBottom = `10px solid ${color}`;
+                    confetti.style.background = 'transparent';
+                }
+                
+                if (shape !== 'triangle') {
+                    confetti.style.background = color;
+                }
+                
+                confetti.style.left = x + 'px';
+                confetti.style.top = y + 'px';
+                
+                const angle = (Math.random() * 360) * (Math.PI / 180);
+                const velocity = Math.random() * 15 + 5;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity - 10;
+                
+                document.body.appendChild(confetti);
+                animateConfetti(confetti, vx, vy);
+            }
+        }
+
+        // Animate confetti
+        function animateConfetti(el, vx, vy) {
+            let x = parseFloat(el.style.left);
+            let y = parseFloat(el.style.top);
+            let rotation = 0;
+            let gravity = 0.3;
+            let friction = 0.99;
+            let opacity = 1;
+
+            function update() {
+                vy += gravity;
+                vx *= friction;
+                x += vx;
+                y += vy;
+                rotation += vx * 2;
+                opacity -= 0.01;
+
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                el.style.transform = `rotate(${rotation}deg)`;
+                el.style.opacity = opacity;
+
+                if (opacity > 0 && y < window.innerHeight) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.remove();
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Massive confetti celebration
+        function createMassiveConfetti() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createConfettiBurst(
+                        Math.random() * window.innerWidth,
+                        Math.random() * window.innerHeight * 0.5,
+                        50
+                    );
+                }, i * 200);
+            }
+        }
+
+        // Fireworks
+        function launchFireworks(count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    createFirework(
+                        Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1,
+                        Math.random() * window.innerHeight * 0.4 + 50
+                    );
+                }, i * 300);
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF69B4', '#00D4FF', '#FF00FF', '#FFFF00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const particles = 30;
+
+            for (let i = 0; i < particles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 6px ${color}, 0 0 12px ${color}`;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+
+                const angle = (i / particles) * Math.PI * 2;
+                const velocity = Math.random() * 8 + 4;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+
+                document.body.appendChild(particle);
+                animateFireworkParticle(particle, vx, vy);
+            }
+        }
+
+        function animateFireworkParticle(el, vx, vy) {
+            let x = parseFloat(el.style.left);
+            let y = parseFloat(el.style.top);
+            let opacity = 1;
+            let gravity = 0.1;
+            let friction = 0.98;
+
+            function update() {
+                vy += gravity;
+                vx *= friction;
+                vy *= friction;
+                x += vx;
+                y += vy;
+                opacity -= 0.02;
+
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                el.style.opacity = opacity;
+                el.style.transform = `scale(${opacity})`;
+
+                if (opacity > 0) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.remove();
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Sound effects (using Web Audio API for simple sounds)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playHornSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sawtooth';
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        // Track orbit rotations
+        function trackOrbits() {
+            const computedStyle = window.getComputedStyle(earthOrbit);
+            const matrix = computedStyle.transform;
+            
+            if (matrix !== 'none') {
+                const values = matrix.split('(')[1].split(')')[0].split(',');
+                const a = values[0];
+                const b = values[1];
+                const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+                const normalizedAngle = angle < 0 ? angle + 360 : angle;
+                
+                if (lastAngle > 300 && normalizedAngle < 60) {
+                    orbitCount++;
+                    counter.textContent = Math.min(orbitCount, TARGET_ORBITS);
+                    
+                    if (orbitCount === TARGET_ORBITS) {
+                        celebrate();
+                    }
+                }
+                
+                lastAngle = normalizedAngle;
+            }
+            
+            requestAnimationFrame(trackOrbits);
+        }
+
+        // Celebration when 21 orbits complete
+        function celebrate() {
+            solarSystem.classList.add('minimized');
+            
+            setTimeout(() => {
+                cakeContainer.classList.add('visible');
+                cakeVisible = true;
+                launchFireworks(5);
+            }, 1000);
+        }
+
+        // Event listeners
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.present, .party-horn, .number-candle, .earth, .image-frame')) return;
+            createConfettiBurst(e.clientX, e.clientY, 15);
+            hint.style.display = 'none';
+        });
+
+        partyHorn.addEventListener('click', () => {
+            const rect = partyHorn.getBoundingClientRect();
+            playHornSound();
+            createConfettiBurst(rect.left + 100, rect.top, 40);
+        });
+
+        document.getElementById('earth').addEventListener('click', () => {
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
+            launchFireworks(3);
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createStars();
+            initCandles();
+            createPresents();
+            trackOrbits();
+            
+            setTimeout(() => {
+                loading.classList.add('hidden');
+            }, 1500);
+        });
+
+        // Touch support
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.present, .party-horn, .number-candle, .earth, .image-frame')) return;
+            const touch = e.touches[0];
+            createConfettiBurst(touch.clientX, touch.clientY, 15);
+        });
+    </script>
+</body>
+</html>

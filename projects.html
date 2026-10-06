@@ -19,10 +19,15 @@
         </nav>
     </header>
     <section>
+        <h2>VLIW SIMD Processor Optimization</h2>
+        <p>Optimized a VLIW SIMD processor simulator kernel from 147,734 cycles to 1,336 cycles, achieving a 110.6x speedup and surpassing Claude Opus 4.5's best result of 1,363 cycles.</p>
+        <p>Implemented selective tree node preloading to eliminate 87% of memory loads through nested vselect multiplexers. Built a dependency-aware VLIW instruction scheduler that detects hazards and maximizes parallel execution.</p>
+    </section>
+    <section>
         <h2>FPGA-Based eBike Controller - System Synthesis and Design</h2>
         <div class="gallery-container">
-            <img src="projects/ebike_synth_test.jpg" alt="2am working version of ebike system after synthesis" onclick="expandMedia(this)">
-            <video muted controls onclick="expandMedia(this)">
+            <img src="projects/ebike_synth_test.jpg" alt="2am working version of ebike system after synthesis">
+            <video muted controls>
                 <source src="projects/ebike_run_vid.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -35,8 +40,8 @@
     <section>
         <h2>Quantum Computing Error Mitigation using Graph Neural Networks - System Architecture for Quantum Computers</h2>
         <div class="gallery-container">
-            <img src="projects/GNN_histogram.jpg" alt="Histogram of Circuit errors" onclick="expandMedia(this)">
-            <img src="projects/GNN_scatter.jpg" alt="Quantum Circuit Error Analysis" onclick="expandMedia(this)">
+            <img src="projects/GNN_histogram.jpg" alt="Histogram of Circuit errors">
+            <img src="projects/GNN_scatter.jpg" alt="Quantum Circuit Error Analysis">
         </div>
         <p>Designed and implemented a Graph Neural Network model with JAX trained on a diverse dataset of over 6,800 quantum circuits on Google TPUs. The dataset comprises 1,800 fuzzed MQT benchmark quantum circuits and 5,000 random QAOA quantum circuits.</p>
         <p>This model achieved a 267% error reduction on structurally different quantum circuits compared to the training set, demonstrating strong generalization capabilities across various quantum computing architectures.</p>
@@ -52,12 +57,12 @@
     <section>
         <h2>Verilog Guitar Tuner on an FPGA - Digital System Fundamentals</h2>
         <div class="gallery-container">
-            <video muted controls onclick="expandMedia(this)">
+            <video muted controls>
                 <source src="projects/IMG_7213.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <img src="projects/IMG_0003.jpg" alt="pipelining design" onclick="expandMedia(this)">
-            <img src="projects/IMG_7214.jpg" alt="ordering dominoes picture" onclick="expandMedia(this)">
+            <img src="projects/IMG_0003.jpg" alt="pipelining design">
+            <img src="projects/IMG_7214.jpg" alt="ordering dominoes picture">
         </div>
         <p>Designed and implemented a real-time guitar tuner on DE2-115 FPGA using Verilog, integrating FSM-based frequency detection, pushbutton synchronizers, and subtraction circuits for accurate string pitch analysis.</p>
         <p>Applied strategic pipelining techniques by inserting pipeline flip-flops at critical path bottlenecks, breaking combinational logic into optimized stages to maximize throughput. Reduced maximum combinational delay from 17ns to 9ns and increased operating frequency from 50MHz to 83.33MHz (67% improvement).</p>
@@ -68,9 +73,9 @@
     <section>
         <h2>Least Squares Classifier Training - Matrix Methods in Machine Learning</h2>
         <div class="gallery-container">
-            <img src="projects/IMG_0126.jpg" alt="grad descent picture" onclick="expandMedia(this)">
-            <img src="projects/IMG_7169.jpg" alt="grad descent picture" onclick="expandMedia(this)">
-            <img src="projects/IMG_7168.jpg" alt="grad descent picture" onclick="expandMedia(this)">
+            <img src="projects/IMG_0126.jpg" alt="grad descent picture">
+            <img src="projects/IMG_7169.jpg" alt="grad descent picture">
+            <img src="projects/IMG_7168.jpg" alt="grad descent picture">
         </div>
         <p>Solved for gradients and wrote the gradient descent function from scratch for a binary least squares classifier, implementing custom mathematical derivations and optimization algorithms.</p>
         <p>Developed the entire training pipeline including cost function computation, gradient calculation, and parameter updates without using pre-built machine learning libraries.</p>
@@ -79,8 +84,8 @@
     <section>
         <h2>LED Controller - Introduction to Electrical Engineering</h2>
         <div class="gallery-container">
-            <img src="projects/IMG_7054.jpg" alt="circuit picture" onclick="expandMedia(this)">
-            <img src="projects/IMG_7079.jpg" alt="oscilloscope picture" onclick="expandMedia(this)">
+            <img src="projects/IMG_7054.jpg" alt="circuit picture">
+            <img src="projects/IMG_7079.jpg" alt="oscilloscope picture">
         </div>
         <p>Used a potentiometer, button, and switch to control flashing frequency and color meshing in this simple circuit.</p>
         <p>Used an oscilloscope to measure delay between state transitions (button getting pressed and the base color changing).</p>
@@ -98,7 +103,7 @@
     <section>
         <h2>ASL Translator App</h2>
         <div class="gallery-container">
-            <img src="projects/IMG_0001.jpg" alt="grad descent picture" onclick="expandMedia(this)">
+            <img src="projects/IMG_0001.jpg" alt="grad descent picture">
         </div>
         <p><a href="https://www.universalmessage.org/technology" target="_blank" rel="noopener noreferrer">Universal Messaging Technology</a></p>
         <p><a href="https://github.com/Air-crypto/ASLAPPV1" target="_blank" rel="noopener noreferrer">Github Repository</a></p>

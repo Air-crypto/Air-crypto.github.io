@@ -31,16 +31,24 @@
     <section>
         <h3>Education</h3>
         <p>University of Wisconsin-Madison, B.S. in Computer Engineering, Double Major: Computer Sciences. Expected Graduation: December 2026.</p>
-        <p>Selected Coursework: System Architecture for Quantum Computers, Matrix Methods in Machine Learning, Artificial Neural Networks, Operating Systems, System Synthesis and Design, Data Structures and Algorithms, Database Design and Management, Machine Organization and Programming, Random Signal Analysis and Statistics, Signals, Information, and Computation, Circuit Analysis</p>
+        <p>Selected Coursework: AI-Assisted Software Development, World Models, System Architecture for Quantum Computers, Matrix Methods in Machine Learning, Artificial Neural Networks, Operating Systems, System Synthesis and Design, Data Structures and Algorithms, Database Design and Management, Machine Organization and Programming, Random Signal Analysis and Statistics, Signals, Information, and Computation, Circuit Analysis</p>
     </section>
     <section>
         <h3>Experience</h3>
-        
+
+        <h2>May 2026 - Present: AI MTS (Contractor) at AMD (Advanced Micro Devices)</h2>
+        <p><strong>Post-Training LLMs with Reinforcement Learning for Proprietary Code Generation</strong></p>
+        <p>Built an end-to-end post-training pipeline to specialize a base model for proprietary device code generation: continued pretraining on the target codebase, supervised fine-tuning on reasoning traces and tool-use trajectories distilled from a larger teacher model, then reinforcement learning with GSPO and verifiable rewards (RLVR).</p>
+        <p>Trained a model that passed more directed device tests than GPT and Claude Opus while generating solutions in under 12,000 tokens, compared with 102,000 for Opus and 360,000 for GPT. Engineered a fused cross-entropy kernel with near-constant memory as sequence length grows, enabling an 8x larger training context window.</p>
+        <p>Architected distributed training and inference across 16 MI250 GPUs on two 8-GPU clusters over RCCL, with a dedicated training server and a vLLM inference server using speculative decoding. Synchronized policy weights every three steps, and measured reward hacking and grader-process exploitation to harden the reward and grading infrastructure.</p>
+        <p>First author of two papers published at AMD's Global Technical Authors Conference detailing the reinforcement learning methodology and the harnesses used to train and evaluate models.</p>
+
         <h2>May 2025 - August 2025: AI/ML Intern at AMD (Advanced Micro Devices)</h2>
         <p><strong>Developing AI Frameworks and Models to Accelerate Hardware Design Efficiency</strong></p>
         <p>Designed and implemented an AI pipeline for root-cause analysis of hardware traces, revolutionizing failure analysis by clustering failures by root causes rather than just error signatures. Achieved 82% accuracy compared to 28% for state-of-the-art systems, reducing verification time and resources by 30x.</p>
         <p>Built a scalable data pipeline from a Dremio data lake to GPU cluster that processed 97,000 transactions/second on a 3.5B-trace corpus at almost linear scale. Redesigned LLM architecture from hierarchical full attention to sliding-window attention, boosting memory efficiency from exponential to linear for long sequences while preserving causality and recent-event focus.</p>
         <p>Implemented QLoRA quantization for 4-bit training through extensive ablation tests, achieving 22x context window growth (from 512 to 11,000 tokens) resulting in a 54% accuracy boost. Developed fine-tuning with layer freezing, enabling quick adaptation to new CPU/GPU chip families with minimal training data while maintaining low reconstruction loss and sharp cluster separation.</p>
+        <p>Ported the end-to-end pipeline from Python and PyTorch to C++ with LibTorch and pybind11, fusing hot paths and optimizing memory layout and data movement. Delivered 4.6x faster training and 3x faster inference with custom HIP kernels.</p>
         <p>First author of a paper published at AMD's Global Technical Authors Conference, highlighting superior results from quantized models leveraging sliding window attention.</p>
 
         <h2>November 2024 - Present: Researcher at Applied Research Laboratory for Intelligence and Security (ARLIS)</h2>
@@ -69,6 +77,13 @@
     <section id="timeline">
         <h3>Projects - For Details Head to the <a href="projects.html">Projects Tab</a></h3>
         <div class="timeline-container">
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h2>February 2026: VLIW SIMD Processor Optimization</h2>
+                    <p>Optimized a VLIW SIMD processor simulator kernel to 1,336 cycles, achieving a 110.6x speedup over the 147,734-cycle baseline through selective tree node preloading and dependency-aware instruction scheduling.</p>
+                </div>
+            </div>
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">

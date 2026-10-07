@@ -5,25 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Projects</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
     <header>
+        <p class="page-kicker">Arihan Yadav / From the workbench</p>
         <h1>My Projects</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html">Back to the desk</a></li>
+                <li><a href="portfolio.html">About & Experience</a></li>
                 <li><a href="projects.html">Projects</a></li>
                 <li><a href="hockey.html">Ice Skating</a></li>
                 <li><a href="gallery.html">Photo Gallery</a></li>
             </ul>
         </nav>
     </header>
-    <section>
+    <section id="simd">
         <h2>VLIW SIMD Processor Optimization</h2>
         <p>Optimized a VLIW SIMD processor simulator kernel from 147,734 cycles to 1,336 cycles, achieving a 110.6x speedup and surpassing Claude Opus 4.5's best result of 1,363 cycles.</p>
         <p>Implemented selective tree node preloading to eliminate 87% of memory loads through nested vselect multiplexers. Built a dependency-aware VLIW instruction scheduler that detects hazards and maximizes parallel execution.</p>
     </section>
-    <section>
+    <section id="hardware">
         <h2>FPGA-Based eBike Controller - System Synthesis and Design</h2>
         <div class="gallery-container">
             <img src="projects/ebike_synth_test.jpg" alt="2am working version of ebike system after synthesis">
@@ -54,7 +57,7 @@
         <p>Utilized semaphores for thread-safe shared resource protection and developed custom system calls enabling dynamic ticket allocation adjustments during runtime.</p>
         <p>Achieved balanced process execution where I/O-heavy processes maintained quick responsiveness while preventing CPU-bound process starvation, demonstrating advanced kernel-level scheduling algorithms and concurrent programming techniques.</p>
     </section>
-    <section>
+    <section id="guitar">
         <h2>Verilog Guitar Tuner on an FPGA - Digital System Fundamentals</h2>
         <div class="gallery-container">
             <video muted controls>
@@ -81,7 +84,7 @@
         <p>Developed the entire training pipeline including cost function computation, gradient calculation, and parameter updates without using pre-built machine learning libraries.</p>
         <p>First image was when I forgot a negative sign which I found funny. Second image is the fully trained finished result.</p>
     </section>
-    <section>
+    <section id="led">
         <h2>LED Controller - Introduction to Electrical Engineering</h2>
         <div class="gallery-container">
             <img src="projects/IMG_7054.jpg" alt="circuit picture">
@@ -119,7 +122,7 @@
         <p><a href="https://github.com/Air-crypto/Air-crypto.github.io" target="_blank" rel="noopener noreferrer">Website Source Code</a></p>
     </section>
     <footer>
-        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="nonoopener noreferrer">LinkedIn Profile</a></p>
+        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a></p>
     </footer>
     <script src="scripts.js"></script>
 </body>

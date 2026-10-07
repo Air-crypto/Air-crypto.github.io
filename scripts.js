@@ -1,55 +1,72 @@
-class MediaManager {
-    static currentlyActive = null; // Shared across all instances
+// Native dialogs keep enlarged media usable with a keyboard as well as a mouse.
+(() => {
+    const viewer = document.createElement('dialog');
+    viewer.className = 'media-viewer';
+    viewer.setAttribute('aria-label', 'Enlarged photo or video');
+    viewer.innerHTML = '<button type="button" class="media-close" aria-label="Close enlarged media">×</button><div class="media-content"></div>';
+    document.body.append(viewer);
+    const content = viewer.querySelector('.media-content');
+    const syncScroll = () => document.documentElement.classList.toggle('modal-open', !!document.querySelector('dialog[open]'));
 
-    constructor(containerSelector) {
-        this.containers = document.querySelectorAll(containerSelector);
-        this.initEvents();
-    }
-
-    initEvents() {
-        this.containers.forEach(container => {
-            container.addEventListener('click', event => {
-                const target = event.target;
-                if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
-                    if (target === MediaManager.currentlyActive) {
-                        this.closeMedia(); // Minimize if the same media is clicked
-                    } else {
-                        this.expandMedia(target); // Expand new media
-                    }
-                    event.stopPropagation(); 
-                }
-            });
-        });
-
-        document.addEventListener('click', () => {
-            this.closeMedia();
-        });
-    }
-
-    expandMedia(media) {
-        // Close any previously active media
-        this.closeMedia();
-
-        // Add 'expanded' class to clicked media and set it as currently active globally
-        media.classList.add('expanded');
+    function openMedia(source) {
+        const media = source.cloneNode(true);
+        media.removeAttribute('tabindex');
+        media.removeAttribute('role');
+        media.removeAttribute('aria-label');
+        media.removeAttribute('loading');
         if (media.tagName === 'VIDEO') {
-            media.play(); // Autoplay when expanded
+            media.controls = true;
+            media.muted = true;
+            media.playsInline = true;
         }
-        MediaManager.currentlyActive = media;
+        content.replaceChildren(media);
+        viewer.showModal();
+        syncScroll();
+        if (media.tagName === 'VIDEO') media.play().catch(() => {});
     }
 
-    closeMedia() {
-        // If media is active, remove the class and reset the currently active media
-        if (MediaManager.currentlyActive) {
-            if (MediaManager.currentlyActive.tagName === 'VIDEO' && !MediaManager.currentlyActive.paused) {
-                MediaManager.currentlyActive.pause();
-            }
-            MediaManager.currentlyActive.classList.remove('expanded');
-            MediaManager.currentlyActive = null;
-        }
-    }
-}
+    window.initPortfolioMedia = (root = document) => {
+        root.querySelectorAll('.gallery-container img').forEach(image => {
+            image.tabIndex = 0;
+            image.setAttribute('role', 'button');
+            image.setAttribute('aria-label', `Enlarge ${image.alt || 'photo'}`);
+        });
+        root.querySelectorAll('.gallery-container video').forEach(video => {
+            if (video.parentElement.classList.contains('media-item')) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'media-item';
+            video.before(wrap);
+            wrap.append(video);
+            const expand = document.createElement('button');
+            expand.type = 'button';
+            expand.className = 'media-expand';
+            expand.textContent = 'Expand video ↗';
+            expand.setAttribute('aria-label', 'Expand video in a larger player');
+            wrap.append(expand);
+        });
+    };
 
-document.addEventListener('DOMContentLoaded', () => {
-    new MediaManager('.gallery-container'); 
-});
+    document.addEventListener('click', event => {
+        const image = event.target.closest('.gallery-container img');
+        const expand = event.target.closest('.media-expand');
+        if (image) openMedia(image);
+        if (expand) openMedia(expand.parentElement.querySelector('video'));
+    });
+    document.addEventListener('keydown', event => {
+        if (event.target.matches('.gallery-container img') && ['Enter', ' '].includes(event.key)) {
+            event.preventDefault();
+            openMedia(event.target);
+        }
+    });
+    viewer.querySelector('.media-close').addEventListener('click', () => viewer.close());
+    viewer.addEventListener('click', event => {
+        const rect = viewer.getBoundingClientRect();
+        if (event.target === viewer && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) viewer.close();
+    });
+    viewer.addEventListener('close', () => {
+        content.querySelector('video')?.pause();
+        content.replaceChildren();
+        syncScroll();
+    });
+    window.initPortfolioMedia();
+})();

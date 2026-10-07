@@ -4,29 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Arihan Yadav's personal workbench. Explore projects, research, and life at the intersection of machine learning, software, and hardware.">
-    <meta name="theme-color" content="#f3f0e8">
+    <meta name="theme-color" content="#392b22">
     <title>Arihan Yadav — The Workbench</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="preload" href="assets/workbench.webp" as="image" fetchpriority="high">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="desk.css?v=2">
+    <link rel="stylesheet" href="desk.css?v=3">
 </head>
 <body class="desk-page">
     <a class="skip-link" href="#desk">Skip to the desk</a>
     <main id="desk" class="desk-main" tabindex="-1">
         <div class="desk-stage" aria-label="Explore Arihan's interactive workbench">
             <img class="desk-photo" src="assets/workbench.webp" width="1536" height="1024" alt="A sunlit wooden workbench. Explore the laptop, engineering notebook, circuit board, photos, and sticky note." fetchpriority="high" draggable="false">
-            <div class="screen-window" aria-label="On the laptop">
-                <span class="screen-greeting">Hey, I'm</span>
-                <h1 class="screen-name">Arihan Yadav.</h1>
-                <span class="screen-description">Machine learning, software, hardware.</span>
-                <div class="screen-links"><a href="portfolio.html#aboutMe" data-open="about">About me <span aria-hidden="true">↗</span></a><a href="projects.html" data-open="projects">Projects <span aria-hidden="true">↗</span></a></div>
-            </div>
-            <a class="desk-object notebook" href="portfolio.html#experience" data-open="experience" aria-label="Open experience from the engineering notebook"><span class="object-label">Experience</span></a>
-            <a class="desk-object circuit" href="projects.html#hardware" data-open="hardware" aria-label="Open hardware projects from the circuit board"><span class="object-label">Hardware</span></a>
-            <a class="desk-object photos" href="gallery.html" data-open="life" aria-label="Open photos and skating from the photo prints"><span class="object-label">Off the clock</span></a>
-            <a class="desk-object sticky" href="mailto:apyadav@wisc.edu" data-open="contact" aria-label="Open contact from the sticky note"><span>Say<br>hello.</span></a>
-            <p class="desk-hint">Click around.</p>
+            <a class="desk-object laptop-screen" href="portfolio.html#aboutMe" data-open="about" aria-label="Open about, education, patents, and activities from the laptop screen"><h1 class="visually-hidden">Arihan Yadav</h1></a>
+            <a class="desk-object laptop-keyboard" href="projects.html" data-open="projects" aria-label="Open all projects from the laptop keyboard"></a>
+            <a class="desk-object notebook" href="portfolio.html#experience" data-open="experience" aria-label="Open experience from the engineering notebook"></a>
+            <a class="desk-object circuit" href="projects.html#hardware" data-open="hardware" aria-label="Open hardware projects from the circuit board"></a>
+            <a class="desk-object photos" href="gallery.html" data-open="life" aria-label="Open photos and skating from the photo prints"></a>
+            <a class="desk-object sticky" href="mailto:apyadav@wisc.edu" data-open="contact" aria-label="Open contact from the sticky note"></a>
+            <div class="desk-controls"><p>Click around.</p><button id="desk-guide" type="button" aria-pressed="false">Get started here</button></div>
+            <p id="guide-status" class="visually-hidden" role="status"></p>
         </div>
     </main>
     <dialog id="portfolio-window" class="portfolio-window" aria-labelledby="window-title">
@@ -37,6 +34,6 @@
     <template id="contact-content"><section class="contact-card"><p class="eyebrow">LET'S TALK</p><h2>Say hello.</h2><p>I'm always happy to talk about machine learning, software, hardware, or something you're building.</p><a class="contact-email" href="mailto:apyadav@wisc.edu">apyadav@wisc.edu <span aria-hidden="true">↗</span></a><div class="contact-links"><a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></section></template>
     <template id="life-content"><section><p class="eyebrow">AWAY FROM THE KEYBOARD</p><h2>Off the clock.</h2><p>A few things from life outside of code. Madison, a frozen lake, a window seat, and getting that hockey stop right :]</p><div class="life-grid"><a href="gallery.html" data-open="gallery"><img src="aurora/IMG_7288.jpg" alt="Aurora over Madison" loading="lazy"><span>Photo gallery <i aria-hidden="true">↗</i></span><small>Flights, northern lights, and life in Madison.</small></a><a href="hockey.html" data-open="skating"><img src="hockey/IMG_719811.jpg" alt="Practicing a hockey stop on the ice" loading="lazy"><span>Ice skating <i aria-hidden="true">↗</i></span><small>Still working on the back foot.</small></a></div></section></template>
     <script src="scripts.js" defer></script>
-    <script src="desk.js?v=2" defer></script>
+    <script src="desk.js?v=3" defer></script>
 </body>
 </html>

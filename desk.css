@@ -1,6 +1,7 @@
 .desk-page {
     min-height: 100svh;
-    background: var(--paper);
+    background: #392b22;
+    background: radial-gradient(ellipse at center, #715239 0%, #392b22 75%);
 }
 .desk-main {
     min-height: 100svh;
@@ -22,58 +23,22 @@
     object-fit: cover;
     user-select: none;
 }
-.screen-window {
+.visually-hidden {
     position: absolute;
-    top: 13.7%;
-    left: 32%;
-    width: 35.5%;
-    height: 30.5%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1.5cqw 1.9cqw;
-    color: #ebf0df;
-}
-.screen-greeting {
-    font-size: 1.2cqw;
-    color: #a4beb1;
-}
-.screen-name {
-    margin: .3cqw 0 .8cqw;
-    font-family: Georgia, serif;
-    font-size: 3.4cqw;
-    font-weight: 400;
-    letter-spacing: -.04em;
-    line-height: 1.1;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
+    border: 0;
 }
-.screen-description {
-    font-size: 1.15cqw;
-    color: #afc0b5;
-}
-.screen-links {
-    display: flex;
-    gap: 2.4cqw;
-    margin-top: 1.2cqw;
-}
-.screen-links a {
-    display: flex;
-    align-items: center;
-    gap: .6cqw;
-    padding: .7cqw 0;
-    font-size: 1.2cqw;
-    color: #dfedc7;
-    text-decoration: none;
-}
-.screen-links a:hover { text-decoration: underline; }
 .desk-object {
     position: absolute;
+    display: block;
     text-decoration: none;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
     border-radius: 12px;
-    color: var(--ink);
 }
 .desk-object::before {
     content: "";
@@ -81,12 +46,20 @@
     inset: 0;
     border-radius: inherit;
     border: 1px solid transparent;
-    transition: background .2s, border-color .2s;
+    transition: background .2s, border-color .2s, box-shadow .2s;
 }
-.desk-object:hover::before, .desk-object:focus-visible::before {
-    background: #fffaf00c;
-    border-color: #fff5d580;
+.desk-object:hover::before {
+    background: #fffaf008;
+    border-color: #fff5d560;
 }
+.desk-object:focus-visible { outline: 2px solid #fff5d5; outline-offset: 3px; }
+.desk-stage.show-guide .desk-object::before {
+    background: #fff5d514;
+    border-color: #fff5d5;
+    box-shadow: 0 0 0 4px #fff5d522, 0 0 24px #fff5d535;
+}
+.laptop-screen { left: 31.5%; top: 13.5%; width: 36%; height: 31%; border-radius: 6px; }
+.laptop-keyboard { left: 31%; top: 47%; width: 37%; height: 34%; border-radius: 8px; }
 .notebook {
     left: 1%; top: 16%; width: 27%; height: 41%;
     transform: rotate(-6deg);
@@ -99,40 +72,39 @@
     left: 5%; top: 56%; width: 23%; height: 36%;
     transform: rotate(-4deg);
 }
-.object-label {
-    position: relative;
-    font-size: 1.1cqw;
-    line-height: 1.3;
-    background: #fffcf0e6;
-    padding: .55cqw 1cqw;
-    border-radius: 3px;
-    transition: background .2s;
-}
-.notebook .object-label { transform: rotate(6deg); bottom: 1.8cqw; }
-.circuit .object-label { transform: rotate(-8deg); bottom: -3.7cqw; }
-.photos .object-label { transform: rotate(4deg); bottom: 2.6cqw; }
-.desk-object:hover .object-label { background: #fffdf8; }
 .sticky {
     left: 79.5%; top: 60%; width: 10%; height: 13%;
     transform: rotate(-14deg);
     border-radius: 0;
-    align-items: center;
-    padding: .6cqw;
-    font-family: Georgia, serif;
-    font-size: 2.2cqw;
-    line-height: 1.05;
 }
-.sticky:hover { color: var(--green); }
-.desk-hint {
+.desk-controls {
     position: absolute;
-    bottom: 1.8%;
+    bottom: 1%;
     left: 50%;
     transform: translateX(-50%);
-    margin: 0;
-    font-size: max(10px, .9cqw);
-    color: #fff7e5b3;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    white-space: nowrap;
+    color: #fff7e5;
     pointer-events: none;
 }
+.desk-controls p { margin: 0; font-size: 11px; }
+.desk-controls button {
+    pointer-events: auto;
+    padding: 0 12px;
+    min-height: 44px;
+    color: inherit;
+    font-size: 11px;
+    background: #33231980;
+    border: 1px solid #fff7e533;
+    border-radius: 4px;
+}
+.desk-controls button:hover, .desk-controls button[aria-pressed="true"] {
+    background: #fff7e526;
+    border-color: #fff7e580;
+}
+.desk-controls button:focus-visible { outline-color: #fff7e5; }
 .portfolio-window {
     padding:0;
     border:1px solid #c9cdc2;
@@ -280,14 +252,8 @@
     to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 700px) {
-    .screen-window { padding: .5cqw 1.7cqw; }
-    .screen-greeting { display: none; }
-    .screen-name { font-size: 4.4cqw; margin: .3cqw 0 0; }
-    .screen-description { display: none; }
-    .screen-links { gap: 2cqw; margin-top: 0; }
-    .screen-links a { font-size: max(10px, 2.6cqw); min-height: 44px; gap: .8cqw; }
-    .object-label { font-size: max(10px, 2.6cqw); padding: 1cqw 1.7cqw; }
-    .sticky { font-size: 3cqw; min-width: 44px; min-height: 44px; }
+    .sticky { min-width: 44px; min-height: 44px; }
+    .desk-controls { gap: 12px; }
     .portfolio-window {
         width: calc(100vw - 20px);
         height: calc(100svh - 32px);

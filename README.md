@@ -2,7 +2,7 @@
 
 Source code for my personal website: [air-crypto.github.io](https://air-crypto.github.io/).
 
-An interactive desk with a laptop, engineering notebook, circuit board, and photos. Everything starts on the image: use the laptop for about and projects, the notebook for experience, the board for hardware, the photos for the gallery and skating, and the sticky note for contact. The same objects work on smaller screens.
+An interactive desk with a laptop, engineering notebook, circuit board, and photos. Everything starts on the image: use the laptop screen for about and the keyboard for projects, the notebook for experience, the board for hardware, the photos for the gallery and skating, and the sticky note for contact. The same objects work on smaller screens. The unlabeled objects stay quiet until hovered, focused, or highlighted with “Get started here.”
 
 ## Run locally
 

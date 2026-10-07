@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js?v=1"></script>
     <title>About & Experience — Arihan Yadav</title>
-    <link rel="stylesheet" type="text/css" href="styles.css?v=2">
+    <link rel="stylesheet" type="text/css" href="styles.css?v=3">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-    <header>
+    <header><button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg><svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14a8.8 8.8 0 0 1-10.5-10.5A9 9 0 1 0 20.5 14Z"/></svg><span class="theme-name">Dark</span></button>
         <p class="page-kicker">Arihan Yadav / The full picture</p>
         <h1>About & Experience</h1>
         <nav>
@@ -59,8 +60,8 @@
             <summary><span class="experience-date">May 2025 – August 2025</span><span class="experience-role">AI/ML Intern · AMD</span><span class="experience-focus">Hardware trace analysis, long-context models, and HIP kernels.</span></summary>
             <div class="experience-body">
         <p><strong>Developing AI Frameworks and Models to Accelerate Hardware Design Efficiency</strong></p>
-        <p>Designed and implemented an AI pipeline for root-cause analysis of hardware traces, revolutionizing failure analysis by clustering failures by root causes rather than just error signatures. Achieved 82% accuracy compared to 28% for state-of-the-art systems, reducing verification time and resources by 30x.</p>
-        <p>Built a scalable data pipeline from a Dremio data lake to GPU cluster that processed 97,000 transactions/second on a 3.5B-trace corpus at almost linear scale. Redesigned LLM architecture from hierarchical full attention to sliding-window attention, boosting memory efficiency from exponential to linear for long sequences while preserving causality and recent-event focus.</p>
+        <p>Designed and implemented an AI pipeline for root-cause analysis of hardware traces, clustering failures by root cause instead of error signature. Achieved 82% accuracy compared to 28% for state-of-the-art systems, reducing verification time and resources by 30x.</p>
+        <p>Built a scalable data pipeline from a Dremio data lake to GPU cluster that processed 97,000 transactions/second on a 3.5B-trace corpus at almost linear scale. Redesigned LLM architecture from hierarchical full attention to sliding-window attention, reducing memory use for long sequences while preserving causality and recent-event focus.</p>
         <p>Implemented QLoRA quantization for 4-bit training through extensive ablation tests, achieving 22x context window growth (from 512 to 11,000 tokens) resulting in a 54% accuracy boost. Developed fine-tuning with layer freezing, enabling quick adaptation to new CPU/GPU chip families with minimal training data while maintaining low reconstruction loss and sharp cluster separation.</p>
         <p>Ported the end-to-end pipeline from Python and PyTorch to C++ with LibTorch and pybind11, fusing hot paths and optimizing memory layout and data movement. Delivered 4.6x faster training and 3x faster inference with custom HIP kernels.</p>
         <p>First author of a paper published at AMD's Global Technical Authors Conference, highlighting superior results from quantized models leveraging sliding window attention.</p>
@@ -72,13 +73,13 @@
         <p><strong>Building a Multimodal Search Engine using LLMs and RAG for the Department of Defense</strong></p>
         <p>Lead developer working with the DoD via the ARLIS institute on novel context-aware multi-modal retrieval systems integrating LLMs with Retrieval Augmented Generation (RAG). This search engine unifies information retrieval across diverse input data types (text, images, audio, and video) for naval assets, declassification workflows, and other defense use cases.</p>
         <p>Architected and trained a PyTorch-based model that aligns heterogeneous data embeddings into a unified semantic space, enabling cross-modal retrieval. Designed specialized contrastive loss functions with regularization and implemented novel cross-attention mechanisms to enhance correlation between projected image, audio, video, and text features.</p>
-        <p>Achieved breakthrough performance metrics: 94.53% accuracy, 99.93% Top-5 accuracy, and 0.9703 Mean Reciprocal Rank (MRR), significantly outperforming state-of-the-art models such as CLIP (35.78% accuracy) on image-caption retrieval tasks.</p>
+        <p>Measured 94.53% accuracy, 99.93% Top-5 accuracy, and 0.9703 Mean Reciprocal Rank (MRR), compared with CLIP (35.78% accuracy) on image-caption retrieval tasks.</p>
             </div>
         </details>
         <details class="experience-entry">
             <summary><span class="experience-date">January 2024 – Present</span><span class="experience-role">Undergraduate Researcher · UW–Madison</span><span class="experience-focus">Multimodal models and retrieval in the Molecular Imaging/Magnetic Resonance Technology Lab.</span></summary>
             <div class="experience-body">
-        <p><strong>Driving AI Innovations in Medicine Through Novel Work in Multimodal LLMs</strong></p>
+        <p><strong>Medical Image Retrieval with Multimodal Models</strong></p>
         <p>Collaborating with researchers at Microsoft to improve medical image retrieval by utilizing expertise in embedding transformations to better align CT and MRI scans for use in multimodal LLMs, enhancing diagnostic accuracy and decision-making critical for patient diagnoses.</p>
         <p>Developed a custom multi-modal Projection Model using PyTorch to translate pseudocode embeddings to C code embeddings, improving retrieval accuracy by 58.2% compared to state-of-the-art models and algorithms (e.g., BM25 and Sentence Transformers). Published a paper as primary author, with UW-Madison filing a patent for this innovation.</p>
         <p>Addressed critical memory limitations during LLaVA model fine-tuning by implementing distributed training across multiple 80GB A100 GPUs, gradient checkpointing, and automatic mixed precision training. Achieved a 41.6% reduction in memory footprint (from 212 GB to 124 GB), enabling training of larger models and batch sizes while accelerating the R&D pipeline.</p>
@@ -97,8 +98,8 @@
             <summary><span class="experience-date">September 2023 – Present</span><span class="experience-role">Team Member · Wisconsin Robotics</span><span class="experience-focus">Sensor fusion and autonomous navigation.</span></summary>
             <div class="experience-body">
         <p><strong>Enhancing Autonomous Vehicle Navigation through Sensor Fusion</strong></p>
-        <p>Developed sensor-fusion trajectory models combining LiDAR and camera data to address navigation accuracy challenges in autonomous vehicles operating on real-time systems. Reduced navigation errors by 34% and enhanced path-planning efficiency by 26% through innovative multi-sensor integration techniques.</p>
-        <p>Leveraged Docker and GitHub alongside ROS to containerize applications and facilitate seamless communication between software systems and robots, demonstrating effective robotics software architecture in autonomous vehicle systems.</p>
+        <p>Developed sensor-fusion trajectory models combining LiDAR and camera data to address navigation accuracy challenges in autonomous vehicles operating on real-time systems. Reduced navigation errors by 34% and enhanced path-planning efficiency by 26% using the combined sensor data.</p>
+        <p>Used Docker, GitHub, and ROS to containerize applications and connect software systems with the robots.</p>
             </div>
         </details>
     </section>

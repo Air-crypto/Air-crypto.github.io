@@ -1,28 +1,52 @@
 .desk-page {
-    min-height: 100svh;
-    background: #392b22;
-    background: radial-gradient(ellipse at center, #715239 0%, #392b22 75%);
+    min-height:100svh;
+    background:var(--surround);
 }
 .desk-main {
-    min-height: 100svh;
-    display: grid;
-    place-items: center;
+    min-height:100svh;
+    display:grid;
+    place-items:center;
+    padding:32px 48px;
 }
-.desk-main:focus { outline: none; }
+.desk-main:focus { outline:none; }
+.desk-shell {
+    width:min(1180px, calc((100svh - 172px) * 1.5), 100%);
+}
+.desk-heading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+}
+.desk-heading p { font:22px Georgia,serif; margin:0; }
+.desk-heading p span { font:12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--muted); margin-left:8px; }
 .desk-stage {
-    position: relative;
-    width: min(100vw, 150svh);
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
-    container-type: inline-size;
+    position:relative;
+    width:100%;
+    aspect-ratio:3 / 2;
+    overflow:hidden;
+    border:1px solid #51443750;
+    border-radius:18px;
+    container-type:inline-size;
+    background:#61482e;
+    box-shadow:0 12px 40px #29241c15;
 }
 .desk-photo {
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-    object-fit: cover;
-    user-select: none;
+    width:100%;
+    height:100%;
+    border-radius:0;
+    object-fit:cover;
+    filter:brightness(.94) saturate(.85);
+    user-select:none;
 }
+[data-theme="dark"] .desk-photo { filter:brightness(.62) saturate(.75); }
+[data-theme="dark"] .desk-stage { border-color:#a38b6638; box-shadow:0 16px 48px #0003; }
+.desk-caption { font-size:11px; color:var(--muted); margin:14px 0 0; text-align:center; }
+.desk-memory { position:absolute; object-fit:cover; border-radius:0; pointer-events:none; filter:brightness(.88) saturate(.8); }
+.memory-lake { left:7.15%; top:58.3%; width:13.4%; height:18.5%; transform:rotate(-13deg); }
+.memory-ice { left:12.8%; top:69.6%; width:12.7%; height:17.4%; transform:rotate(11deg); }
+[data-theme="dark"] .desk-memory { filter:brightness(.6) saturate(.7); }
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -36,6 +60,7 @@
 }
 .desk-object {
     position: absolute;
+    z-index:2;
     display: block;
     text-decoration: none;
     border-radius: 12px;
@@ -64,9 +89,12 @@
     object-fit: cover;
     border-radius: 2px;
     clip-path: polygon(0 0, 100% 0, 98.7% 100%, 1.3% 100%);
-    filter: brightness(.85) saturate(.82);
+    filter: brightness(.9) saturate(.82);
     pointer-events: none;
 }
+.pixel-portrait { image-rendering:pixelated; }
+.pixel-portrait[hidden] { display:none; }
+[data-theme="dark"] .screen-portrait { filter:brightness(.73) saturate(.7); }
 .laptop-screen::before { z-index: 1; pointer-events: none; }
 .laptop-keyboard { left: 31%; top: 47%; width: 37%; height: 34%; border-radius: 8px; }
 .notebook {
@@ -89,26 +117,39 @@
 /* The existing cup and plant open personal interests and student life. */
 .coffee { left: 68%; top: 77%; width: 20%; height: 22%; border-radius: 50%; }
 .plant { left: 0; top: 0; width: 23%; height: 16%; border-radius: 8px; }
-.desk-hint {
-    position: absolute;
-    bottom: 1.8%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
-    white-space: nowrap;
-    font-size: 11px;
-    color: #fff7e5;
-    pointer-events: none;
+.object-label {
+    position:absolute;
+    white-space:nowrap;
+    font-size:clamp(10px, 1.15cqw, 13px);
+    font-weight:500;
+    letter-spacing:.025em;
+    line-height:1.5;
+    color:#fff9e9;
+    text-shadow:0 1px 3px #251407;
+    border-bottom:1px solid #fff9e959;
+    padding:0 0 3px;
 }
+.desk-object:hover .object-label, .desk-object:focus-visible .object-label { border-bottom-color:#fff9e9; }
+.laptop-screen .object-label { right:-1%; top:-15%; }
+.laptop-keyboard .object-label { left:38%; bottom:-13%; }
+.notebook .object-label { left:24%; bottom:16%; transform:rotate(6deg); color:#403424; text-shadow:none; border-bottom-color:#40342466; }
+.circuit .object-label { left:15%; bottom:-18%; transform:rotate(-8deg); }
+.photos .object-label { right:-3%; bottom:-7%; transform:rotate(4deg); }
+.sticky .object-label { left:14%; top:28%; transform:rotate(14deg); color:#403424; text-shadow:none; border-bottom-color:#40342466; }
+.coffee .object-label { left:28%; top:-15%; }
+.plant .object-label { left:114%; top:34%; }
+[data-theme="dark"] .notebook .object-label,
+[data-theme="dark"] .sticky .object-label { color:#fff9e9; text-shadow:0 1px 3px #251407; border-bottom-color:#fff9e959; }
 .portfolio-window {
     padding:0;
-    border:1px solid #c9cdc2;
+    border:1px solid var(--line);
     border-radius:14px;
     width:min(900px,calc(100vw - 64px));
     height:min(780px,calc(100svh - 90px));
     max-width:none;
     max-height:none;
     background:var(--card);
+    color:var(--ink);
     box-shadow:0 30px 120px #18282050;
     overflow:hidden
 }
@@ -131,7 +172,7 @@
     font-family:ui-monospace,SFMono-Regular,monospace;
     font-size:11px;
     color:var(--muted);
-    background:#eeeee5
+    background:var(--surface)
 }
 .window-dots {
     display:flex;
@@ -176,10 +217,10 @@
 }
 .window-nav button[aria-current="page"] {
     background:var(--green);
-    color:var(--card)
+    color:var(--paper)
 }
 .window-nav button:hover {
-    background:#e1e5db
+    background:var(--hover)
 }
 .window-nav button[aria-current="page"]:hover {
     background:var(--green)
@@ -247,7 +288,24 @@
     to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 700px) {
+    .desk-main { padding:24px 16px; }
+    .desk-shell { width:min(580px, calc((100svh - 148px) * 1.5), 100%); }
+    .desk-heading { margin-bottom:14px; }
+    .desk-heading p { font-size:20px; }
+    .desk-heading p span { display:none; }
+    .desk-stage { border-radius:12px; }
+    .object-label { font-size:clamp(9px, 2.25cqw, 12px); padding-bottom:1px; }
+    .plant .object-label { left:111%; top:34%; }
+    .laptop-screen .object-label { top:-23%; }
+    .laptop-keyboard .object-label { bottom:-16%; }
+    .notebook .object-label { left:20%; bottom:20%; }
+    .photos .object-label { bottom:-11%; right:2%; }
+    .circuit .object-label { bottom:-23%; left:6%; }
+    .coffee .object-label { left:9%; top:-20%; }
+    .sticky .object-label { left:4%; top:30%; font-size:9px; }
+
     .sticky { min-width: 44px; min-height: 44px; }
+    .plant { min-height:44px; }
     .portfolio-window {
         width: calc(100vw - 20px);
         height: calc(100svh - 32px);

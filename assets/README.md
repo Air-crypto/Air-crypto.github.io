@@ -11,7 +11,7 @@ Use case: photorealistic-natural. Asset type: original interactive portfolio web
 
 ## Pixelated profile portrait
 
-`portrait-pixels.png` was created in built-in image generation edit mode from the existing `selfie.jpg`. It is displayed inside the laptop screen with CSS, leaving the desk artwork unchanged.
+`portrait-pixels.png` was created in built-in image generation edit mode from the existing `selfie.jpg`. This was an earlier screen asset and is no longer displayed. The laptop now uses a canvas rendering of the original `selfie.jpg` at 96 × 54 pixels, with CSS preserving the pixel edges. The photo prints also display existing Madison and hockey photos as HTML overlays.
 
 ### Portrait prompt
 

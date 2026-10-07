@@ -6,8 +6,46 @@
     --green:#245446;
     --line:#dddcd1;
     --gold:#c08947;
+    --surface:#eeeee5;
+    --hover:#e1e5db;
+    --surround:#e9e6de;
     color-scheme:light
 }
+/* A warm, quiet palette for the desk and every reading window. */
+:root[data-theme="dark"] {
+    --paper:#171916;
+    --card:#22251f;
+    --ink:#e8e7de;
+    --muted:#b0b4a8;
+    --green:#afc7ae;
+    --line:#3e4439;
+    --gold:#ccab77;
+    --surface:#2b2f27;
+    --hover:#353b30;
+    --surround:#171916;
+    color-scheme:dark;
+}
+.theme-toggle {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:44px;
+    padding:8px 12px;
+    border:1px solid var(--line);
+    border-radius:24px;
+    background:transparent;
+    color:var(--ink);
+    font-size:12px;
+    line-height:1;
+}
+.theme-toggle:hover { background:var(--hover); }
+.theme-toggle svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.theme-sun { display:none; }
+[data-theme="dark"] .theme-sun { display:block; }
+[data-theme="dark"] .theme-moon { display:none; }
+header { position:relative; }
+header>.theme-toggle { position:absolute; right:20px; top:12px; }
 * {
     box-sizing:border-box
 }
@@ -196,7 +234,8 @@ li {
     position:absolute;
     right:10px;
     top:10px;
-    background:#fffdf8;
+    background:var(--card);
+    color:var(--ink);
     border:0;
     border-radius:50%;
     width:38px;

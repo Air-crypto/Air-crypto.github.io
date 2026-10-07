@@ -143,8 +143,8 @@
 .laptop-keyboard .object-label { left:38%; bottom:-11%; }
 /* Follow the notebook edge, the front photo, and the sticky note. */
 .notebook .object-label { left:24%; bottom:16%; transform:rotate(-8deg); color:#4d4638; text-shadow:none; }
-.photos .object-label { right:0; bottom:-5%; transform:rotate(15deg); }
-.sticky .object-label { left:16%; top:31%; color:#514831; text-shadow:none; }
+.photos .object-label { right:6%; bottom:-8%; transform:rotate(15deg); }
+.sticky .object-label { left:50%; top:50%; transform:translate(-50%, -50%); color:#514831; text-shadow:none; }
 [data-theme="dark"] .notebook .object-label { color:#e6ddc9; }
 [data-theme="dark"] .sticky .object-label { color:#e6ddc9; }
 .portfolio-window {
@@ -305,8 +305,7 @@
     .laptop-screen .object-label { top:-23%; }
     .laptop-keyboard .object-label { bottom:-16%; }
     .notebook .object-label { left:20%; bottom:20%; }
-    .photos .object-label { bottom:-9%; right:2%; }
-    .sticky .object-label { left:6%; top:32%; }
+    .photos .object-label { bottom:-12%; right:8%; }
 
     .sticky { min-width: 44px; min-height: 44px; }
     .plant { min-height:44px; }

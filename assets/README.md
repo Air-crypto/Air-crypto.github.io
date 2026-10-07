@@ -1,5 +1,13 @@
 # Desk artwork
 
+## Current frame and photo layout
+
+`workbench-v2.webp` is a localized edit made with the built-in imagegen tool. The circuit board became an empty walnut frame, and the original photo prints were cleared so each real photograph and its paper frame can share one layer. The frame holds a pixelated canvas rendering of the real `selfie.jpg`; the laptop shows experience. The earlier background is preserved as `workbench.webp`.
+
+### Edit prompt
+
+Use case: precise-object-edit. Edit target: the supplied overhead workbench photograph. Make only two localized changes, retaining the original 1536x1024, 3:2 composition and the exact position, size, perspective, wood grain, sunlight, shadows and appearance of the laptop, notebook, pencils, plant, coffee, sticky note, screwdriver and small tray. 1) Replace the green printed circuit board at upper right with a simple small dark walnut picture frame lying flat on the same desk, rotated clockwise about 8 degrees. The frame should occupy roughly the same board area, centered at 83% across and 32% down, outer width about 18% of image width and height about 32% of image height. Portrait orientation, straight rectangular edges, modest real wood border, flat ivory blank photographic paper inside; the inside is completely blank and will receive a real portrait via HTML. No generated person or photo. Match the existing sunlight from upper left and realistic shadow. 2) Remove both instant photo prints at lower left, including their shadows, restoring only uninterrupted matching tabletop in their area (roughly x=5%-29%, y=56%-94%). We will add the real photographs and their frames as correctly layered HTML objects. Keep every other object and all original geometry unchanged. Laptop screen stays completely blank dark teal. No text, no logos, no extra objects, no perspective change.
+
 `workbench.webp` is an original background generated with the built-in image generation tool in generation mode. The generated PNG was converted to WebP at 1536 × 1024 for the site. Interface text and clickable areas are HTML/CSS overlays.
 
 The reference portfolio informed the idea of exploring a desk. No reference artwork or source code was reused.
@@ -11,7 +19,7 @@ Use case: photorealistic-natural. Asset type: original interactive portfolio web
 
 ## Pixelated profile portrait
 
-`portrait-pixels.png` was created in built-in image generation edit mode from the existing `selfie.jpg`. This was an earlier screen asset and is no longer displayed. The laptop now uses a canvas rendering of the original `selfie.jpg` at 96 × 54 pixels, with CSS preserving the pixel edges. The photo prints also display existing Madison and hockey photos as HTML overlays.
+`portrait-pixels.png` was created in built-in image generation edit mode from the existing `selfie.jpg`. This was an earlier screen asset and is no longer displayed. The picture frame now uses a canvas rendering of the original `selfie.jpg` at 40 × 58 pixels, with CSS preserving the pixel edges. The photo prints display existing Madison and hockey photos, with each photograph and its paper border grouped into one HTML layer.
 
 ### Portrait prompt
 

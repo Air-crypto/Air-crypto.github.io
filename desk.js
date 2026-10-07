@@ -5,10 +5,10 @@
     function drawPortrait() {
         const ctx = pixels.getContext('2d');
         if (!ctx || !portrait.naturalWidth) return;
-        const width = portrait.naturalWidth;
+        const width = Math.min(portrait.naturalWidth, portrait.naturalHeight * pixels.width / pixels.height);
         const height = width * pixels.height / pixels.width;
         const top = Math.max(0, Math.min(portrait.naturalHeight - height, portrait.naturalHeight * .55 - height / 2));
-        ctx.drawImage(portrait, 0, top, width, height, 0, 0, pixels.width, pixels.height);
+        ctx.drawImage(portrait, (portrait.naturalWidth - width) / 2, top, width, height, 0, 0, pixels.width, pixels.height);
         pixels.hidden = false;
         portrait.style.visibility = 'hidden';
     }
@@ -37,7 +37,7 @@
         skating: {title: 'Ice skating', path: 'hockey.html', selectors: 'body > section'},
         contact: {title: 'Say hello', path: 'mailto:apyadav@wisc.edu', template: 'contact-content'}
     };
-    const pageVersion = '7';
+    const pageVersion = '8';
     const cache = new Map();
     let requestNumber = 0;
     let lastTrigger = null;

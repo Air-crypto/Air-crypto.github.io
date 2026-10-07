@@ -20,6 +20,7 @@
     width:min(1180px, calc((100svh - 172px) * 1.5), 100%);
 }
 .desk-heading {
+    min-height:44px;
     display:flex;
     align-items:center;
     justify-content:space-between;

@@ -53,12 +53,21 @@
     border-color: #fff5d560;
 }
 .desk-object:focus-visible { outline: 2px solid #fff5d5; outline-offset: 3px; }
-.desk-stage.show-guide .desk-object::before {
-    background: #fff5d514;
-    border-color: #fff5d5;
-    box-shadow: 0 0 0 4px #fff5d522, 0 0 24px #fff5d535;
-}
 .laptop-screen { left: 31.5%; top: 13.5%; width: 36%; height: 31%; border-radius: 6px; }
+.screen-portrait {
+    position: absolute;
+    left: 1.4%;
+    top: .6%;
+    width: 98.6%;
+    height: 99%;
+    max-width: none;
+    object-fit: cover;
+    border-radius: 2px;
+    clip-path: polygon(0 0, 100% 0, 98.7% 100%, 1.3% 100%);
+    filter: brightness(.85) saturate(.82);
+    pointer-events: none;
+}
+.laptop-screen::before { z-index: 1; pointer-events: none; }
 .laptop-keyboard { left: 31%; top: 47%; width: 37%; height: 34%; border-radius: 8px; }
 .notebook {
     left: 1%; top: 16%; width: 27%; height: 41%;
@@ -77,34 +86,17 @@
     transform: rotate(-14deg);
     border-radius: 0;
 }
-.desk-controls {
+.desk-hint {
     position: absolute;
-    bottom: 1%;
+    bottom: 1.8%;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 18px;
+    margin: 0;
     white-space: nowrap;
+    font-size: 11px;
     color: #fff7e5;
     pointer-events: none;
 }
-.desk-controls p { margin: 0; font-size: 11px; }
-.desk-controls button {
-    pointer-events: auto;
-    padding: 0 12px;
-    min-height: 44px;
-    color: inherit;
-    font-size: 11px;
-    background: #33231980;
-    border: 1px solid #fff7e533;
-    border-radius: 4px;
-}
-.desk-controls button:hover, .desk-controls button[aria-pressed="true"] {
-    background: #fff7e526;
-    border-color: #fff7e580;
-}
-.desk-controls button:focus-visible { outline-color: #fff7e5; }
 .portfolio-window {
     padding:0;
     border:1px solid #c9cdc2;
@@ -253,7 +245,6 @@
 }
 @media (max-width: 700px) {
     .sticky { min-width: 44px; min-height: 44px; }
-    .desk-controls { gap: 12px; }
     .portfolio-window {
         width: calc(100vw - 20px);
         height: calc(100svh - 32px);

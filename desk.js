@@ -14,22 +14,6 @@
         skating: {title: 'Ice skating', path: 'hockey.html', selectors: 'body > section'},
         contact: {title: 'Say hello', path: 'mailto:apyadav@wisc.edu', template: 'contact-content'}
     };
-    const stage = document.querySelector('.desk-stage');
-    const guide = document.querySelector('#desk-guide');
-    const guideStatus = document.querySelector('#guide-status');
-    let guideTimer;
-    function showGuide(visible) {
-        clearTimeout(guideTimer);
-        stage.classList.toggle('show-guide', visible);
-        guide.setAttribute('aria-pressed', String(visible));
-        guideStatus.textContent = visible ? 'Clickable desk objects are highlighted. Use Tab to explore.' : '';
-        if (visible) guideTimer = setTimeout(() => showGuide(false), 6000);
-    }
-    guide.addEventListener('click', () => showGuide(!stage.classList.contains('show-guide')));
-    document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') showGuide(false);
-    });
-
     const cache = new Map();
     let requestNumber = 0;
     let lastTrigger = null;
@@ -51,7 +35,6 @@
     async function openSection(key, trigger, updateHistory = true) {
         const page = pages[key];
         if (!page) return;
-        showGuide(false);
         const thisRequest = ++requestNumber;
         if (!dialog.open) {
             lastTrigger = trigger || document.activeElement;

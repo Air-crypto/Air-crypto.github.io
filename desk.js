@@ -9,11 +9,20 @@
         experience: {title: 'Experience', path: 'portfolio.html#experience', selectors: '#experience'},
         projects: {title: 'Things I have built', path: 'projects.html', selectors: 'body > section'},
         hardware: {title: 'Hardware & systems', path: 'projects.html#hardware', selectors: '#simd, #hardware, #guitar, #led'},
-        life: {title: 'Off the clock', path: 'gallery.html', template: 'life-content'},
+        life: {title: 'Outside of code', path: 'life.html', selectors: '#life'},
+        littlethings: {title: 'Little things', path: 'life.html#littleThings', selectors: '#littleThings'},
+        studentlife: {title: 'Student life', path: 'portfolio.html#education', selectors: '#education, #activities'},
+        flights: {title: 'Window seat pics', path: 'gallery.html#flights', selectors: '#flights'},
+        madison: {title: 'Madison', path: 'gallery.html#madison', selectors: '#madison'},
+        swimming: {title: 'A freezing swim', path: 'gallery.html#lakeSwim', selectors: '#lakeSwim'},
+        aurora: {title: 'Northern lights', path: 'gallery.html#aurora', selectors: '#aurora'},
+        eclipse: {title: 'The eclipse', path: 'gallery.html#eclipse', selectors: '#eclipse'},
+        sanfrancisco: {title: 'San Francisco on the Fourth', path: 'gallery.html#sanFrancisco', selectors: '#sanFrancisco'},
         gallery: {title: 'Photo gallery', path: 'gallery.html', selectors: 'body > section'},
         skating: {title: 'Ice skating', path: 'hockey.html', selectors: 'body > section'},
         contact: {title: 'Say hello', path: 'mailto:apyadav@wisc.edu', template: 'contact-content'}
     };
+    const pageVersion = '6';
     const cache = new Map();
     let requestNumber = 0;
     let lastTrigger = null;
@@ -21,7 +30,7 @@
     async function loadPage(path) {
         const url = path.split('#')[0];
         if (!cache.has(url)) {
-            cache.set(url, fetch(url).then(response => {
+            cache.set(url, fetch(`${url}?v=${pageVersion}`).then(response => {
                 if (!response.ok) throw new Error('Could not load this page.');
                 return response.text();
             }).then(html => new DOMParser().parseFromString(html, 'text/html')).catch(error => {
@@ -45,7 +54,7 @@
         source.href = page.path;
         source.textContent = key === 'contact' ? 'Send me an email ↗' : 'Open this page on its own ↗';
         dialog.querySelectorAll('.window-nav [data-open]').forEach(button => {
-            if (button.dataset.open === key || (key === 'hardware' && button.dataset.open === 'projects') || (['gallery', 'skating'].includes(key) && button.dataset.open === 'life')) button.setAttribute('aria-current', 'page');
+            if (button.dataset.open === key || (key === 'hardware' && button.dataset.open === 'projects') || (['littlethings', 'gallery', 'skating', 'flights', 'madison', 'swimming', 'aurora', 'eclipse', 'sanfrancisco'].includes(key) && button.dataset.open === 'life') || (key === 'studentlife' && button.dataset.open === 'about')) button.setAttribute('aria-current', 'page');
             else button.removeAttribute('aria-current');
         });
         content.querySelectorAll('video').forEach(video => video.pause());

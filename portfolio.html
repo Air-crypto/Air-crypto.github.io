@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About & Experience — Arihan Yadav</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="styles.css?v=2">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -26,9 +26,15 @@
             <img src="selfie.jpg" alt="Fun Portrait" id="profilePicture">
         </div>
         <div class="flex-child">
-            <h3>About Me</h3>
-            <p>I'm Arihan Yadav, a Computer Engineering and Computer Sciences double major at the University of Wisconsin-Madison, with a concentration on Machine Learning and Data Science. I'm passionate about bridging the gap between theory and real-world applications of AI.</p>
-            <p>My programming skills span across Java, C, C++, Python, Go, JavaScript, MATLAB, SQL, Assembly, and Verilog. These skills have been honed through both rigorous coursework and practical experience in various research and development projects. I have also worked with many frameworks such as PyTorch, JAX, TensorFlow, LangChain, LlamaIndex, Flask, AWS OpenSearch, GitHub, ROCm, CUDA, Docker, ROS, and MLIR. </p>
+            <h3>A little about me</h3>
+            <h2>Hey, I'm Arihan.</h2>
+            <p>I'm studying Computer Engineering and Computer Science at the University of Wisconsin-Madison, graduating in December 2026.</p>
+            <p>Most of my work is somewhere between machine learning, software, and hardware. At AMD, I work on training language models for device code generation, along with the kernels and distributed systems that make that training possible.</p>
+            <p>Outside of that, there's ice hockey, rock climbing, hiking, photos from flights, and a lot of Madison. A frozen lake is a ton of fun. An electric skateboard on ice, less so :].</p>
+            <p><a href="life.html" data-open="life">A few things from outside of code ↗</a></p>
+            <details class="skills-details"><summary>What I work with</summary>
+<p>My programming skills span across Java, C, C++, Python, Go, JavaScript, MATLAB, SQL, Assembly, and Verilog. These skills have been honed through both rigorous coursework and practical experience in various research and development projects. I have also worked with many frameworks such as PyTorch, JAX, TensorFlow, LangChain, LlamaIndex, Flask, AWS OpenSearch, GitHub, ROCm, CUDA, Docker, ROS, and MLIR. </p>
+            </details>
         </div>
     </section>
     <section id="education">
@@ -38,44 +44,63 @@
     </section>
     <section id="experience">
         <h3>Experience</h3>
-
-        <h2>May 2026 - Present: AI MTS (Contractor) at AMD (Advanced Micro Devices)</h2>
+        <p>I've worked on language models, multimodal retrieval, GPU kernels, and robotics. Here's what I've been up to.</p>
+        <details class="experience-entry">
+            <summary><span class="experience-date">May 2026 – Present</span><span class="experience-role">AI MTS (Contractor) · AMD</span><span class="experience-focus">LLM post-training, reinforcement learning, and GPU systems.</span></summary>
+            <div class="experience-body">
         <p><strong>Post-Training LLMs with Reinforcement Learning for Proprietary Code Generation</strong></p>
         <p>Built an end-to-end post-training pipeline to specialize a base model for proprietary device code generation: continued pretraining on the target codebase, supervised fine-tuning on reasoning traces and tool-use trajectories distilled from a larger teacher model, then reinforcement learning with GSPO and verifiable rewards (RLVR).</p>
         <p>Trained a model that passed more directed device tests than GPT and Claude Opus while generating solutions in under 12,000 tokens, compared with 102,000 for Opus and 360,000 for GPT. Engineered a fused cross-entropy kernel with near-constant memory as sequence length grows, enabling an 8x larger training context window.</p>
         <p>Architected distributed training and inference across 16 MI250 GPUs on two 8-GPU clusters over RCCL, with a dedicated training server and a vLLM inference server using speculative decoding. Synchronized policy weights every three steps, and measured reward hacking and grader-process exploitation to harden the reward and grading infrastructure.</p>
         <p>First author of two papers published at AMD's Global Technical Authors Conference detailing the reinforcement learning methodology and the harnesses used to train and evaluate models.</p>
-
-        <h2>May 2025 - August 2025: AI/ML Intern at AMD (Advanced Micro Devices)</h2>
+            </div>
+        </details>
+        <details class="experience-entry">
+            <summary><span class="experience-date">May 2025 – August 2025</span><span class="experience-role">AI/ML Intern · AMD</span><span class="experience-focus">Hardware trace analysis, long-context models, and HIP kernels.</span></summary>
+            <div class="experience-body">
         <p><strong>Developing AI Frameworks and Models to Accelerate Hardware Design Efficiency</strong></p>
         <p>Designed and implemented an AI pipeline for root-cause analysis of hardware traces, revolutionizing failure analysis by clustering failures by root causes rather than just error signatures. Achieved 82% accuracy compared to 28% for state-of-the-art systems, reducing verification time and resources by 30x.</p>
         <p>Built a scalable data pipeline from a Dremio data lake to GPU cluster that processed 97,000 transactions/second on a 3.5B-trace corpus at almost linear scale. Redesigned LLM architecture from hierarchical full attention to sliding-window attention, boosting memory efficiency from exponential to linear for long sequences while preserving causality and recent-event focus.</p>
         <p>Implemented QLoRA quantization for 4-bit training through extensive ablation tests, achieving 22x context window growth (from 512 to 11,000 tokens) resulting in a 54% accuracy boost. Developed fine-tuning with layer freezing, enabling quick adaptation to new CPU/GPU chip families with minimal training data while maintaining low reconstruction loss and sharp cluster separation.</p>
         <p>Ported the end-to-end pipeline from Python and PyTorch to C++ with LibTorch and pybind11, fusing hot paths and optimizing memory layout and data movement. Delivered 4.6x faster training and 3x faster inference with custom HIP kernels.</p>
         <p>First author of a paper published at AMD's Global Technical Authors Conference, highlighting superior results from quantized models leveraging sliding window attention.</p>
-
-        <h2>November 2024 - Present: Researcher at Applied Research Laboratory for Intelligence and Security (ARLIS)</h2>
+            </div>
+        </details>
+        <details class="experience-entry">
+            <summary><span class="experience-date">November 2024 – Present</span><span class="experience-role">Researcher · ARLIS</span><span class="experience-focus">Multimodal search and retrieval for the Department of Defense.</span></summary>
+            <div class="experience-body">
         <p><strong>Building a Multimodal Search Engine using LLMs and RAG for the Department of Defense</strong></p>
         <p>Lead developer working with the DoD via the ARLIS institute on novel context-aware multi-modal retrieval systems integrating LLMs with Retrieval Augmented Generation (RAG). This search engine unifies information retrieval across diverse input data types (text, images, audio, and video) for naval assets, declassification workflows, and other defense use cases.</p>
         <p>Architected and trained a PyTorch-based model that aligns heterogeneous data embeddings into a unified semantic space, enabling cross-modal retrieval. Designed specialized contrastive loss functions with regularization and implemented novel cross-attention mechanisms to enhance correlation between projected image, audio, video, and text features.</p>
         <p>Achieved breakthrough performance metrics: 94.53% accuracy, 99.93% Top-5 accuracy, and 0.9703 Mean Reciprocal Rank (MRR), significantly outperforming state-of-the-art models such as CLIP (35.78% accuracy) on image-caption retrieval tasks.</p>
-
-        <h2>January 2024 - Present: Undergraduate Researcher at Molecular Imaging/Magnetic Resonance Technology Lab</h2>
+            </div>
+        </details>
+        <details class="experience-entry">
+            <summary><span class="experience-date">January 2024 – Present</span><span class="experience-role">Undergraduate Researcher · UW–Madison</span><span class="experience-focus">Multimodal models and retrieval in the Molecular Imaging/Magnetic Resonance Technology Lab.</span></summary>
+            <div class="experience-body">
         <p><strong>Driving AI Innovations in Medicine Through Novel Work in Multimodal LLMs</strong></p>
         <p>Collaborating with researchers at Microsoft to improve medical image retrieval by utilizing expertise in embedding transformations to better align CT and MRI scans for use in multimodal LLMs, enhancing diagnostic accuracy and decision-making critical for patient diagnoses.</p>
         <p>Developed a custom multi-modal Projection Model using PyTorch to translate pseudocode embeddings to C code embeddings, improving retrieval accuracy by 58.2% compared to state-of-the-art models and algorithms (e.g., BM25 and Sentence Transformers). Published a paper as primary author, with UW-Madison filing a patent for this innovation.</p>
         <p>Addressed critical memory limitations during LLaVA model fine-tuning by implementing distributed training across multiple 80GB A100 GPUs, gradient checkpointing, and automatic mixed precision training. Achieved a 41.6% reduction in memory footprint (from 212 GB to 124 GB), enabling training of larger models and batch sizes while accelerating the R&D pipeline.</p>
-
-        <h2>June 2024 - December 2024: Software Developer Intern at Theom Inc.</h2>
+            </div>
+        </details>
+        <details class="experience-entry">
+            <summary><span class="experience-date">June 2024 – December 2024</span><span class="experience-role">Software Developer Intern · Theom</span><span class="experience-focus">Vector search, data lineage, and access control for LLM applications.</span></summary>
+            <div class="experience-body">
         <p><strong>Built High-Performance Fine-Grained Access Control for LLMs with Vector Search and Data Lineage Tracking</strong></p>
         <p>Designed and implemented a Flask-based RAG service with fine-grained access control, integrating multiple vector databases (Pinecone, OpenSearch, Milvus, Chroma, MongoDB) to enable identity and context-aware similarity searches for LLM applications. Engineered novel algorithms for creating, updating, and deleting vector embeddings across multiple databases with batch processing capabilities.</p>
         <p>Developed permission-based filtering mechanisms that allow the vector system to filter results based on the querier's access policies, context, and identity. Utilized LangChain and LlamaIndex to scale deployment to customers through generalized scalable solutions.</p>
         <p>Implemented a semantic search algorithm using C++, SQL, and AWS OpenSearch that identified similar data, significantly outperforming fuzzy hashing approaches. Achieved 10x runtime performance improvement in data classification and enhanced data traceability by 572%.</p>
-
-        <h2>September 2023 - Present: Team Member at Wisconsin Robotics</h2>
+            </div>
+        </details>
+        <details class="experience-entry">
+            <summary><span class="experience-date">September 2023 – Present</span><span class="experience-role">Team Member · Wisconsin Robotics</span><span class="experience-focus">Sensor fusion and autonomous navigation.</span></summary>
+            <div class="experience-body">
         <p><strong>Enhancing Autonomous Vehicle Navigation through Sensor Fusion</strong></p>
         <p>Developed sensor-fusion trajectory models combining LiDAR and camera data to address navigation accuracy challenges in autonomous vehicles operating on real-time systems. Reduced navigation errors by 34% and enhanced path-planning efficiency by 26% through innovative multi-sensor integration techniques.</p>
         <p>Leveraged Docker and GitHub alongside ROS to containerize applications and facilitate seamless communication between software systems and robots, demonstrating effective robotics software architecture in autonomous vehicle systems.</p>
+            </div>
+        </details>
     </section>
     <section id="timeline">
         <h3>Projects - For Details Head to the <a href="projects.html">Projects Tab</a></h3>

@@ -86,6 +86,9 @@
     transform: rotate(-14deg);
     border-radius: 0;
 }
+/* The existing cup and plant open personal interests and student life. */
+.coffee { left: 68%; top: 77%; width: 20%; height: 22%; border-radius: 50%; }
+.plant { left: 0; top: 0; width: 23%; height: 16%; border-radius: 8px; }
 .desk-hint {
     position: absolute;
     bottom: 1.8%;

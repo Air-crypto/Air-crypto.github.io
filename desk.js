@@ -10,6 +10,8 @@
         projects: {title: 'Things I have built', path: 'projects.html', selectors: 'body > section'},
         hardware: {title: 'Hardware & systems', path: 'projects.html#hardware', selectors: '#simd, #hardware, #guitar, #led'},
         life: {title: 'Off the clock', path: 'gallery.html', template: 'life-content'},
+        gallery: {title: 'Photo gallery', path: 'gallery.html', selectors: 'body > section'},
+        skating: {title: 'Ice skating', path: 'hockey.html', selectors: 'body > section'},
         contact: {title: 'Say hello', path: 'mailto:apyadav@wisc.edu', template: 'contact-content'}
     };
     const cache = new Map();
@@ -43,7 +45,7 @@
         source.href = page.path;
         source.textContent = key === 'contact' ? 'Send me an email ↗' : 'Open this page on its own ↗';
         dialog.querySelectorAll('.window-nav [data-open]').forEach(button => {
-            if (button.dataset.open === key || (key === 'hardware' && button.dataset.open === 'projects')) button.setAttribute('aria-current', 'page');
+            if (button.dataset.open === key || (key === 'hardware' && button.dataset.open === 'projects') || (['gallery', 'skating'].includes(key) && button.dataset.open === 'life')) button.setAttribute('aria-current', 'page');
             else button.removeAttribute('aria-current');
         });
         content.querySelectorAll('video').forEach(video => video.pause());

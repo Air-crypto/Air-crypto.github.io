@@ -13,49 +13,29 @@
 </head>
 <body class="desk-page">
     <a class="skip-link" href="#desk">Skip to the desk</a>
-    <header class="desk-header">
-        <a class="brand" href="index.html" aria-label="Arihan Yadav home"><span class="brand-mark">ay.</span><span>Arihan Yadav<small>THE WORKBENCH</small></span></a>
-        <nav aria-label="Portfolio navigation" class="desk-nav">
-            <a href="portfolio.html#aboutMe" data-open="about">About</a>
-            <a href="portfolio.html#experience" data-open="experience">Experience</a>
-            <a href="projects.html" data-open="projects">Projects</a>
-            <a href="gallery.html" data-open="life">Off the clock</a>
-        </nav>
-        <a class="header-contact" href="mailto:apyadav@wisc.edu" data-open="contact">Say hello <span aria-hidden="true">↗</span></a>
-    </header>
-    <main id="desk" class="desk-main">
-        <div class="mobile-intro"><p class="eyebrow">MY LITTLE CORNER OF THE INTERNET</p><h1>Hey, I'm Arihan.</h1><p>I build things at the intersection of machine learning, software, and hardware.</p></div>
+    <main id="desk" class="desk-main" tabindex="-1">
         <div class="desk-stage" aria-label="Explore Arihan's interactive workbench">
-            <img class="desk-photo" src="assets/workbench.webp" width="1536" height="1024" alt="A sunlit wooden workbench with a laptop, engineering notebook, circuit board, lake and skating photos, and a coffee cup." fetchpriority="high" draggable="false">
-            <a class="screen-window" href="projects.html" data-open="projects" aria-label="Open projects on the laptop">
-                <span class="screen-status"><span class="status-dot"></span> arihan@workbench <span class="screen-time">~/projects</span></span>
+            <img class="desk-photo" src="assets/workbench.webp" width="1536" height="1024" alt="A sunlit wooden workbench. Explore the laptop, engineering notebook, circuit board, photos, and sticky note." fetchpriority="high" draggable="false">
+            <div class="screen-window" aria-label="On the laptop">
                 <span class="screen-greeting">Hey, I'm</span>
                 <h1 class="screen-name">Arihan Yadav.</h1>
-                <span class="screen-description">Machine learning, software, hardware.<br>Usually all three.</span>
-                <span class="screen-cta">Explore my projects <span aria-hidden="true">↗</span></span>
-                <span class="screen-mobile">My projects <span aria-hidden="true">↗</span></span>
-            </a>
-            <a class="desk-object notebook" href="portfolio.html#experience" data-open="experience" aria-label="Open experience from the engineering notebook"><span class="object-label"><span class="object-number">01</span> Experience <span aria-hidden="true">↗</span></span></a>
-            <a class="desk-object circuit" href="projects.html#hardware" data-open="hardware" aria-label="Open hardware projects from the circuit board"><span class="object-label"><span class="object-number">02</span> Hardware <span aria-hidden="true">↗</span></span></a>
-            <a class="desk-object photos" href="gallery.html" data-open="life" aria-label="Open photos and skating from the photo prints"><span class="object-label"><span class="object-number">03</span> Off the clock <span aria-hidden="true">↗</span></span></a>
-            <a class="desk-object sticky" href="mailto:apyadav@wisc.edu" data-open="contact" aria-label="Open contact from the sticky note"><span>Say<br>hello.</span><span aria-hidden="true">↗</span></a>
+                <span class="screen-description">Machine learning, software, hardware.</span>
+                <div class="screen-links"><a href="portfolio.html#aboutMe" data-open="about">About me <span aria-hidden="true">↗</span></a><a href="projects.html" data-open="projects">Projects <span aria-hidden="true">↗</span></a></div>
+            </div>
+            <a class="desk-object notebook" href="portfolio.html#experience" data-open="experience" aria-label="Open experience from the engineering notebook"><span class="object-label">Experience</span></a>
+            <a class="desk-object circuit" href="projects.html#hardware" data-open="hardware" aria-label="Open hardware projects from the circuit board"><span class="object-label">Hardware</span></a>
+            <a class="desk-object photos" href="gallery.html" data-open="life" aria-label="Open photos and skating from the photo prints"><span class="object-label">Off the clock</span></a>
+            <a class="desk-object sticky" href="mailto:apyadav@wisc.edu" data-open="contact" aria-label="Open contact from the sticky note"><span>Say<br>hello.</span></a>
+            <p class="desk-hint">Click around.</p>
         </div>
-        <div class="mobile-links" aria-label="Explore the portfolio">
-            <a href="portfolio.html#aboutMe" data-open="about"><span>01 / A LITTLE ABOUT ME</span><strong>Hi, I'm Arihan <i aria-hidden="true">↗</i></strong></a>
-            <a href="portfolio.html#experience" data-open="experience"><span>02 / WHAT I'VE BEEN UP TO</span><strong>Experience <i aria-hidden="true">↗</i></strong></a>
-            <a href="projects.html" data-open="projects"><span>03 / THINGS I'VE BUILT</span><strong>Projects <i aria-hidden="true">↗</i></strong></a>
-            <a href="gallery.html" data-open="life"><span>04 / AWAY FROM THE KEYBOARD</span><strong>Off the clock <i aria-hidden="true">↗</i></strong></a>
-        </div>
-        <div class="desk-caption"><p><span class="caption-dot" aria-hidden="true"></span> Click around. There's a little of everything here.</p><a href="portfolio.html">Read the full portfolio <span aria-hidden="true">↗</span></a></div>
     </main>
-    <footer class="desk-footer"><span>Computer Engineering + Computer Science</span><span>UW–Madison · Class of 2026</span><a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub ↗</a></footer>
     <dialog id="portfolio-window" class="portfolio-window" aria-labelledby="window-title">
         <div class="window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="window-title">The workbench</span><button class="window-close" type="button" aria-label="Close portfolio window">✕</button></div>
         <nav class="window-nav" aria-label="Portfolio window sections"><button type="button" data-open="about">About</button><button type="button" data-open="experience">Experience</button><button type="button" data-open="projects">Projects</button><button type="button" data-open="life">Off the clock</button><button type="button" data-open="contact">Contact</button></nav>
         <div class="window-scroll" tabindex="0"><div id="window-content" class="reader" aria-live="polite"></div><a id="window-source" class="window-source" href="portfolio.html">Open this page on its own ↗</a></div>
     </dialog>
     <template id="contact-content"><section class="contact-card"><p class="eyebrow">LET'S TALK</p><h2>Say hello.</h2><p>I'm always happy to talk about machine learning, software, hardware, or something you're building.</p><a class="contact-email" href="mailto:apyadav@wisc.edu">apyadav@wisc.edu <span aria-hidden="true">↗</span></a><div class="contact-links"><a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></section></template>
-    <template id="life-content"><section><p class="eyebrow">AWAY FROM THE KEYBOARD</p><h2>Off the clock.</h2><p>A few things from life outside of code. Madison, a frozen lake, a window seat, and getting that hockey stop right :]</p><div class="life-grid"><a href="gallery.html"><img src="aurora/IMG_7288.jpg" alt="Aurora over Madison" loading="lazy"><span>Photo gallery <i aria-hidden="true">↗</i></span><small>Flights, northern lights, and life in Madison.</small></a><a href="hockey.html"><img src="hockey/IMG_719811.jpg" alt="Practicing a hockey stop on the ice" loading="lazy"><span>Ice skating <i aria-hidden="true">↗</i></span><small>Still working on the back foot.</small></a></div></section></template>
+    <template id="life-content"><section><p class="eyebrow">AWAY FROM THE KEYBOARD</p><h2>Off the clock.</h2><p>A few things from life outside of code. Madison, a frozen lake, a window seat, and getting that hockey stop right :]</p><div class="life-grid"><a href="gallery.html" data-open="gallery"><img src="aurora/IMG_7288.jpg" alt="Aurora over Madison" loading="lazy"><span>Photo gallery <i aria-hidden="true">↗</i></span><small>Flights, northern lights, and life in Madison.</small></a><a href="hockey.html" data-open="skating"><img src="hockey/IMG_719811.jpg" alt="Practicing a hockey stop on the ice" loading="lazy"><span>Ice skating <i aria-hidden="true">↗</i></span><small>Still working on the back foot.</small></a></div></section></template>
     <script src="scripts.js" defer></script>
     <script src="desk.js" defer></script>
 </body>

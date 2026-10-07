@@ -2,7 +2,7 @@
 
 Source code for my personal website: [air-crypto.github.io](https://air-crypto.github.io/).
 
-An interactive desk with a laptop, engineering notebook, circuit board, and photos. Click an object to explore, or use the navigation. On smaller screens, the same sections have larger cards below the desk.
+An interactive desk with a laptop, engineering notebook, circuit board, and photos. Everything starts on the image: use the laptop for about and projects, the notebook for experience, the board for hardware, the photos for the gallery and skating, and the sticky note for contact. The same objects work on smaller screens.
 
 ## Run locally
 
@@ -23,6 +23,6 @@ Open `http://localhost:8765`. A server is needed for the desk windows to load th
 - `styles.css` and `scripts.js`: shared page styles and accessible photo/video viewers.
 - `assets/workbench.webp`: the original desk photograph. Its generation prompt is recorded in [assets/README.md](assets/README.md).
 
-Desk windows reuse the standalone pages so descriptions stay consistent. Links still open those pages when JavaScript is unavailable. Native dialogs support keyboard focus, Escape to close, and reduced motion preferences.
+Desk windows reuse the standalone pages so descriptions stay consistent. Photos and skating also open over the desk. Links still open those pages when JavaScript is unavailable. Native dialogs support keyboard focus, Escape to close, and reduced motion preferences.
 
 GitHub Pages deploys the static files from `main`.

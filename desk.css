@@ -153,7 +153,6 @@
     transition:opacity .2s;
 }
 .desk-object:hover .object-label, .desk-object:focus-visible .object-label { opacity:1; }
-.laptop .object-label { left:38%; bottom:-5%; }
 .portrait-frame .object-label { left:24%; bottom:-17%; }
 /* Follow the notebook edge, the front photo, and the sticky note. */
 .notebook .object-label { left:24%; bottom:16%; transform:rotate(-8deg); color:#4d4638; text-shadow:none; }
@@ -316,7 +315,6 @@
     .desk-heading p span { display:none; }
     .desk-stage { border-radius:12px; }
     .object-label { font-size:clamp(9px, 2.25cqw, 10.5px); }
-    .laptop .object-label { bottom:-8%; }
     .laptop-display { padding:1.7cqw 2cqw; }
     .screen-heading { margin-bottom:1cqw; }
     .screen-role { display:none; }

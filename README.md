@@ -2,7 +2,7 @@
 
 Source code for my personal website: [air-crypto.github.io](https://air-crypto.github.io/).
 
-An interactive desk with a laptop, engineering notebook, circuit board, and photos. Everything starts on the image: use the laptop screen for about and the keyboard for projects, the notebook for experience, the board for hardware, the photos for life outside of code, the cup for little life things, the plant for student life, and the sticky note for contact. The same objects work on smaller screens. A bounded frame keeps the whole desk in view, with small labels beside the objects. Light and dark modes follow your system preference until you choose one; the choice is remembered across the desk and standalone pages.
+An interactive desk with a laptop, engineering notebook, circuit board, and photos. Everything starts on the image: use the laptop screen for about and the keyboard for projects, the notebook for experience, the board for hardware, the photos for life outside of code, the cup for little life things, the plant for student life, and the sticky note for contact. The same objects work on smaller screens. A bounded frame keeps the whole desk in view, with small handwritten guides for about, projects, experience, life, and contact. Light and dark modes follow your system preference until you choose one; the choice is remembered across the desk and standalone pages.
 
 ## Run locally
 

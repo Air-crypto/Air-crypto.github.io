@@ -16,3 +16,7 @@ Use case: photorealistic-natural. Asset type: original interactive portfolio web
 ### Portrait prompt
 
 Use case: style-transfer, identity-preserve. Edit the supplied profile selfie into a faithful pixelated portrait for a laptop screen on a minimalist portfolio. Preserve this exact person's recognizable face, swept black hair, red sunglasses, red Wisconsin floral shirt, and gray backpack straps. Landscape 16:9 composition: crop to head and upper chest, center the face, with the same sunny green campus lawn and brick building behind him simplified into pixels. Pixelated photograph / tasteful retro pixel art, a crisp regular square pixel grid approximately 96 pixels wide by 54 high, clearly visible square color blocks, no smooth photographic texture, no blur, restrained natural colors. Keep the likeness and relaxed expression, do not redesign his features or clothing. Image only, fill the entire canvas with the scene. No laptop or monitor frame, no text, no logos added, no buttons, no decorative border.
+
+## Desk guide lettering
+
+`kalam-light.woff2` is Kalam Light by Indian Type Foundry, subset to basic Latin and self-hosted for the small desk labels. See `Kalam-OFL.txt` for its SIL Open Font License.

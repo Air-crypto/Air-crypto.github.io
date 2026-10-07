@@ -1,3 +1,10 @@
+@font-face {
+    font-family:"Desk notes";
+    src:url("assets/kalam-light.woff2") format("woff2");
+    font-weight:300;
+    font-style:normal;
+    font-display:swap;
+}
 .desk-page {
     min-height:100svh;
     background:var(--surround);
@@ -120,26 +127,26 @@
 .object-label {
     position:absolute;
     white-space:nowrap;
-    font-size:clamp(10px, 1.15cqw, 13px);
-    font-weight:500;
-    letter-spacing:.025em;
-    line-height:1.5;
-    color:#fff9e9;
-    text-shadow:0 1px 3px #251407;
-    border-bottom:1px solid #fff9e959;
-    padding:0 0 3px;
+    font-family:"Desk notes","Bradley Hand",cursive;
+    font-size:clamp(9px, 1.1cqw, 12px);
+    font-weight:300;
+    letter-spacing:.015em;
+    line-height:1.4;
+    color:#e6ddc9;
+    opacity:.88;
+    text-shadow:0 1px 2px #25140770;
+    transform-origin:center;
+    transition:opacity .2s;
 }
-.desk-object:hover .object-label, .desk-object:focus-visible .object-label { border-bottom-color:#fff9e9; }
-.laptop-screen .object-label { right:-1%; top:-15%; }
-.laptop-keyboard .object-label { left:38%; bottom:-13%; }
-.notebook .object-label { left:24%; bottom:16%; transform:rotate(6deg); color:#403424; text-shadow:none; border-bottom-color:#40342466; }
-.circuit .object-label { left:15%; bottom:-18%; transform:rotate(-8deg); }
-.photos .object-label { right:-3%; bottom:-7%; transform:rotate(4deg); }
-.sticky .object-label { left:14%; top:28%; transform:rotate(14deg); color:#403424; text-shadow:none; border-bottom-color:#40342466; }
-.coffee .object-label { left:28%; top:-15%; }
-.plant .object-label { left:114%; top:34%; }
-[data-theme="dark"] .notebook .object-label,
-[data-theme="dark"] .sticky .object-label { color:#fff9e9; text-shadow:0 1px 3px #251407; border-bottom-color:#fff9e959; }
+.desk-object:hover .object-label, .desk-object:focus-visible .object-label { opacity:1; }
+.laptop-screen .object-label { right:0; top:-13%; }
+.laptop-keyboard .object-label { left:38%; bottom:-11%; }
+/* Follow the notebook edge, the front photo, and the sticky note. */
+.notebook .object-label { left:24%; bottom:16%; transform:rotate(-8deg); color:#4d4638; text-shadow:none; }
+.photos .object-label { right:0; bottom:-5%; transform:rotate(15deg); }
+.sticky .object-label { left:16%; top:31%; color:#514831; text-shadow:none; }
+[data-theme="dark"] .notebook .object-label { color:#e6ddc9; }
+[data-theme="dark"] .sticky .object-label { color:#e6ddc9; }
 .portfolio-window {
     padding:0;
     border:1px solid var(--line);
@@ -294,15 +301,12 @@
     .desk-heading p { font-size:20px; }
     .desk-heading p span { display:none; }
     .desk-stage { border-radius:12px; }
-    .object-label { font-size:clamp(9px, 2.25cqw, 12px); padding-bottom:1px; }
-    .plant .object-label { left:111%; top:34%; }
+    .object-label { font-size:clamp(9px, 2.25cqw, 10.5px); }
     .laptop-screen .object-label { top:-23%; }
     .laptop-keyboard .object-label { bottom:-16%; }
     .notebook .object-label { left:20%; bottom:20%; }
-    .photos .object-label { bottom:-11%; right:2%; }
-    .circuit .object-label { bottom:-23%; left:6%; }
-    .coffee .object-label { left:9%; top:-20%; }
-    .sticky .object-label { left:4%; top:30%; font-size:9px; }
+    .photos .object-label { bottom:-9%; right:2%; }
+    .sticky .object-label { left:6%; top:32%; }
 
     .sticky { min-width: 44px; min-height: 44px; }
     .plant { min-height:44px; }

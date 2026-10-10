@@ -4,30 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="theme.js?v=2"></script>
-    <title>Photo Gallery</title>
-    <link rel="stylesheet" type="text/css" href="styles.css?v=4">
+    <title>Photo Gallery — Arihan Yadav</title>
+    <meta name="description" content="Photos by Arihan Yadav: flights, Madison, the northern lights, the 2024 eclipse, and San Francisco.">
+    <link rel="stylesheet" type="text/css" href="styles.css?v=7">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
     <header>
         <p class="page-kicker">Arihan Yadav / From the workbench</p>
-        <h1>Fun Photo Gallery</h1>
-        <nav>
+        <h1>Photo Gallery</h1>
+        <nav aria-label="Site">
             <ul>
                 <li><a href="index.html">Back to the desk</a></li>
                 <li><a href="portfolio.html">About & Experience</a></li>
                 <li><a href="projects.html">Projects</a></li>
+                <li><a href="life.html">Life</a></li>
                 <li><a href="hockey.html">Ice Skating</a></li>
-                <li><a href="gallery.html">Photo Gallery</a></li>
+                <li><a href="gallery.html" aria-current="page">Photo Gallery</a></li>
             </ul>
         </nav>
     </header>
     <section id="flights">
         <h2>Flight Pics</h2>
         <div class="gallery-container">
-            <img src="flights/IMG_9357.jpg" alt="flights picture">
-            <img src="flights/IMG_9722.jpg" alt="flights picture">
-            <img src="flights/IMG_9726.jpg" alt="flights picture">
+            <img src="thumbs/flights-IMG_9357.jpg" data-full="flights/IMG_9357.jpg" alt="View from a flight window" loading="lazy" decoding="async">
+            <img src="thumbs/flights-IMG_9722.jpg" data-full="flights/IMG_9722.jpg" alt="View from a flight window" loading="lazy" decoding="async">
+            <img src="thumbs/flights-IMG_9726.jpg" data-full="flights/IMG_9726.jpg" alt="View from a flight window" loading="lazy" decoding="async">
         </div>
         <p>Small (but growing) collection of pictures from flights I take. Only updated when I have a window seat :D</p>
         <p>First pic reminds me of the song "Spittin' off the Edge of the World"</p>
@@ -35,19 +37,19 @@
     <section id="sanFrancisco">
         <h2>Independence Day from San Francisco - July 4, 2025</h2>
         <div class="gallery-container">
-            <img src="july4_SF/IMG_9375.jpg" alt="SF picture">
-            <img src="july4_SF/IMG_9403.jpg" alt="SF picture">
-            <img src="july4_SF/IMG_9437.jpg" alt="SF picture">
+            <img src="thumbs/july4_SF-IMG_9375.jpg" data-full="july4_SF/IMG_9375.jpg" alt="San Francisco Bay on July 4" loading="lazy" decoding="async">
+            <img src="thumbs/july4_SF-IMG_9403.jpg" data-full="july4_SF/IMG_9403.jpg" alt="San Francisco Bay on July 4" loading="lazy" decoding="async">
+            <img src="thumbs/july4_SF-IMG_9437.jpg" data-full="july4_SF/IMG_9437.jpg" alt="San Francisco Bay on July 4" loading="lazy" decoding="async">
         </div>
         <p>Pictures from the SF Bay on July 4th, 2025.</p>
     </section>
     <section id="aurora">
         <h2>Aurora Borealis - May 10, 2024</h2>
         <div class="gallery-container">
-            <img src="aurora/IMG_7288.jpg" alt="aurora picture">
-            <img src="aurora/IMG_7289.jpg" alt="aurora picture">
-            <img src="aurora/IMG_7290.jpg" alt="aurora picture">
-            <img src="aurora/IMG_7298.jpg" alt="aurora picture">
+            <img src="thumbs/aurora-IMG_7288.jpg" data-full="aurora/IMG_7288.jpg" alt="Northern lights over Madison" loading="lazy" decoding="async">
+            <img src="thumbs/aurora-IMG_7289.jpg" data-full="aurora/IMG_7289.jpg" alt="Northern lights over Madison" loading="lazy" decoding="async">
+            <img src="thumbs/aurora-IMG_7290.jpg" data-full="aurora/IMG_7290.jpg" alt="Northern lights over Madison" loading="lazy" decoding="async">
+            <img src="thumbs/aurora-IMG_7298.jpg" data-full="aurora/IMG_7298.jpg" alt="Northern lights over Madison" loading="lazy" decoding="async">
         </div>
         <p>Aurora borealis as seen from the University of Wisconsin-Madison campus (Porter Boathouse dock and Memorial Union Terrace). Photos taken on my iPhone 15 Pro with 5-10 second exposure lengths.</p>
         <p>K-index was a 9 making it very visible to the naked eye.</p>
@@ -55,8 +57,8 @@
     <section id="lakeSwim">
         <h2>Swimming in Lake Mendota - May 10, 2024</h2>
         <div class="gallery-container">
-            <img src="madison/IMG_7242.jpg" alt="swimming in lake">
-            <img src="madison/IMG_7247.jpg" alt="swimming in lake">
+            <img src="thumbs/madison-IMG_7242.jpg" data-full="madison/IMG_7242.jpg" alt="Swimming in Lake Mendota" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_7247.jpg" data-full="madison/IMG_7247.jpg" alt="Swimming in Lake Mendota" loading="lazy" decoding="async">
         </div>
         <p>Had some fun swimming in Lake Mendota.</p>
         <p>Water was freezing. Only recommend if you bring a towel (which I didn't).</p>
@@ -64,9 +66,9 @@
     <section id="eclipse">
         <h2>Solar Eclipse - April 8, 2024</h2>
         <div class="gallery-container">
-            <img src="eclipse/IMG_7146.jpg" alt="eclipse picture">
-            <img src="eclipse/IMG_7148.jpg" alt="eclipse picture">
-            <img src="eclipse/IMG_7156.jpg" alt="eclipse picture">
+            <img src="thumbs/eclipse-IMG_7146.jpg" data-full="eclipse/IMG_7146.jpg" alt="The April 2024 solar eclipse" loading="lazy" decoding="async">
+            <img src="thumbs/eclipse-IMG_7148.jpg" data-full="eclipse/IMG_7148.jpg" alt="The April 2024 solar eclipse" loading="lazy" decoding="async">
+            <img src="thumbs/eclipse-IMG_7156.jpg" data-full="eclipse/IMG_7156.jpg" alt="The April 2024 solar eclipse" loading="lazy" decoding="async">
         </div>
         <p>The April 8th solar eclipse from the University of Wisconsin-Madison campus (Memorial Union Terrace). Photos taken on my iPhone 15 Pro - through solar eclipse glasses in one image.</p>
         <p>90-95% eclipse totality.</p>
@@ -74,25 +76,25 @@
     <section id="madison">
         <h2>Madison, Wisconsin</h2>
         <div class="gallery-container">
-            <img src="madison/IMG_7043.jpg" alt="madison picture">
-            <img src="madison/IMG_7045.jpg" alt="madison picture">
-            <img src="madison/IMG_7162.jpg" alt="madison picture">
-            <img src="madison/IMG_0569.jpg" alt="madison picture">
-            <img src="madison/IMG_1145.jpg" alt="madison picture">
-            <img src="madison/IMG_6490.jpg" alt="madison picture">
-            <img src="madison/IMG_6623.jpg" alt="madison picture">
-            <img src="madison/IMG_6928.jpg" alt="madison picture">
-            <img src="madison/IMG_6929.jpg" alt="madison picture">
-            <img src="madison/IMG_6940.jpg" alt="madison picture">
-            <img src="madison/IMG_7183.jpg" alt="madison picture">
-            <img src="madison/IMG_7187.jpg" alt="madison picture">
+            <img src="thumbs/madison-IMG_7043.jpg" data-full="madison/IMG_7043.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_7045.jpg" data-full="madison/IMG_7045.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_7162.jpg" data-full="madison/IMG_7162.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_0569.jpg" data-full="madison/IMG_0569.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_1145.jpg" data-full="madison/IMG_1145.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_6490.jpg" data-full="madison/IMG_6490.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_6623.jpg" data-full="madison/IMG_6623.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_6928.jpg" data-full="madison/IMG_6928.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_6929.jpg" data-full="madison/IMG_6929.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_6940.jpg" data-full="madison/IMG_6940.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_7183.jpg" data-full="madison/IMG_7183.jpg" alt="Around Madison" loading="lazy" decoding="async">
+            <img src="thumbs/madison-IMG_7187.jpg" data-full="madison/IMG_7187.jpg" alt="Around Madison" loading="lazy" decoding="async">
         </div>
         <p>A collection of photos I took in Madison. A frozen lake is a ton of fun.</p>
         <p>Pro tip: don't ride an electric skateboard on ice :].</p>
     </section>
     <footer>
-        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub</a></p>
     </footer>
-    <script src="scripts.js"></script>
+    <script src="scripts.js?v=4"></script>
 </body>
 </html>

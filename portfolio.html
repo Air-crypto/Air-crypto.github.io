@@ -5,18 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="theme.js?v=2"></script>
     <title>About & Experience — Arihan Yadav</title>
-    <link rel="stylesheet" type="text/css" href="styles.css?v=4">
+    <meta name="description" content="About Arihan Yadav: education at UW–Madison and experience at AMD, ARLIS, and Theom across language models, multimodal retrieval, and GPU systems.">
+    <link rel="stylesheet" type="text/css" href="styles.css?v=7">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
     <header>
         <p class="page-kicker">Arihan Yadav / The full picture</p>
         <h1>About & Experience</h1>
-        <nav>
+        <nav aria-label="Site">
             <ul>
                 <li><a href="index.html">Back to the desk</a></li>
                 <li><a href="portfolio.html" aria-current="page">About & Experience</a></li>
                 <li><a href="projects.html">Projects</a></li>
+                <li><a href="life.html">Life</a></li>
                 <li><a href="hockey.html">Ice Skating</a></li>
                 <li><a href="gallery.html">Photo Gallery</a></li>
             </ul>
@@ -24,7 +26,7 @@
     </header>
     <section id="aboutMe" class="flex-container">
         <div class="flex-child">
-            <img src="selfie.jpg" alt="Fun Portrait" id="profilePicture">
+            <img src="thumbs/selfie.jpg" alt="Arihan Yadav on campus" id="profilePicture" width="600" height="800">
         </div>
         <div class="flex-child">
             <h3>A little about me</h3>
@@ -47,7 +49,7 @@
         <h3>Experience</h3>
         <p>I've worked on language models, multimodal retrieval, GPU kernels, and robotics. Here's what I've been up to.</p>
         <details class="experience-entry">
-            <summary><span class="experience-date">May 2026 – Present</span><span class="experience-role">AI MTS (Contractor) · AMD</span><span class="experience-focus">LLM post-training, reinforcement learning, and GPU systems.</span></summary>
+            <summary><span class="experience-date">May 2026 – Present</span><span class="experience-role">AI Engineer 1 (Contractor) · AMD</span><span class="experience-focus">LLM post-training, reinforcement learning, and GPU systems.</span></summary>
             <div class="experience-body">
         <p><strong>Post-Training LLMs with Reinforcement Learning for Proprietary Code Generation</strong></p>
         <p>Built an end-to-end post-training pipeline to specialize a base model for proprietary device code generation: continued pretraining on the target codebase, supervised fine-tuning on reasoning traces and tool-use trajectories distilled from a larger teacher model, then reinforcement learning with GSPO and verifiable rewards (RLVR).</p>
@@ -104,7 +106,8 @@
         </details>
     </section>
     <section id="timeline">
-        <h3>Projects - For Details Head to the <a href="projects.html">Projects Tab</a></h3>
+        <h3>Projects</h3>
+        <p class="section-note">A short list. <a href="projects.html" data-open="projects">See the projects page for details ↗</a></p>
         <div class="timeline-container">
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
@@ -116,21 +119,21 @@
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>February 2025 - May 2025: FPGA-Based eBike Controller</h2>
-                    <p>Developed a high performance, battery efficient, digital eBike controller using System Verilog with PID-based motor control and achieved 400 MHz clock frequency.</p>
+                    <h2>February 2025 – May 2025: FPGA-Based eBike Controller</h2>
+                    <p>Developed a high performance, battery efficient, digital eBike controller using SystemVerilog with PID-based motor control and achieved 400 MHz clock frequency.</p>
                 </div>
             </div>
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>March 2025 - May 2025: Quantum Computing Error Mitigation using Graph Neural Networks</h2>
+                    <h2>March 2025 – May 2025: Quantum Computing Error Mitigation using Graph Neural Networks</h2>
                     <p>Designed a Graph Neural Network model with JAX trained on 6,800+ quantum circuits, achieving 267% error reduction on unseen circuit structures.</p>
                 </div>
             </div>
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>October 2024 - November 2024: Multithreaded Kernel Scheduler</h2>
+                    <h2>October 2024 – November 2024: Multithreaded Kernel Scheduler</h2>
                     <p>Implemented a stride scheduler in the xv6 kernel with semaphores and dynamic priority adjustment through custom system calls.</p>
                 </div>
             </div>
@@ -144,7 +147,7 @@
             <div class="timeline-block">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h2>February 2024 - April 2024: Verilog Guitar Tuner on FPGA</h2>
+                    <h2>February 2024 – April 2024: Verilog Guitar Tuner on FPGA</h2>
                     <p>Designed a real-time guitar tuner in Verilog with pipeline optimizations, achieving frequency detection and pitch analysis on FPGA hardware.</p>
                 </div>
             </div>
@@ -198,8 +201,8 @@
         </ul>
     </section>
     <footer>
-        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a></p>
+        <p>Contact me at <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a> | <a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub</a></p>
     </footer>
-    <script src="scripts.js"></script>
+    <script src="scripts.js?v=4"></script>
 </body>
 </html>

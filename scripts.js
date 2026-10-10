@@ -14,13 +14,25 @@
         media.removeAttribute('role');
         media.removeAttribute('aria-label');
         media.removeAttribute('loading');
+        // Grid images are small copies. Show the copy at full size, then swap in the original.
+        if (media.dataset.full) {
+            if (source.naturalWidth) {
+                const scale = Math.min(innerWidth * .9 / source.naturalWidth, innerHeight * .84 / source.naturalHeight);
+                media.style.width = `${Math.round(source.naturalWidth * scale)}px`;
+            }
+            const full = new Image();
+            full.onload = () => { if (media.isConnected) media.src = full.src; };
+            full.src = media.dataset.full;
+        }
         if (media.tagName === 'VIDEO') {
             media.controls = true;
+            media.preload = 'auto';
             media.muted = true;
             media.playsInline = true;
         }
         content.replaceChildren(media);
         viewer.showModal();
+        viewer.focus({preventScroll: true});
         syncScroll();
         if (media.tagName === 'VIDEO') media.play().catch(() => {});
     }

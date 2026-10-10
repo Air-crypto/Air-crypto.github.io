@@ -4,6 +4,8 @@ Source code for my personal website: [air-crypto.github.io](https://air-crypto.g
 
 An interactive desk with a laptop, project notebook, portrait frame, and photos. Everything starts on the image: the whole laptop opens experience, the notebook opens projects, the portrait frame opens about, the photo prints open life, and the sticky note opens contact. The cup opens little life things and the plant opens student life. A bounded frame keeps the whole desk in view, with small handwritten guides for projects, about, life, and contact. The appearance follows your system preference or an existing saved theme across the desk and standalone pages. Each life photograph and its paper border share one layer, with the upper print above the lower one.
 
+Photo grids load small copies from `thumbs/`. The viewer opens the original file. Videos show a poster image from `thumbs/` until played.
+
 ## Run locally
 
 This is a static site, with no build step or package dependencies.

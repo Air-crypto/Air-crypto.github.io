@@ -1,19 +1,4 @@
 (() => {
-    // Render the original campus photo at a small resolution, keeping the pixels visible.
-    const portrait = document.querySelector('.portrait-source');
-    const pixels = document.querySelector('.pixel-portrait');
-    function drawPortrait() {
-        const ctx = pixels.getContext('2d');
-        if (!ctx || !portrait.naturalWidth) return;
-        const width = Math.min(portrait.naturalWidth, portrait.naturalHeight * pixels.width / pixels.height);
-        const height = width * pixels.height / pixels.width;
-        const top = Math.max(0, Math.min(portrait.naturalHeight - height, portrait.naturalHeight * .55 - height / 2));
-        ctx.drawImage(portrait, (portrait.naturalWidth - width) / 2, top, width, height, 0, 0, pixels.width, pixels.height);
-        pixels.hidden = false;
-        portrait.style.visibility = 'hidden';
-    }
-    if (portrait.complete) drawPortrait();
-    else portrait.addEventListener('load', drawPortrait, {once: true});
     const dialog = document.querySelector('#portfolio-window');
     const content = document.querySelector('#window-content');
     const title = document.querySelector('#window-title');
@@ -37,7 +22,7 @@
         skating: {title: 'Ice skating', path: 'hockey.html', selectors: 'body > section'},
         contact: {title: 'Say hello', path: 'mailto:apyadav@wisc.edu', template: 'contact-content'}
     };
-    const pageVersion = '8';
+    const pageVersion = '9';
     const cache = new Map();
     let requestNumber = 0;
     let lastTrigger = null;
@@ -63,6 +48,8 @@
         if (!dialog.open) {
             lastTrigger = trigger || document.activeElement;
             dialog.showModal();
+            // Start at the window itself so no control shows a focus ring on open.
+            dialog.focus({preventScroll: true});
         }
         document.documentElement.classList.add('modal-open');
         title.textContent = page.title;
@@ -92,7 +79,7 @@
             window.initPortfolioMedia(content);
         } catch (error) {
             if (thisRequest !== requestNumber) return;
-            content.innerHTML = '<p>This page is taking a little longer to open. Use the link below to read it on its own.</p>';
+            content.innerHTML = '<p>This page did not open. Use the link below to read it on its own.</p>';
         } finally {
             if (thisRequest === requestNumber) content.removeAttribute('aria-busy');
         }

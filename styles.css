@@ -102,6 +102,9 @@ header nav a {
 header nav a:hover,header nav a[aria-current] {
     text-decoration:underline
 }
+header nav a[aria-current] {
+    color:var(--ink)
+}
 body>section {
     max-width:1000px;
     margin:22px auto;
@@ -168,6 +171,9 @@ li {
     object-fit:cover;
     background:#dae0d9
 }
+.gallery-container video {
+    border-radius:8px
+}
 .gallery-container>img {
     cursor:zoom-in;
     transition:transform .2s,box-shadow .2s
@@ -197,6 +203,9 @@ li {
     max-height:90svh;
     box-shadow:0 30px 100px #0007
 }
+.media-viewer:focus {
+    outline:none
+}
 .media-viewer::backdrop {
     background:#101714d9;
     backdrop-filter:blur(5px)
@@ -204,6 +213,7 @@ li {
 .media-viewer img,.media-viewer video {
     display:block;
     width:auto;
+    height:auto;
     max-width:90vw;
     max-height:84svh;
     object-fit:contain;
@@ -298,6 +308,8 @@ footer p {
     font-style:normal;
     color:var(--green)
 }
+.section-note { font-size: 14px; color: var(--muted); }
+.error-page { text-align: center; }
 .skills-details { margin: 20px 0 0; }
 .skills-details summary { cursor: pointer; font-size: 13px; color: var(--green); }
 .skills-details p { margin-top: 16px; }

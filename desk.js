@@ -26,6 +26,7 @@
     const cache = new Map();
     let requestNumber = 0;
     let lastTrigger = null;
+    let keyboardOpen = false;
 
     async function loadPage(path) {
         const url = path.split('#')[0];
@@ -89,6 +90,8 @@
         const trigger = event.target.closest('[data-open]');
         if (!trigger || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
+        // A click made with the keyboard has no click count.
+        if (!dialog.open) keyboardOpen = event.detail === 0;
         openSection(trigger.dataset.open, trigger);
     });
     dialog.querySelector('.window-close').addEventListener('click', () => dialog.close());
@@ -101,7 +104,10 @@
         content.querySelectorAll('video').forEach(video => video.pause());
         document.documentElement.classList.toggle('modal-open', !!document.querySelector('dialog[open]'));
         if (pages[location.hash.slice(1)]) history.replaceState(null, '', `${location.pathname}${location.search}`);
-        if (lastTrigger?.isConnected) lastTrigger.focus({preventScroll: true});
+        // Return focus for keyboard users only. After a mouse click the object must not stay outlined.
+        if (keyboardOpen && lastTrigger?.isConnected) lastTrigger.focus({preventScroll: true});
+        else if (document.activeElement?.closest('.desk-stage')) document.activeElement.blur();
+        keyboardOpen = false;
     });
     function followLocation() {
         const key = location.hash.slice(1);

@@ -25,7 +25,7 @@
         : ['assignment', 'exam'].includes(i.kind)
           ? 'First check the exact source instructions and course AI rules. If permitted, help me plan the work and prepare a draft reply for my review, grounded in the readings and my own ideas. Ask for missing readings or ideas; do not invent them.'
           : 'Explain what I need to prepare and suggest next steps for my review.',
-      'If this chat has access to my connected Mac and I ask you to use it, read the exact source page in my existing session. Otherwise ask me to paste or attach the source. Do not claim to have opened a page you have not inspected.',
+      'If this chat has access to my connected Mac, use it to read the exact source page in my existing session. Otherwise ask me to paste or attach the source. Do not claim to have opened a page you have not inspected.',
       'Do not submit, post, upload, send, or change anything in Canvas or another app. Keep any draft in this conversation for my review.'
     ];
     return lines.filter(v => v !== false && v != null).join('\n\n');

@@ -314,7 +314,12 @@ $("next").onclick = () => { view = T.addDays(view, 7); renderCal(); };
 let renderedDate = todayKey(), boundaryTimer;
 function refreshClock() {
   renderHero();
-  if (todayKey() !== renderedDate) { renderedDate = todayKey(); renderDays(); renderCal(); }
+  if (todayKey() !== renderedDate) {
+    const nextDay = todayKey();
+    if (view === renderedDate) view = nextDay;
+    if (selected === renderedDate) selected = nextDay;
+    renderedDate = nextDay; renderDays(); renderCal();
+  }
   document.querySelectorAll("[data-cd]").forEach(el => {
     const i = items.find(x => x.id === el.dataset.cd); if (i) el.textContent = T.status(i);
   });

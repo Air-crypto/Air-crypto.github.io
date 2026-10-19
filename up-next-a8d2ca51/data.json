@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T10:12-05:00",
+ "updated": "2026-10-19T10:29-05:00",
  "items": [
   {
    "date": "2026-10-19",
@@ -9,6 +9,16 @@
    "course": "",
    "title": "Interview: AfterQuery",
    "note": "Google Meet link in the Outlook invite. Rescheduled from Fri Oct 16.",
+   "done": false
+  },
+  {
+   "date": "2026-10-19",
+   "start": "18:00",
+   "end": "18:50",
+   "kind": "interview",
+   "course": "",
+   "title": "Old Mission Capital on-campus test",
+   "note": "Confirmed (Meg McLeish, 9:36am Mon). Room 2516, Morgridge Hall; arrive 10 min early (5:50pm). Bring a pencil and a government-issued ID. 50-min multiple-choice CS fundamentals test. No smart watches or Meta glasses; you must stay the full time and can't step out, so handle restroom/water first. Pizza after. If you pass, they email by end of evening to pick a Tuesday interview slot. The form wrongly said Eastern; it's 6pm Central. Email: https://outlook.cloud.microsoft/mail/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQADuOOxVNUBBDiZ5AkncpYfM%3D",
    "done": false
   },
   {
@@ -28,16 +38,6 @@
    "closes": "2026-10-20T04:59:59Z",
    "pts": 1,
    "courseUrl": "https://canvas.wisc.edu/courses/522051"
-  },
-  {
-   "date": "2026-10-19",
-   "start": null,
-   "end": null,
-   "kind": "interview",
-   "course": "",
-   "title": "Old Mission Capital on-campus test",
-   "note": "50-min proctored paper test, 30 CS multiple-choice questions. Bring photo ID. Time and room are emailed Monday morning to people who filled out the sign-up form (Meg McLeish, Oct 15). As of 7:55am Mon, no session email in inbox or junk.",
-   "done": false
   },
   {
    "date": "2026-10-19",
@@ -102,7 +102,7 @@
    "kind": "interview",
    "course": "",
    "title": "Old Mission in-person interviews",
-   "note": "Only if you advance from Monday's test.",
+   "note": "Only if you pass Monday's 6pm test. They email by end of Monday evening to pick a slot; check-ins will watch for it.",
    "done": false
   },
   {

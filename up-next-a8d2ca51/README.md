@@ -1,6 +1,6 @@
 # Up next tracker
 
-This folder is a buildless static page. It uses the existing `data.json` and does not require a backend or new dependencies.
+This folder is a buildless static page. It uses the existing `data.json` and does not require a backend or new dependencies. Runtime asset URLs carry a shared version token; bump it when changing the markup/script contract so returning visitors do not mix cached assets from different layouts.
 
 ## Local review
 

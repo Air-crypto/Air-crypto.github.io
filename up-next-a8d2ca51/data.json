@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T10:29-05:00",
+ "updated": "2026-10-19T10:52-05:00",
  "items": [
   {
    "date": "2026-10-19",
@@ -18,8 +18,9 @@
    "kind": "interview",
    "course": "",
    "title": "Old Mission Capital on-campus test",
-   "note": "Confirmed (Meg McLeish, 9:36am Mon). Room 2516, Morgridge Hall; arrive 10 min early (5:50pm). Bring a pencil and a government-issued ID. 50-min multiple-choice CS fundamentals test. No smart watches or Meta glasses; you must stay the full time and can't step out, so handle restroom/water first. Pizza after. If you pass, they email by end of evening to pick a Tuesday interview slot. The form wrongly said Eastern; it's 6pm Central. Email: https://outlook.cloud.microsoft/mail/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQADuOOxVNUBBDiZ5AkncpYfM%3D",
-   "done": false
+   "note": "Confirmed (Meg McLeish, 9:36am Mon). Room 2516, Morgridge Hall; arrive 10 min early (5:50pm). Bring a pencil and a government-issued ID. 50-min multiple-choice CS fundamentals test. No smart watches or Meta glasses; you must stay the full time and can't step out, so handle restroom/water first. Pizza after. If you pass, they email by end of evening to pick a Tuesday interview slot. The form wrongly said Eastern; it's 6pm Central.",
+   "done": false,
+   "email": "https://outlook.cloud.microsoft/mail/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQADuOOxVNUBBDiZ5AkncpYfM%3D"
   },
   {
    "date": "2026-10-19",
@@ -47,6 +48,16 @@
    "course": "",
    "title": "Wisconsin Venture Innovation Challenge application closes",
    "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-20",
+   "start": "00:00",
+   "end": "00:45",
+   "kind": "event",
+   "course": "",
+   "title": "Arihan <> Lior",
+   "note": "Outlook calendar invite from Lior Moshe, which you accepted. It's at midnight tonight (Mon night into Tue), so double-check the time zone.",
    "done": false
   },
   {
@@ -232,6 +243,16 @@
    "courseUrl": "https://canvas.wisc.edu/courses/528258"
   },
   {
+   "date": "2026-10-24",
+   "start": null,
+   "end": null,
+   "kind": "personal",
+   "course": "",
+   "title": "Hasaween",
+   "note": "On your personal Google calendar.",
+   "done": false
+  },
+  {
    "date": "2026-10-27",
    "start": "23:59",
    "end": null,
@@ -374,6 +395,16 @@
    "closes": "2026-11-08T05:59:59Z",
    "pts": 100,
    "courseUrl": "https://canvas.wisc.edu/courses/516795"
+  },
+  {
+   "date": "2026-11-06",
+   "start": null,
+   "end": null,
+   "kind": "personal",
+   "course": "",
+   "title": "Tiffany Zhang's birthday",
+   "note": "On your personal Google calendar.",
+   "done": false
   },
   {
    "date": "2026-11-13",
@@ -555,5 +586,71 @@
    "pts": 140,
    "courseUrl": "https://canvas.wisc.edu/courses/530045"
   }
- ]
+ ],
+ "mail": {
+  "date": "2026-10-19",
+  "total": 33,
+  "counts": {
+   "application-ack": 23,
+   "newsletter": 4,
+   "school": 1,
+   "rejection": 3,
+   "spam": 1,
+   "assessment": 1
+  },
+  "important": [
+   {
+    "n": "06",
+    "url": "https://outlook.cloud.microsoft/mail/inbox/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQADGSdHn8ieZMugThdgiWpAU%3D",
+    "from": "Agentio Hiring Team",
+    "subject": "Agentio Application Update",
+    "category": "rejection",
+    "summary": "Rejected for the Software Engineer role."
+   },
+   {
+    "n": "10",
+    "url": "https://outlook.cloud.microsoft/mail/inbox/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQAPucRma8vw9Js7bqdxqj5Rk%3D",
+    "from": "Brellium Hiring Team",
+    "subject": "Brellium Application Update",
+    "category": "rejection",
+    "summary": "Rejected for the Senior Platform Engineer role."
+   },
+   {
+    "n": "11",
+    "url": "https://outlook.cloud.microsoft/mail/inbox/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQAA3Jx8sDRvdPmTDJg7t%2FtUY%3D",
+    "from": "Rebar Hiring Team",
+    "subject": "Rebar Application Update",
+    "category": "rejection",
+    "summary": "Rejected for Software Engineer, Platform Infrastructure; info kept on file."
+   },
+   {
+    "n": "om",
+    "url": "https://outlook.cloud.microsoft/mail/id/AAQkAGU4MTk2ODIyLWQ5YjYtNDk0Mi1iODJiLTBjMmY4MDI4ZWE4ZQAQADuOOxVNUBBDiZ5AkncpYfM%3D",
+    "from": "Meg McLeish (Old Mission)",
+    "subject": "Old Mission Jr. SWE Test Confirmation \u2013 Mon Oct 19, 6:00 pm CT",
+    "category": "assessment",
+    "summary": "Confirmed for the 6pm CT test in Room 2516 Morgridge Hall; passers pick a Tuesday interview slot that evening.",
+    "action": "Arrive 5:50pm with pencil + government ID.",
+    "deadline": "2026-10-19T18:00:00-05:00"
+   }
+  ],
+  "junk": [
+   {
+    "n": "j1",
+    "url": "https://outlook.cloud.microsoft/mail/junkemail/id/AAkALgAAAAAAHYQDEapmEc2byACqAC%2FEWg0AMlR7oO%2FLK06%2FssAT4%2FXGAwADNYzoNwAA",
+    "from": "ICICT 2027",
+    "subject": "Paper Submission Deadline | Springer Proceedings",
+    "category": "spam",
+    "summary": "Mass call for papers; deadline already passed. Really junk."
+   },
+   {
+    "n": "j2",
+    "url": "https://outlook.cloud.microsoft/mail/junkemail/id/AAkALgAAAAAAHYQDEapmEc2byACqAC%2FEWg0AMlR7oO%2FLK06%2FssAT4%2FXGAwADLM8q0QAA",
+    "from": "Jim Zellmer (amuz)",
+    "subject": "Chelsea & 2026, so far",
+    "category": "newsletter",
+    "summary": "Unsolicited travel/photo newsletter. Harmless, really junk."
+   }
+  ]
+ }
 }

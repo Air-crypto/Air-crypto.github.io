@@ -1,0 +1,335 @@
+{
+ "updated": "2026-10-19T07:55-05:00",
+ "items": [
+  {
+   "date": "2026-10-19",
+   "start": "11:30",
+   "end": null,
+   "kind": "interview",
+   "course": "",
+   "title": "Interview: AfterQuery",
+   "note": "Google Meet link in the Outlook invite. Rescheduled from Fri Oct 16.",
+   "done": false
+  },
+  {
+   "date": "2026-10-19",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "MUSIC113",
+   "title": "Written Assignment Week 7 (1 pt)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-19",
+   "start": null,
+   "end": null,
+   "kind": "interview",
+   "course": "",
+   "title": "Old Mission Capital on-campus test",
+   "note": "50-min proctored paper test, 30 CS multiple-choice questions. Bring photo ID. Time and room are emailed Monday morning to people who filled out the sign-up form (Meg McLeish, Oct 15). As of 7:55am Mon, no session email in inbox or junk.",
+   "done": false
+  },
+  {
+   "date": "2026-10-19",
+   "start": null,
+   "end": null,
+   "kind": "event",
+   "course": "",
+   "title": "Wisconsin Venture Innovation Challenge application closes",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-20",
+   "start": "13:30",
+   "end": "13:50",
+   "kind": "interview",
+   "course": "",
+   "title": "Interview: Trajectory",
+   "note": "https://meet.google.com/wie-juve-xpi (accepted)",
+   "done": false
+  },
+  {
+   "date": "2026-10-20",
+   "start": "16:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Knowledge Entry 13",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-20",
+   "start": "23:59",
+   "end": null,
+   "kind": "routine",
+   "course": "FOLKLORE215",
+   "title": "20 Oct. Attendance",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-20",
+   "start": null,
+   "end": null,
+   "kind": "interview",
+   "course": "",
+   "title": "Old Mission in-person interviews",
+   "note": "Only if you advance from Monday's test.",
+   "done": false
+  },
+  {
+   "date": "2026-10-22",
+   "start": "16:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Knowledge Entry 14",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-22",
+   "start": "23:59",
+   "end": null,
+   "kind": "routine",
+   "course": "FOLKLORE215",
+   "title": "22 Oct. Attendance",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-23",
+   "start": "15:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Demo 2 - Custom Mezzanine Module (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-23",
+   "start": "15:30",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Week 8",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-23",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "ID Bibliographic Sources (10 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-23",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Schedule Consultant Interview (20 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-24",
+   "start": "16:30",
+   "end": null,
+   "kind": "exam",
+   "course": "RELIGST102",
+   "title": "Quiz 3 (opens 10/22 4:30pm, 10 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-27",
+   "start": "23:59",
+   "end": null,
+   "kind": "routine",
+   "course": "FOLKLORE215",
+   "title": "27 Oct. Attendance",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-29",
+   "start": "23:59",
+   "end": null,
+   "kind": "routine",
+   "course": "FOLKLORE215",
+   "title": "29 Oct. Attendance",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-10-31",
+   "start": "15:30",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Week 10",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-01",
+   "start": "16:30",
+   "end": null,
+   "kind": "assignment",
+   "course": "RELIGST102",
+   "title": "Essay 2 upload (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-02",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE555",
+   "title": "CAD Tutorial 2",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-03",
+   "start": "16:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Knowledge Entries 15 and 16",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-03",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Illustrated Quote (22 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-04",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE555",
+   "title": "Homework 3 (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-13",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Field Report (60 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-13",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE555",
+   "title": "Project Milestone-1, gate-level design (25 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-16",
+   "start": "15:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Demo 3 - Team Integration (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-19",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Instructor Assigned Quality and Achievement (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-11-19",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Zine: discuss style with instructor (10 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-12-02",
+   "start": "00:01",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Final Project Demo (100 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-12-03",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Informal Presentation",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-12-04",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "ECE453",
+   "title": "Completed Project Files, Final Project Video, Individual Assessment #2",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-12-04",
+   "start": "23:59",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Essay (150 pts)",
+   "note": "",
+   "done": false
+  },
+  {
+   "date": "2026-12-08",
+   "start": "17:00",
+   "end": null,
+   "kind": "assignment",
+   "course": "FOLKLORE215",
+   "title": "Zine (140 pts)",
+   "note": "",
+   "done": false
+  }
+ ]
+}

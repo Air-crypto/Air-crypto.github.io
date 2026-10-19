@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T07:55-05:00",
+ "updated": "2026-10-19T10:12-05:00",
  "items": [
   {
    "date": "2026-10-19",
@@ -19,7 +19,15 @@
    "course": "MUSIC113",
    "title": "Written Assignment Week 7 (1 pt)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/522051/quizzes/757727",
+   "desc": "Responses must meet the word count to receive credit (99 words gets a zero). Write in your own words: no AI, translation, or grammar-rewriting tools.",
+   "how": "Online quiz",
+   "ext": null,
+   "opens": "2026-10-14T19:10:00Z",
+   "closes": "2026-10-20T04:59:59Z",
+   "pts": 1,
+   "courseUrl": "https://canvas.wisc.edu/courses/522051"
   },
   {
    "date": "2026-10-19",
@@ -59,7 +67,15 @@
    "course": "FOLKLORE215",
    "title": "Knowledge Entry 13",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212938",
+   "desc": "Daily Knowledge Journal. Respond to the day's readings before class and turn the journal in before or at the start of class. Upload a photo of the page.",
+   "how": "File upload",
+   "ext": "jpg, png",
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-20",
@@ -69,7 +85,15 @@
    "course": "FOLKLORE215",
    "title": "20 Oct. Attendance",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212372",
+   "desc": "",
+   "how": "",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-20",
@@ -89,7 +113,15 @@
    "course": "FOLKLORE215",
    "title": "Knowledge Entry 14",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212939",
+   "desc": "Daily Knowledge Journal. Respond to the day's readings before class and turn the journal in before or at the start of class. Upload a photo of the page.",
+   "how": "File upload",
+   "ext": "jpg, png",
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-22",
@@ -99,7 +131,15 @@
    "course": "FOLKLORE215",
    "title": "22 Oct. Attendance",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212375",
+   "desc": "",
+   "how": "",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-23",
@@ -109,7 +149,15 @@
    "course": "ECE453",
    "title": "Demo 2 - Custom Mezzanine Module (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126345",
+   "desc": "Each team member completes the schematic, PCB design, and test firmware for a mezzanine module containing a subcircuit used in the final project. Must include a meaningful software/firmware part; purely hardware designs aren't allowed. Individual assignment; each member designs a different subcircuit. Power supply is handled in Demo 3.",
+   "how": "Text entry or file upload",
+   "ext": "pdf",
+   "opens": "2026-09-02T20:00:00Z",
+   "closes": "2026-10-23T20:00:00Z",
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-10-23",
@@ -119,7 +167,15 @@
    "course": "ECE453",
    "title": "Week 8",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126365",
+   "desc": "Attend 1 ECE453 lab session this week; counts toward Quality and Effort (100% if you attended).",
+   "how": "Text entry",
+   "ext": null,
+   "opens": "2026-10-19T05:00:00Z",
+   "closes": "2026-10-23T20:30:00Z",
+   "pts": 0,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-10-23",
@@ -129,7 +185,15 @@
    "course": "FOLKLORE215",
    "title": "ID Bibliographic Sources (10 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3169812",
+   "desc": "Annotated bibliography: at least 4 citations with full bibliographic info relevant to your tradition. Use a variety of source types (not four online articles); at least two must be scholarly/peer-reviewed.",
+   "how": "Text entry",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 10,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-23",
@@ -139,7 +203,15 @@
    "course": "FOLKLORE215",
    "title": "Schedule Consultant Interview (20 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3169813",
+   "desc": "Schedule an interview (block at least an hour) with your consultant and report it here; include it if already done. Make sure they know what you'll ask about and why.",
+   "how": "Text entry",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 20,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-24",
@@ -149,7 +221,15 @@
    "course": "RELIGST102",
    "title": "Quiz 3 (opens 10/22 4:30pm, 10 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/528258/quizzes/726537",
+   "desc": "Opens Thu Oct 22 at 4:30pm, closes Sat Oct 24 at 4:30pm.",
+   "how": "Online quiz",
+   "ext": null,
+   "opens": "2026-10-22T21:30:00Z",
+   "closes": null,
+   "pts": 10,
+   "courseUrl": "https://canvas.wisc.edu/courses/528258"
   },
   {
    "date": "2026-10-27",
@@ -159,7 +239,15 @@
    "course": "FOLKLORE215",
    "title": "27 Oct. Attendance",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212377",
+   "desc": "",
+   "how": "",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-29",
@@ -169,7 +257,15 @@
    "course": "FOLKLORE215",
    "title": "29 Oct. Attendance",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212378",
+   "desc": "",
+   "how": "",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 4,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-10-31",
@@ -179,7 +275,15 @@
    "course": "ECE453",
    "title": "Week 10",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126354",
+   "desc": "Attend 1 ECE453 lab session this week; counts toward Quality and Effort (100% if you attended).",
+   "how": "Text entry",
+   "ext": null,
+   "opens": "2026-10-26T05:00:00Z",
+   "closes": "2026-10-31T20:30:00Z",
+   "pts": 0,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-11-01",
@@ -189,7 +293,15 @@
    "course": "RELIGST102",
    "title": "Essay 2 upload (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/528258/assignments/3112219",
+   "desc": "Upload opens Mon Oct 26 at 4:30pm.",
+   "how": "File upload",
+   "ext": "doc, docx",
+   "opens": "2026-10-26T21:30:00Z",
+   "closes": null,
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/528258"
   },
   {
    "date": "2026-11-02",
@@ -199,7 +311,15 @@
    "course": "ECE555",
    "title": "CAD Tutorial 2",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516795/assignments/3247463",
+   "desc": "Cadence Virtuoso tutorial (ECE555_tutorial_2_F26.pdf). Don't recreate your ece555 directory or rerun the setup script; each session run `module load courses/ece555/asap7-cadence-calibre` and export the VAR_M* offsets before launching. Not graded, but Homework 3 depends on it.",
+   "how": "Not graded",
+   "ext": null,
+   "opens": "2026-10-08T05:00:00Z",
+   "closes": "2026-11-06T05:59:59Z",
+   "pts": null,
+   "courseUrl": "https://canvas.wisc.edu/courses/516795"
   },
   {
    "date": "2026-11-03",
@@ -209,7 +329,15 @@
    "course": "FOLKLORE215",
    "title": "Knowledge Entries 15 and 16",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3212941",
+   "desc": "Daily Knowledge Journal. Respond to the day's readings before class and turn the journal in before or at the start of class. Upload a photo of the page.",
+   "how": "File upload",
+   "ext": "jpg, png",
+   "opens": null,
+   "closes": null,
+   "pts": 8,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-11-03",
@@ -219,7 +347,15 @@
    "course": "FOLKLORE215",
    "title": "Illustrated Quote (22 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3213158",
+   "desc": "",
+   "how": "On paper",
+   "ext": null,
+   "opens": "2026-10-27T05:00:00Z",
+   "closes": null,
+   "pts": 22,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-11-04",
@@ -229,7 +365,15 @@
    "course": "ECE555",
    "title": "Homework 3 (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516795/assignments/3252087",
+   "desc": "Extensive layout design, start early. Uses CAD Tutorial 2. FO4 load can be done in the layout (four inverters on the AND output) or in the testbench. Submit a readable PDF.",
+   "how": "File upload",
+   "ext": "pdf, doc, docx",
+   "opens": "2026-10-16T05:00:00Z",
+   "closes": "2026-11-08T05:59:59Z",
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/516795"
   },
   {
    "date": "2026-11-13",
@@ -239,7 +383,15 @@
    "course": "FOLKLORE215",
    "title": "Field Report (60 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3169814",
+   "desc": "Interview a veteran, reservist, or active-duty service member (your consultant) about a military tradition they know or practice. Must be a real ethnographic interview.",
+   "how": "File upload",
+   "ext": "pdf",
+   "opens": null,
+   "closes": null,
+   "pts": 60,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-11-13",
@@ -249,7 +401,15 @@
    "course": "ECE555",
    "title": "Project Milestone-1, gate-level design (25 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516795/assignments/3250997",
+   "desc": "Gate-level design. Only the first milestone is due now; requirements in F26-Project-ECE555.pdf, details in F26_ECE555_project.pptx. Submit as PDF or Word.",
+   "how": "File upload",
+   "ext": "pdf, doc, docx",
+   "opens": "2026-10-14T05:00:00Z",
+   "closes": "2026-11-17T05:59:59Z",
+   "pts": 25,
+   "courseUrl": "https://canvas.wisc.edu/courses/516795"
   },
   {
    "date": "2026-11-16",
@@ -259,7 +419,15 @@
    "course": "ECE453",
    "title": "Demo 3 - Team Integration (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126346",
+   "desc": "Integrate the team's individual designs into one system and show how critical functional requirements are met. Also design a power mezzanine board; have staff review the schematic before layout.",
+   "how": "Text entry",
+   "ext": null,
+   "opens": "2026-09-02T05:00:00Z",
+   "closes": "2026-11-16T21:00:00Z",
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-11-19",
@@ -269,7 +437,15 @@
    "course": "ECE453",
    "title": "Instructor Assigned Quality and Achievement (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126351",
+   "desc": "",
+   "how": "File upload",
+   "ext": null,
+   "opens": "2026-11-19T06:00:00Z",
+   "closes": "2026-11-20T05:59:00Z",
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-11-19",
@@ -279,7 +455,15 @@
    "course": "FOLKLORE215",
    "title": "Zine: discuss style with instructor (10 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3225096",
+   "desc": "Brief in-class meeting about your zine: be ready to discuss style, tone, aesthetics, and materials.",
+   "how": "In class",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 10,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-12-02",
@@ -289,7 +473,15 @@
    "course": "ECE453",
    "title": "Final Project Demo (100 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments/3126347",
+   "desc": "",
+   "how": "In person",
+   "ext": null,
+   "opens": "2026-12-02T06:00:00Z",
+   "closes": "2026-12-02T06:01:00Z",
+   "pts": 100,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-12-03",
@@ -299,7 +491,15 @@
    "course": "FOLKLORE215",
    "title": "Informal Presentation",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3171842",
+   "desc": "Short 5-10 minute presentation of your research to the class; can use your essay or a zine draft. Points count toward Participation.",
+   "how": "In class",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 0,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-12-04",
@@ -309,7 +509,15 @@
    "course": "ECE453",
    "title": "Completed Project Files, Final Project Video, Individual Assessment #2",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/516655/assignments",
+   "desc": "Three final deliverables, all due the same night.",
+   "how": "Text entry / file upload",
+   "ext": null,
+   "opens": "2026-11-17T06:00:00Z",
+   "closes": "2026-12-05T05:59:00Z",
+   "pts": 300,
+   "courseUrl": "https://canvas.wisc.edu/courses/516655"
   },
   {
    "date": "2026-12-04",
@@ -319,7 +527,15 @@
    "course": "FOLKLORE215",
    "title": "Essay (150 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3169815",
+   "desc": "Short essay on your research topic with contextual info, drawing on your research and your consultant interview. Describe the military folklore text/artifact with context (history, usage, meaning, development).",
+   "how": "Text entry or file upload",
+   "ext": "pdf, doc, docx",
+   "opens": null,
+   "closes": null,
+   "pts": 150,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   },
   {
    "date": "2026-12-08",
@@ -329,7 +545,15 @@
    "course": "FOLKLORE215",
    "title": "Zine (140 pts)",
    "note": "",
-   "done": false
+   "done": false,
+   "url": "https://canvas.wisc.edu/courses/530045/assignments/3169816",
+   "desc": "Turn your research, interview, and essay into a zine. Follow the zine-making instructions and make at least three copies (one for the instructor, one to share).",
+   "how": "On paper",
+   "ext": null,
+   "opens": null,
+   "closes": null,
+   "pts": 140,
+   "courseUrl": "https://canvas.wisc.edu/courses/530045"
   }
  ]
 }

@@ -7,61 +7,129 @@
 <title>Up Next</title>
 <style>
   :root {
-    --bg: #f6f5f2; --card: #ffffff; --ink: #1d1d1b; --muted: #6b6a66; --line: #e4e2dc;
-    --interview: #c2410c; --interview-bg: #fff1e8;
-    --exam: #b91c1c; --assignment: #1d4ed8; --routine: #8a8984; --event: #047857;
-    --today: #1d1d1b;
+    --bg: #f6f5f2; --card: #ffffff; --ink: #1d1d1b; --muted: #6b6a66; --line: #e4e2dc; --hover: #f0eee9;
+    --interview: #c2410c; --exam: #b91c1c; --assignment: #1d4ed8; --routine: #8a8984; --event: #047857;
+    --accent: #1d4ed8; --shade: rgba(20, 20, 18, .35);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #141413; --card: #1e1e1c; --ink: #ecebe7; --muted: #9a9993; --line: #2e2e2b;
-      --interview: #fb923c; --interview-bg: #2a1d14;
-      --exam: #f87171; --assignment: #7aa2ff; --routine: #77766f; --event: #34d399;
-      --today: #ecebe7;
+      --bg: #141413; --card: #1e1e1c; --ink: #ecebe7; --muted: #9a9993; --line: #2e2e2b; --hover: #262624;
+      --interview: #fb923c; --exam: #f87171; --assignment: #7aa2ff; --routine: #77766f; --event: #34d399;
+      --accent: #7aa2ff; --shade: rgba(0, 0, 0, .55);
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
     font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 28px 16px 64px; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 72px; }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; }
   header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   h1 { font-size: 28px; margin: 0; letter-spacing: -0.02em; }
   .stamp { color: var(--muted); font-size: 13px; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 32px 0 10px; }
-  .soon { display: grid; gap: 10px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
-    display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: start; }
-  .card.interview { background: var(--interview-bg); border-color: color-mix(in srgb, var(--interview) 35%, var(--line)); }
-  .when { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
-  .when b { display: block; color: var(--ink); font-size: 14px; }
-  .title { font-weight: 600; }
-  a { color: var(--assignment); }
-  .meta { font-size: 13px; color: var(--muted); }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 28px 0 10px; font-weight: 600; }
+  .muted { color: var(--muted); }
+  .empty { color: var(--muted); font-style: italic; }
+
+  /* kind colors */
+  .k-interview { --k: var(--interview); } .k-exam { --k: var(--exam); } .k-assignment { --k: var(--assignment); }
+  .k-routine { --k: var(--routine); } .k-event { --k: var(--event); }
   .tag { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
-    padding: 1px 7px; border-radius: 99px; margin-right: 6px; border: 1px solid currentColor; }
-  .k-interview { color: var(--interview); } .k-exam { color: var(--exam); } .k-assignment { color: var(--assignment); }
-  .k-routine { color: var(--routine); } .k-event { color: var(--event); }
+    padding: 1px 7px; border-radius: 99px; color: var(--k); border: 1px solid var(--k); white-space: nowrap; }
+
+  /* hero */
+  .hero { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--k);
+    border-radius: 14px; padding: 16px 18px; cursor: pointer; display: grid; gap: 4px; }
+  .hero:hover { background: var(--hover); }
+  .hero .eyebrow { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .hero .big { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
+  .hero .cd { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--k); font-weight: 600; }
+
+  /* soon strip */
+  .strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .tile { text-align: left; background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--k);
+    border-radius: 12px; padding: 10px 12px; cursor: pointer; display: grid; gap: 3px; }
+  .tile:hover { background: var(--hover); }
+  .tile .t { font-weight: 600; }
+  .tile .s { font-size: 13px; color: var(--muted); }
+  .tile .cd { font-size: 12px; color: var(--k); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* toolbar */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 28px 0 12px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); }
+  .seg button { background: none; border: 0; padding: 6px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: 13px; cursor: pointer; }
+  .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+  .chip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 99px; background: var(--k); margin-right: 5px; }
+  .search { flex: 1 1 160px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 6px 10px; font: inherit; color: var(--ink); }
+  .opt { font-size: 13px; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; }
+
+  /* agenda */
+  .wk { margin: 20px 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .dayhead { font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  .dayhead.today { color: var(--ink); font-weight: 600; }
+  .row { width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--k);
+    border-radius: 10px; padding: 9px 12px; margin-bottom: 6px; cursor: pointer;
+    display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; }
+  .row:hover { background: var(--hover); }
+  .row .tm { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .row .t { font-weight: 600; }
+  .row .s { font-size: 13px; color: var(--muted); }
+  .row .r { text-align: right; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .row.done { opacity: .5; } .row.done .t { text-decoration: line-through; }
+  .row.routine { opacity: .7; }
+  @media (max-width: 560px) { .row { grid-template-columns: 58px 1fr; } .row .r { display: none; } }
+
+  /* calendar */
   .cal { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .cal-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
-  .cal-head button { background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 4px 10px; cursor: pointer; font: inherit; }
+  .cal-head button { background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
   .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .dow { font-size: 11px; color: var(--muted); text-align: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
-  .day { min-height: 74px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px; font-size: 12px; cursor: pointer; }
+  .day { min-height: 92px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px; font-size: 12px; min-width: 0; }
   .day:nth-child(7n) { border-right: none; }
-  .day.other { opacity: .35; }
-  .day .n { font-size: 12px; color: var(--muted); }
-  .day.is-today .n { background: var(--today); color: var(--bg); border-radius: 99px; padding: 0 6px; }
-  .day.sel { outline: 2px solid var(--assignment); outline-offset: -2px; }
-  .dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
-  .dot { width: 7px; height: 7px; border-radius: 99px; background: currentColor; }
-  .day .lbl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; margin-top: 2px; }
-  @media (max-width: 620px) { .day .lbl { display: none; } .day { min-height: 52px; } .card { grid-template-columns: 74px 1fr; } }
-  .daylist { margin-top: 12px; display: grid; gap: 8px; }
-  .agenda .wk { margin-top: 18px; font-size: 13px; color: var(--muted); }
-  .row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
-  .row.routine { opacity: .6; }
-  .toggle { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-  .empty { color: var(--muted); font-style: italic; }
+  .day.other { opacity: .4; }
+  .day .n { font-size: 12px; color: var(--muted); display: inline-block; padding: 0 5px; }
+  .day.is-today .n { background: var(--ink); color: var(--bg); border-radius: 99px; }
+  .ev { display: block; width: 100%; text-align: left; border: 0; background: color-mix(in srgb, var(--k) 14%, transparent);
+    color: var(--ink); border-left: 2px solid var(--k); border-radius: 4px; padding: 1px 4px; margin-top: 2px;
+    font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .ev:hover { background: color-mix(in srgb, var(--k) 28%, transparent); }
+  .more { font-size: 11px; color: var(--muted); background: none; border: 0; padding: 1px 4px; cursor: pointer; }
+  @media (max-width: 620px) {
+    .day { min-height: 58px; padding: 3px; }
+    .ev { font-size: 0; height: 6px; padding: 0; border: 0; background: var(--k); margin-top: 3px; }
+  }
+  .daylist { margin-top: 12px; }
+
+  /* drawer */
+  .shade { position: fixed; inset: 0; background: var(--shade); opacity: 0; pointer-events: none; transition: opacity .18s; z-index: 10; }
+  .shade.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: var(--card); z-index: 11;
+    border-left: 1px solid var(--line); transform: translateX(100%); transition: transform .2s ease; overflow-y: auto;
+    padding: 18px 20px 40px; box-shadow: -10px 0 30px rgba(0,0,0,.12); }
+  .drawer.open { transform: none; }
+  @media (max-width: 620px) {
+    .drawer { top: auto; left: 0; width: 100%; max-height: 88vh; border-left: 0; border-top: 1px solid var(--line);
+      border-radius: 16px 16px 0 0; transform: translateY(100%); }
+  }
+  .dclose { float: right; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 2px 10px; cursor: pointer; }
+  .drawer h3 { font-size: 21px; margin: 10px 0 2px; letter-spacing: -0.01em; clear: both; }
+  .drawer .sub { color: var(--muted); font-size: 14px; }
+  .cdbig { margin: 14px 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--k) 12%, transparent);
+    color: var(--k); font-weight: 650; font-variant-numeric: tabular-nums; }
+  .facts { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; margin: 12px 0; font-size: 14px; }
+  .facts dt { color: var(--muted); }
+  .facts dd { margin: 0; overflow-wrap: anywhere; }
+  .desc { font-size: 14px; white-space: pre-wrap; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; overflow-wrap: anywhere; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); text-decoration: none; cursor: pointer; font-size: 14px; }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .check { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -71,103 +139,255 @@
     <span class="stamp" id="stamp"></span>
   </header>
 
+  <div id="hero"></div>
+
   <h2>Next 48 hours</h2>
-  <div class="soon" id="soon"></div>
+  <div class="strip" id="soon"></div>
 
-  <h2>Calendar</h2>
-  <div class="cal">
-    <div class="cal-head">
-      <button id="prev" aria-label="Previous month">‹</button>
-      <strong id="month"></strong>
-      <button id="next" aria-label="Next month">›</button>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="View">
+      <button data-view="list" aria-pressed="true">List</button>
+      <button data-view="cal" aria-pressed="false">Calendar</button>
     </div>
-    <div class="grid" id="grid"></div>
+    <input class="search" id="q" type="search" placeholder="Search" aria-label="Search">
+    <label class="opt"><input type="checkbox" id="showRoutine"> Attendance</label>
+    <label class="opt"><input type="checkbox" id="showDone"> Done</label>
   </div>
-  <div class="daylist" id="daylist"></div>
+  <div class="chips" id="kinds"></div>
+  <div class="chips" id="courses" style="margin-top:6px"></div>
 
-  <h2>Everything ahead</h2>
-  <label class="toggle"><input type="checkbox" id="showRoutine"> Show attendance check-ins</label>
-  <div class="agenda" id="agenda"></div>
+  <section id="listView"><div id="agenda"></div></section>
+  <section id="calView" hidden>
+    <div class="cal" style="margin-top:14px">
+      <div class="cal-head">
+        <button id="prev" aria-label="Previous month">‹</button>
+        <strong id="month"></strong>
+        <button id="next" aria-label="Next month">›</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="daylist" id="daylist"></div>
+  </section>
 </main>
+
+<div class="shade" id="shade"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle"></aside>
+
 <script>
-const LABEL = { interview: "Interview", exam: "Exam", assignment: "Due", routine: "Attendance", event: "Event" };
+const LABEL = { interview: "Interview", exam: "Exam / quiz", assignment: "Assignment", routine: "Attendance", event: "Event" };
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, "0");
 const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const linkify = s => esc(s).replace(/https?:\/\/[^\s,)]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const URL_RE = /https?:\/\/[^\s,)]+/g;
+const linkify = s => esc(s).replace(URL_RE, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
 const fmtTime = t => { if (!t) return ""; let [h, m] = t.split(":").map(Number);
   if (h === 23 && m === 59) return "11:59pm"; const ap = h >= 12 ? "pm" : "am"; h = h % 12 || 12; return `${h}:${pad(m)}${ap}`; };
-const fmtDay = (k, opts = { weekday: "short", month: "short", day: "numeric" }) =>
-  new Date(k + "T12:00").toLocaleDateString("en-US", opts);
-const asDate = i => new Date(`${i.date}T${i.start || "23:59"}`);
+const fmtDay = (k, o = { weekday: "short", month: "short", day: "numeric" }) => new Date(k + "T12:00").toLocaleDateString("en-US", o);
+const fmtStamp = iso => new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const when = i => new Date(`${i.date}T${i.start || "23:59"}`);
+const timeStr = i => i.end ? `${fmtTime(i.start)}–${fmtTime(i.end)}` : (fmtTime(i.start) || "All day");
+const idOf = i => (i.date + "-" + (i.course || "") + "-" + i.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 80);
 
-let items = [], view = new Date(), selected = key(new Date());
+function until(d, now = new Date()) {
+  let ms = d - now; const past = ms < 0; ms = Math.abs(ms);
+  const dd = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
+  const s = dd ? `${dd}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+  return past ? `${s} ago` : `in ${s}`;
+}
 
-function card(i, cls = "card") {
-  const time = i.end ? `${fmtTime(i.start)}–${fmtTime(i.end)}` : fmtTime(i.start);
-  return `<div class="${cls} ${i.kind}">
-    <div class="when"><b>${fmtDay(i.date, { weekday: "short" })}</b>${fmtDay(i.date, { month: "short", day: "numeric" })}${time ? `<br>${time}` : ""}</div>
-    <div><div class="title"><span class="tag k-${i.kind}">${LABEL[i.kind]}</span>${linkify(i.title)}</div>
-    ${i.course ? `<div class="meta">${esc(i.course)}</div>` : ""}
-    ${i.note ? `<div class="meta">${linkify(i.note)}</div>` : ""}</div></div>`;
+// per-viewer "done" ticks, best effort
+const store = { get() { try { return JSON.parse(localStorage.getItem("upnext-done") || "{}"); } catch { return {}; } },
+  set(v) { try { localStorage.setItem("upnext-done", JSON.stringify(v)); } catch {} } };
+let ticked = store.get();
+const isDone = i => i.done || !!ticked[i.id];
+
+let items = [], view = new Date(), selected = key(new Date()), mode = "list";
+const filt = { kinds: new Set(), courses: new Set(), q: "" };
+
+function passes(i) {
+  if (filt.kinds.size && !filt.kinds.has(i.kind)) return false;
+  if (filt.courses.size && !filt.courses.has(i.course || "Other")) return false;
+  if (i.kind === "routine" && !$("showRoutine").checked && !filt.kinds.has("routine")) return false;
+  if (isDone(i) && !$("showDone").checked) return false;
+  if (filt.q) { const hay = `${i.title} ${i.course} ${i.note} ${i.desc || ""}`.toLowerCase(); if (!hay.includes(filt.q)) return false; }
+  return true;
+}
+
+function sub(i) { return [i.course, i.pts != null ? `${i.pts} pts` : "", i.how || ""].filter(Boolean).join(" · ") || (i.note ? i.note.replace(URL_RE, "").replace(/\s+[;,.]?\s*$/, "").slice(0, 90) : ""); }
+
+function renderHero() {
+  const now = new Date();
+  const next = items.filter(i => !isDone(i) && i.kind !== "routine" && when(i) >= now)[0];
+  if (!next) { $("hero").innerHTML = ""; return; }
+  $("hero").innerHTML = `<div class="hero k-${next.kind}" data-id="${next.id}" role="button" tabindex="0">
+    <span class="eyebrow">Next up · ${LABEL[next.kind]}</span>
+    <span class="big">${esc(next.title)}</span>
+    <span class="muted">${esc(next.course ? next.course + " · " : "")}${fmtDay(next.date, { weekday: "long", month: "short", day: "numeric" })}, ${timeStr(next)}</span>
+    <span class="cd" data-cd="${next.id}">${until(when(next))}</span></div>`;
 }
 
 function renderSoon() {
-  const now = new Date(), horizon = new Date(now.getTime() + 48 * 3600e3);
-  const today = key(now);
-  const list = items.filter(i => !i.done && (i.date === today || (asDate(i) >= now && asDate(i) <= horizon)));
-  $("soon").innerHTML = list.length ? list.map(i => card(i)).join("") : `<p class="empty">Nothing in the next 48 hours.</p>`;
+  const now = new Date(), horizon = new Date(now.getTime() + 48 * 3600e3), today = key(now);
+  const list = items.filter(i => !isDone(i) && i.kind !== "routine" && (i.date === today || (when(i) >= now && when(i) <= horizon)));
+  $("soon").innerHTML = list.length ? list.map(i => `<button class="tile k-${i.kind}" data-id="${i.id}">
+      <span><span class="tag">${LABEL[i.kind]}</span></span>
+      <span class="t">${esc(i.title)}</span>
+      <span class="s">${fmtDay(i.date, { weekday: "short" })} ${timeStr(i)}${i.course ? " · " + esc(i.course) : ""}</span>
+      <span class="cd" data-cd="${i.id}">${until(when(i))}</span></button>`).join("")
+    : `<p class="empty">Nothing in the next 48 hours.</p>`;
 }
 
-function renderCal() {
-  const y = view.getFullYear(), m = view.getMonth();
-  $("month").textContent = view.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  const start = new Date(y, m, 1 - new Date(y, m, 1).getDay());
-  const byDay = {};
-  items.forEach(i => (byDay[i.date] ||= []).push(i));
-  let html = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => `<div class="dow">${d}</div>`).join("");
-  for (let n = 0; n < 42; n++) {
-    const d = new Date(start); d.setDate(start.getDate() + n);
-    const k = key(d), its = (byDay[k] || []).filter(i => i.kind !== "routine");
-    const top = its.find(i => i.kind === "interview") || its[0];
-    html += `<div class="day ${d.getMonth() !== m ? "other" : ""} ${k === key(new Date()) ? "is-today" : ""} ${k === selected ? "sel" : ""}" data-k="${k}">
-      <span class="n">${d.getDate()}</span>
-      <div class="dots">${its.map(i => `<span class="dot k-${i.kind}"></span>`).join("")}</div>
-      ${top ? `<span class="lbl k-${top.kind}">${esc((top.course ? top.course + " " : "") + top.title.replace(/^Interview: /, ""))}</span>` : ""}
-    </div>`;
-  }
-  $("grid").innerHTML = html;
-  $("grid").querySelectorAll(".day").forEach(el => el.onclick = () => { selected = el.dataset.k; renderCal(); renderDay(); });
-}
-
-function renderDay() {
-  const its = items.filter(i => i.date === selected);
-  $("daylist").innerHTML = `<div class="meta">${fmtDay(selected, { weekday: "long", month: "long", day: "numeric" })}</div>` +
-    (its.length ? its.map(i => card(i)).join("") : `<p class="empty">Nothing scheduled.</p>`);
+function rowHtml(i) {
+  return `<button class="row k-${i.kind} ${i.kind} ${isDone(i) ? "done" : ""}" data-id="${i.id}">
+    <span class="tm">${i.start ? timeStr(i).replace("–", "–<br>") : "All day"}</span>
+    <span><span class="t">${esc(i.title)}</span><br><span class="s">${esc(sub(i))}</span></span>
+    <span class="r"><span class="tag">${LABEL[i.kind]}</span></span></button>`;
 }
 
 function renderAgenda() {
-  const showRoutine = $("showRoutine").checked, today = key(new Date());
-  const list = items.filter(i => !i.done && i.date >= today && (showRoutine || i.kind !== "routine"));
-  let html = "", lastWk = "";
+  const today = key(new Date());
+  const list = items.filter(i => i.date >= today && passes(i));
+  let html = "", lastWk = "", lastDay = "";
   list.forEach(i => {
     const d = new Date(i.date + "T12:00"); d.setDate(d.getDate() - d.getDay());
     const wk = `Week of ${fmtDay(key(d), { month: "short", day: "numeric" })}`;
     if (wk !== lastWk) { html += `<div class="wk">${wk}</div>`; lastWk = wk; }
-    html += card(i, "row");
+    if (i.date !== lastDay) { html += `<div class="dayhead ${i.date === today ? "today" : ""}">${i.date === today ? "Today · " : ""}${fmtDay(i.date, { weekday: "long", month: "short", day: "numeric" })}</div>`; lastDay = i.date; }
+    html += rowHtml(i);
   });
-  $("agenda").innerHTML = html || `<p class="empty">All clear.</p>`;
+  $("agenda").innerHTML = html || `<p class="empty">Nothing matches.</p>`;
 }
 
+function renderCal() {
+  const y = view.getFullYear(), m = view.getMonth(), today = key(new Date());
+  $("month").textContent = view.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const start = new Date(y, m, 1 - new Date(y, m, 1).getDay());
+  const byDay = {};
+  items.filter(passes).forEach(i => (byDay[i.date] ||= []).push(i));
+  let html = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => `<div class="dow">${d}</div>`).join("");
+  for (let n = 0; n < 42; n++) {
+    const d = new Date(start); d.setDate(start.getDate() + n);
+    const k = key(d), its = byDay[k] || [];
+    html += `<div class="day ${d.getMonth() !== m ? "other" : ""} ${k === today ? "is-today" : ""}">
+      <button class="more" data-day="${k}"><span class="n">${d.getDate()}</span></button>
+      ${its.slice(0, 3).map(i => `<button class="ev k-${i.kind}" data-id="${i.id}" title="${esc(i.title)}">${esc((i.course ? i.course.replace(/\d+$/, "") + " " : "") + i.title.replace(/^Interview: /, ""))}</button>`).join("")}
+      ${its.length > 3 ? `<button class="more" data-day="${k}">+${its.length - 3} more</button>` : ""}
+    </div>`;
+  }
+  $("grid").innerHTML = html;
+  renderDay();
+}
+
+function renderDay() {
+  const its = items.filter(i => i.date === selected && passes(i));
+  $("daylist").innerHTML = `<div class="dayhead today">${fmtDay(selected, { weekday: "long", month: "long", day: "numeric" })}</div>` +
+    (its.length ? its.map(rowHtml).join("") : `<p class="empty">Nothing scheduled.</p>`);
+}
+
+function renderChips() {
+  const kinds = ["interview", "exam", "assignment", "event", "routine"].filter(k => items.some(i => i.kind === k));
+  $("kinds").innerHTML = kinds.map(k => `<button class="chip k-${k}" data-kind="${k}" aria-pressed="${filt.kinds.has(k)}"><span class="sw"></span>${LABEL[k]}</button>`).join("");
+  const courses = [...new Set(items.map(i => i.course || "Other"))].sort((a, b) => a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b));
+  $("courses").innerHTML = courses.map(c => `<button class="chip" data-course="${esc(c)}" aria-pressed="${filt.courses.has(c)}">${c === "Other" ? "Interviews & events" : esc(c)}</button>`).join("");
+}
+
+function renderAll() { renderHero(); renderSoon(); renderChips(); mode === "list" ? renderAgenda() : renderCal(); }
+
+/* ---------- detail drawer ---------- */
+function ics(i) {
+  const dt = (d, t) => d.replace(/-/g, "") + (t ? "T" + t.replace(":", "") + "00" : "");
+  const start = i.start || "23:00", end = i.end || (i.start ? null : "23:59");
+  let endT = end; if (!endT) { const d = when(i); d.setMinutes(d.getMinutes() + 30); endT = `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  const desc = [i.course, i.note, i.url, i.desc].filter(Boolean).join("\\n").replace(/[,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+  const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//upnext//EN", "BEGIN:VEVENT", `UID:${i.id}@upnext`,
+    `DTSTART;TZID=America/Chicago:${dt(i.date, start)}`, `DTEND;TZID=America/Chicago:${dt(i.date, endT)}`,
+    `SUMMARY:${(i.course ? i.course + ": " : "") + i.title}`.replace(/[,;]/g, m => "\\" + m), `DESCRIPTION:${desc}`,
+    "BEGIN:VALARM", "TRIGGER:-PT1H", "ACTION:DISPLAY", "DESCRIPTION:Reminder", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  return "data:text/calendar;charset=utf-8," + encodeURIComponent(body);
+}
+
+function windowState(i) {
+  const now = new Date(), o = i.opens && new Date(i.opens), c = i.closes && new Date(i.closes);
+  if (o && o > now) return `Opens ${until(o)}`;
+  if (c && c < now) return "Closed";
+  if (o || c) return "Open now";
+  return "";
+}
+
+function openItem(id, push = true) {
+  const i = items.find(x => x.id === id); if (!i) return;
+  const links = (i.note.match(URL_RE) || []);
+  const meet = links.find(u => /zoom|meet\.google|teams|webex/i.test(u));
+  const facts = [
+    ["When", `${fmtDay(i.date, { weekday: "long", month: "long", day: "numeric" })}, ${timeStr(i)}`],
+    i.course && ["Course", i.courseUrl ? `<a href="${i.courseUrl}" target="_blank" rel="noopener">${esc(i.course)}</a>` : esc(i.course)],
+    i.pts != null && ["Points", esc(i.pts)],
+    i.how && ["Submit via", esc(i.how)],
+    i.ext && ["File types", esc(Array.isArray(i.ext) ? i.ext.join(", ") : i.ext)],
+    i.opens && ["Opens", fmtStamp(i.opens)],
+    i.closes && ["Closes", fmtStamp(i.closes)],
+    windowState(i) && ["Window", windowState(i)],
+  ].filter(Boolean);
+  $("drawer").className = `drawer open k-${i.kind}`;
+  $("drawer").innerHTML = `<button class="dclose" id="dclose" aria-label="Close">Close</button>
+    <span class="tag">${LABEL[i.kind]}</span>
+    <h3 id="dtitle">${esc(i.title)}</h3>
+    <div class="sub">${esc(i.course || "")}</div>
+    <div class="cdbig" data-cd="${i.id}">${until(when(i))}</div>
+    <dl class="facts">${facts.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>
+    ${i.note ? `<div class="desc"><strong>Notes</strong><br>${linkify(i.note)}</div>` : ""}
+    ${i.desc ? `<div class="desc"><strong>Details</strong><br>${linkify(i.desc)}</div>` : ""}
+    <div class="actions">
+      ${i.url ? `<a class="btn primary" href="${i.url}" target="_blank" rel="noopener">Open in Canvas</a>` : ""}
+      ${meet ? `<a class="btn primary" href="${meet}" target="_blank" rel="noopener">Join meeting</a>` : ""}
+      ${links.filter(u => u !== meet).map(u => `<a class="btn" href="${u}" target="_blank" rel="noopener">${esc(new URL(u).hostname.replace(/^www\./, ""))}</a>`).join("")}
+      <a class="btn" href="${ics(i)}" download="${i.id}.ics">Add to calendar</a>
+      <button class="btn" id="copylink">Copy link</button>
+    </div>
+    ${i.done ? `<p class="muted">Marked done on Canvas.</p>` : `<label class="check"><input type="checkbox" id="tick" ${ticked[i.id] ? "checked" : ""}> I've done this (only on this device)</label>`}`;
+  $("shade").classList.add("open");
+  if (push) history.replaceState(null, "", "#" + i.id);
+  $("dclose").onclick = closeItem;
+  $("copylink").onclick = e => { navigator.clipboard?.writeText(location.href).then(() => e.target.textContent = "Copied"); };
+  const t = $("tick"); if (t) t.onchange = () => { if (t.checked) ticked[i.id] = 1; else delete ticked[i.id]; store.set(ticked); renderAll(); };
+  $("dclose").focus();
+}
+function closeItem() {
+  $("drawer").classList.remove("open"); $("shade").classList.remove("open");
+  history.replaceState(null, "", location.pathname + location.search);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const it = e.target.closest("[data-id]"); if (it && !e.target.closest("#drawer")) return openItem(it.dataset.id);
+  const dy = e.target.closest("[data-day]"); if (dy) { selected = dy.dataset.day; return renderDay(); }
+  const k = e.target.closest("[data-kind]"); if (k) { const v = k.dataset.kind; filt.kinds.has(v) ? filt.kinds.delete(v) : filt.kinds.add(v); return renderAll(); }
+  const c = e.target.closest("[data-course]"); if (c) { const v = c.dataset.course; filt.courses.has(v) ? filt.courses.delete(v) : filt.courses.add(v); return renderAll(); }
+  const v = e.target.closest("[data-view]"); if (v) {
+    mode = v.dataset.view;
+    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b === v));
+    $("listView").hidden = mode !== "list"; $("calView").hidden = mode !== "cal"; return renderAll();
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeItem();
+  if (e.key === "Enter" && e.target.matches(".hero")) openItem(e.target.dataset.id);
+});
+$("shade").onclick = closeItem;
+$("q").oninput = e => { filt.q = e.target.value.trim().toLowerCase(); renderAll(); };
+$("showRoutine").onchange = $("showDone").onchange = renderAll;
 $("prev").onclick = () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCal(); };
 $("next").onclick = () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCal(); };
-$("showRoutine").onchange = renderAgenda;
+setInterval(() => document.querySelectorAll("[data-cd]").forEach(el => {
+  const i = items.find(x => x.id === el.dataset.cd); if (i) el.textContent = until(when(i));
+}), 30000);
 
 fetch("data.json", { cache: "no-store" }).then(r => r.json()).then(d => {
-  items = d.items;
-  $("stamp").textContent = "Updated " + new Date(d.updated).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  renderSoon(); renderCal(); renderDay(); renderAgenda();
+  items = d.items.map(i => ({ ...i, id: idOf(i) }));
+  $("stamp").textContent = "Updated " + fmtStamp(d.updated);
+  renderAll();
+  if (location.hash) openItem(decodeURIComponent(location.hash.slice(1)), false);
 }).catch(() => { $("soon").innerHTML = `<p class="empty">Couldn't load data.json.</p>`; });
 </script>
 </body>

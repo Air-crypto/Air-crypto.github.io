@@ -5,162 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Up Next</title>
-<style>
-  :root {
-    --bg: #f6f5f2; --card: #ffffff; --ink: #1d1d1b; --muted: #6b6a66; --line: #e4e2dc; --hover: #f0eee9;
-    --interview: #c2410c; --exam: #b91c1c; --assignment: #1d4ed8; --routine: #8a8984; --event: #047857; --personal: #7c3aed;
-    --accent: #1d4ed8; --shade: rgba(20, 20, 18, .35);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141413; --card: #1e1e1c; --ink: #ecebe7; --muted: #9a9993; --line: #2e2e2b; --hover: #262624;
-      --interview: #fb923c; --exam: #f87171; --assignment: #7aa2ff; --routine: #77766f; --event: #34d399; --personal: #c4b5fd;
-      --accent: #7aa2ff; --shade: rgba(0, 0, 0, .55);
-    }
-  }
-  * { box-sizing: border-box; }
-  html { scroll-padding-top: 12px; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
-    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
-  main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 72px; }
-  a { color: var(--accent); }
-  button { font: inherit; color: inherit; }
-  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  h1 { font-size: 28px; margin: 0; letter-spacing: -0.02em; }
-  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
-  .stamp, .muted { color: var(--muted); }
-  .stamp { font-size: 13px; }
-  .empty { color: var(--muted); font-style: italic; }
+<link rel="stylesheet" href="styles.css">
 
-  .k-interview { --k: var(--interview); } .k-exam { --k: var(--exam); } .k-assignment { --k: var(--assignment); }
-  .k-routine { --k: var(--routine); } .k-event { --k: var(--event); } .k-personal { --k: var(--personal); }
-  .k-mail { --k: var(--muted); } .k-rejection { --k: var(--exam); } .k-assessment { --k: var(--interview); }
-  .tag { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
-    padding: 1px 7px; border-radius: 99px; color: var(--k); border: 1px solid var(--k); white-space: nowrap; }
-
-  .hero { margin: 18px 0 0; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--k);
-    border-radius: 14px; padding: 14px 18px; cursor: pointer; display: grid; gap: 2px; }
-  .hero:hover { background: var(--hover); }
-  .hero .eyebrow { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .hero .big { font-size: 21px; font-weight: 650; letter-spacing: -0.01em; }
-  .hero .cd { font-variant-numeric: tabular-nums; color: var(--k); font-weight: 600; }
-
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 8px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: 13px; cursor: pointer; }
-  .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
-  .chip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 99px; background: var(--k); margin-right: 5px; }
-  .search { flex: 1 1 160px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-    padding: 6px 10px; font: inherit; color: var(--ink); }
-  .opt { font-size: 13px; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; }
-
-  /* two panes: days on the left, calendar on the right */
-  .split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; margin-top: 16px; align-items: start; }
-  .side { position: sticky; top: 12px; display: grid; gap: 14px; max-height: calc(100vh - 24px); overflow-y: auto; }
-  @media (max-width: 860px) {
-    .split { grid-template-columns: minmax(0, 1fr); }
-    .side { position: static; order: -1; max-height: none; }
-  }
-
-  .day { padding: 10px 0 4px; border-top: 1px solid var(--line); }
-  .day:first-child { border-top: 0; }
-  .dh { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-  .dh b { font-size: 15px; }
-  .dh .rel { font-size: 12px; color: var(--muted); }
-  .day.today .dh b::after { content: "Today"; margin-left: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .06em; background: var(--ink); color: var(--bg); padding: 1px 7px; border-radius: 99px; vertical-align: 2px; }
-  .day.free { padding: 6px 0; }
-  .day.free .dh { margin: 0; }
-  .day.free .dh b { font-weight: 500; color: var(--muted); font-size: 14px; }
-  .day.flash { animation: flash 1.2s ease; }
-  @keyframes flash { 0% { background: color-mix(in srgb, var(--accent) 18%, transparent); } 100% { background: transparent; } }
-  .wk { margin: 18px 0 2px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
-
-  .row { width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--k);
-    border-radius: 10px; padding: 9px 12px; margin-bottom: 6px; cursor: pointer;
-    display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; }
-  .row:hover { background: var(--hover); }
-  .row .tm { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .row .t { font-weight: 600; }
-  .row .s { font-size: 13px; color: var(--muted); }
-  .row .r { text-align: right; font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .row.done { opacity: .5; } .row.done .t { text-decoration: line-through; }
-  .row.routine { opacity: .7; }
-  @media (max-width: 560px) { .row { grid-template-columns: 58px 1fr; } .row .r { display: none; } }
-
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
-  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .cal-head button { background: none; border: 1px solid var(--line); border-radius: 8px; padding: 2px 10px; cursor: pointer; }
-  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
-  .dow { font-size: 11px; color: var(--muted); text-align: center; padding: 2px 0 4px; }
-  .cd-day { aspect-ratio: 1 / 1; border: 0; border-radius: 8px; background: none; cursor: pointer; padding: 3px 0 0;
-    display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; min-width: 0; }
-  .cd-day:hover { background: var(--hover); }
-  .cd-day.other { opacity: .35; }
-  .cd-day.past { color: var(--muted); }
-  .cd-day.today .num { background: var(--ink); color: var(--bg); border-radius: 99px; padding: 0 6px; }
-  .cd-day.sel { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 100%; }
-  .dot { width: 6px; height: 6px; border-radius: 99px; background: var(--k); }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: 12px; color: var(--muted); }
-  .legend span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 99px; background: var(--k); margin-right: 4px; }
-
-  .mail-row { display: block; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line);
-    padding: 8px 2px; cursor: pointer; }
-  .mail-row:hover { background: var(--hover); }
-  .mail-row .t { font-weight: 600; font-size: 14px; }
-  .mail-row .s { font-size: 13px; color: var(--muted); }
-  .mail-stats { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-
-  .shade { position: fixed; inset: 0; background: var(--shade); opacity: 0; pointer-events: none; transition: opacity .18s; z-index: 10; }
-  .shade.open { opacity: 1; pointer-events: auto; }
-  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: var(--card); z-index: 11;
-    border-left: 1px solid var(--line); transform: translateX(100%); transition: transform .2s ease; overflow-y: auto;
-    padding: 18px 20px 40px; box-shadow: -10px 0 30px rgba(0,0,0,.12); }
-  .drawer.open { transform: none; }
-  @media (max-width: 620px) {
-    .drawer { top: auto; left: 0; width: 100%; max-height: 88vh; border-left: 0; border-top: 1px solid var(--line);
-      border-radius: 16px 16px 0 0; transform: translateY(100%); }
-  }
-  .dclose { float: right; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 2px 10px; cursor: pointer; }
-  .drawer h3 { font-size: 21px; margin: 10px 0 2px; letter-spacing: -0.01em; clear: both; }
-  .drawer .sub { color: var(--muted); font-size: 14px; }
-  .cdbig { margin: 14px 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--k) 12%, transparent);
-    color: var(--k); font-weight: 650; font-variant-numeric: tabular-nums; }
-  .facts { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; margin: 12px 0; font-size: 14px; }
-  .facts dt { color: var(--muted); }
-  .facts dd { margin: 0; overflow-wrap: anywhere; }
-  .desc { font-size: 14px; white-space: pre-wrap; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; overflow-wrap: anywhere; }
-  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line);
-    background: var(--card); color: var(--ink); text-decoration: none; cursor: pointer; font-size: 14px; }
-  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  .btn.claude { border-color: #d97757; color: #d97757; }
-  .check { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; margin-top: 14px; }
-</style>
 </head>
 <body>
 <main>
   <header>
-    <h1>Up next</h1>
+    <div><p class="eyebrow">Your schedule, in one place</p><h1>Up next<span class="title-dot">.</span></h1></div>
     <span class="stamp" id="stamp"></span>
   </header>
 
   <div id="hero"></div>
 
+  <p class="context">America/Chicago · CST / CDT <span>Completion is saved on this device only.</span></p>
   <div class="toolbar">
-    <input class="search" id="q" type="search" placeholder="Search" aria-label="Search">
-    <label class="opt"><input type="checkbox" id="showRoutine"> Attendance</label>
-    <label class="opt"><input type="checkbox" id="showFree" checked> Free days</label>
-    <label class="opt"><input type="checkbox" id="showDone"> Done</label>
+    <input class="search" id="q" type="search" placeholder="Find an assignment, interview, or event…" aria-label="Search schedule">
+    <a class="btn calendar-shortcut" href="#calendar">Calendar ↗</a>
   </div>
-  <div class="chips" id="kinds"></div>
-  <div class="chips" id="courses" style="margin-top:6px"></div>
+  <details class="filters" id="filters">
+    <summary>Filters <span id="filterCount">All events</span></summary>
+    <div class="filter-body">
+      <div class="chips" id="kinds" aria-label="Event types"></div>
+      <div class="chips" id="courses" aria-label="Courses"></div>
+      <div class="filter-options">
+        <label class="opt"><input type="checkbox" id="showRoutine"> Attendance</label>
+        <label class="opt"><input type="checkbox" id="showFree"> Free days</label>
+        <label class="opt"><input type="checkbox" id="showDone"> Completed (device-local)</label>
+        <button class="text-btn" id="resetFilters">Reset filters</button>
+      </div>
+    </div>
+  </details>
 
   <div class="split">
-    <section id="days" aria-label="Day by day"></section>
+    <section aria-label="Day by day"><div class="section-head"><h2>Timeline</h2><span class="muted" id="resultCount"></span></div><div id="days"></div></section>
     <aside class="side">
-      <div class="panel">
+      <details class="panel calendar-panel" id="calendar" open>
+        <summary class="calendar-toggle">Calendar <span id="calendarSummary"></span></summary>
+        <div class="calendar-body">
+        <div class="section-head"><h2>Calendar</h2><button class="text-btn" id="today">Today</button></div>
         <div class="cal-head">
           <button id="prev" aria-label="Previous month">‹</button>
           <strong id="month"></strong>
@@ -168,309 +50,17 @@
         </div>
         <div class="grid" id="grid"></div>
         <div class="legend" id="legend"></div>
-      </div>
-      <div class="panel" id="mail"></div>
+        <div class="selected-day" id="selectedDay"></div>
+        </div>
+      </details>
+      <details class="panel mail-panel"><summary>Email review <span class="muted" id="mailCount"></span></summary><div id="mail"></div></details>
     </aside>
   </div>
 </main>
 
-<div class="shade" id="shade"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle"></aside>
+<dialog class="drawer" id="drawer" aria-labelledby="dtitle"></dialog>
 
-<script>
-const LABEL = { interview: "Interview", exam: "Exam / quiz", assignment: "Assignment", routine: "Attendance", event: "Event", personal: "Personal" };
-const MAILCAT = { rejection: "Rejection", assessment: "Assessment", interview: "Interview", "action-needed": "Action needed",
-  "application-ack": "Application received", newsletter: "Newsletter", school: "School", promo: "Promo", spam: "Spam", other: "Other" };
-const $ = id => document.getElementById(id);
-const pad = n => String(n).padStart(2, "0");
-const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const URL_RE = /https?:\/\/[^\s,)]+/g;
-const linkify = s => esc(s).replace(URL_RE, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
-const fmtTime = t => { if (!t) return ""; let [h, m] = t.split(":").map(Number);
-  if (h === 23 && m === 59) return "11:59pm"; const ap = h >= 12 ? "pm" : "am"; h = h % 12 || 12; return `${h}:${pad(m)}${ap}`; };
-const fmtDay = (k, o = { weekday: "short", month: "short", day: "numeric" }) => new Date(k + "T12:00").toLocaleDateString("en-US", o);
-const fmtStamp = iso => new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-const when = i => new Date(`${i.date}T${i.start || "23:59"}`);
-const timeStr = i => i.end ? `${fmtTime(i.start)}–${fmtTime(i.end)}` : (fmtTime(i.start) || "All day");
-const idOf = i => (i.date + "-" + (i.course || "") + "-" + i.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 80);
-
-function until(d, now = new Date()) {
-  let ms = d - now; const past = ms < 0; ms = Math.abs(ms);
-  const dd = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
-  const s = dd ? `${dd}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
-  return past ? `${s} ago` : `in ${s}`;
-}
-
-// per-viewer "done" ticks, best effort
-const store = { get() { try { return JSON.parse(localStorage.getItem("upnext-done") || "{}"); } catch { return {}; } },
-  set(v) { try { localStorage.setItem("upnext-done", JSON.stringify(v)); } catch {} } };
-let ticked = store.get();
-const isDone = i => i.done || !!ticked[i.id];
-
-let items = [], mail = null, view = new Date(), selected = key(new Date());
-const filt = { kinds: new Set(), courses: new Set(), q: "" };
-
-function passes(i) {
-  if (filt.kinds.size && !filt.kinds.has(i.kind)) return false;
-  if (filt.courses.size && !filt.courses.has(i.course || "Other")) return false;
-  if (i.kind === "routine" && !$("showRoutine").checked && !filt.kinds.has("routine")) return false;
-  if (isDone(i) && !$("showDone").checked) return false;
-  if (filt.q) { const hay = `${i.title} ${i.course} ${i.note} ${i.desc || ""}`.toLowerCase(); if (!hay.includes(filt.q)) return false; }
-  return true;
-}
-const filtering = () => filt.kinds.size || filt.courses.size || filt.q;
-
-function sub(i) {
-  return [i.course, i.pts != null ? `${i.pts} pts` : "", i.how || ""].filter(Boolean).join(" · ")
-    || (i.note ? i.note.replace(URL_RE, "").replace(/\s+[;,.]?\s*$/, "").slice(0, 110) : "");
-}
-
-function renderHero() {
-  const now = new Date();
-  const next = items.filter(i => !isDone(i) && !["routine", "personal"].includes(i.kind) && when(i) >= now)[0];
-  if (!next) { $("hero").innerHTML = ""; return; }
-  $("hero").innerHTML = `<div class="hero k-${next.kind}" data-id="${next.id}" role="button" tabindex="0">
-    <span class="eyebrow">Next up · ${LABEL[next.kind]}</span>
-    <span class="big">${esc(next.title)}</span>
-    <span class="muted">${esc(next.course ? next.course + " · " : "")}${fmtDay(next.date, { weekday: "long", month: "short", day: "numeric" })}, ${timeStr(next)}</span>
-    <span class="cd" data-cd="${next.id}">${until(when(next))}</span></div>`;
-}
-
-function rowHtml(i) {
-  return `<button class="row k-${i.kind} ${i.kind} ${isDone(i) ? "done" : ""}" data-id="${i.id}">
-    <span class="tm">${i.start ? timeStr(i).replace("–", "–<br>") : "All day"}</span>
-    <span><span class="t">${esc(i.title)}</span><br><span class="s">${esc(sub(i))}</span></span>
-    <span class="r"><span class="tag">${LABEL[i.kind]}</span><br><span data-cd="${i.id}">${until(when(i))}</span></span></button>`;
-}
-
-/* left pane: every day from today to the last item */
-function renderDays() {
-  const today = key(new Date());
-  const list = items.filter(i => i.date >= today && passes(i));
-  const byDay = {}; list.forEach(i => (byDay[i.date] ||= []).push(i));
-  const last = items.reduce((m, i) => i.date > m ? i.date : m, today);
-  const showFree = $("showFree").checked && !filtering();
-  let html = "", lastWk = "";
-  for (let d = new Date(today + "T12:00"); key(d) <= last; d.setDate(d.getDate() + 1)) {
-    const k = key(d), its = byDay[k] || [];
-    if (!its.length && !showFree && k !== today) continue;
-    const s = new Date(d); s.setDate(s.getDate() - s.getDay());
-    const wk = `Week of ${fmtDay(key(s), { month: "short", day: "numeric" })}`;
-    if (wk !== lastWk) { html += `<div class="wk">${wk}</div>`; lastWk = wk; }
-    const diff = Math.round((new Date(k + "T12:00") - new Date(today + "T12:00")) / 864e5);
-    const rel = diff === 1 ? "Tomorrow" : diff > 1 && diff < 7 ? `in ${diff} days` : "";
-    html += `<div class="day ${k === today ? "today" : ""} ${its.length ? "" : "free"}" id="d-${k}" data-k="${k}">
-      <div class="dh"><b>${fmtDay(k, { weekday: "long", month: "short", day: "numeric" })}</b>
-      <span class="rel">${its.length ? rel : "Nothing scheduled"}</span></div>
-      ${its.map(rowHtml).join("")}</div>`;
-  }
-  $("days").innerHTML = html || `<p class="empty">Nothing matches.</p>`;
-  observeDays();
-}
-
-/* right pane: month calendar */
-function renderCal() {
-  const y = view.getFullYear(), m = view.getMonth(), today = key(new Date());
-  $("month").textContent = view.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  const start = new Date(y, m, 1 - new Date(y, m, 1).getDay());
-  const byDay = {}; items.filter(passes).forEach(i => (byDay[i.date] ||= []).push(i));
-  let html = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="dow">${d}</div>`).join("");
-  for (let n = 0; n < 42; n++) {
-    const d = new Date(start); d.setDate(start.getDate() + n);
-    const k = key(d), its = (byDay[k] || []).filter(i => i.kind !== "routine");
-    const title = its.map(i => (i.course ? i.course + ": " : "") + i.title).join("\n");
-    html += `<button class="cd-day ${d.getMonth() !== m ? "other" : ""} ${k < today ? "past" : ""} ${k === today ? "today" : ""} ${k === selected ? "sel" : ""}"
-      data-day="${k}" title="${esc(title)}" aria-label="${fmtDay(k, { weekday: "long", month: "long", day: "numeric" })}, ${its.length} items">
-      <span class="num">${d.getDate()}</span>
-      <span class="dots">${its.slice(0, 6).map(i => `<span class="dot k-${i.kind}"></span>`).join("")}</span></button>`;
-  }
-  $("grid").innerHTML = html;
-  const kinds = ["interview", "exam", "assignment", "event", "personal"].filter(k => items.some(i => i.kind === k));
-  $("legend").innerHTML = kinds.map(k => `<span class="k-${k}">${LABEL[k]}</span>`).join("");
-}
-
-function renderMail() {
-  if (!mail) { $("mail").innerHTML = `<h2>Email</h2><p class="empty">No email review yet.</p>`; return; }
-  const c = mail.counts, bits = Object.entries(c).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${v} ${MAILCAT[k] ? MAILCAT[k].toLowerCase() : k}`);
-  const junk = (mail.junk || []);
-  const realJunk = junk.filter(j => j.junk_verdict !== "not junk").length;
-  $("mail").innerHTML = `<h2>Email · read in full ${fmtDay(mail.date, { month: "short", day: "numeric" })}</h2>
-    <div class="mail-stats">${mail.total} emails: ${bits.join(", ")}.${junk.length ? ` Junk checked: ${realJunk} of ${junk.length} really are junk.` : ""}</div>
-    ${mail.important.map((e, n) => `<button class="mail-row k-${e.category}" data-mail="${n}">
-      <span class="tag">${esc(MAILCAT[e.category] || e.category)}</span>
-      <div class="t">${esc(e.subject)}</div><div class="s">${esc(e.summary)}</div></button>`).join("") || `<p class="empty">Nothing that needs you.</p>`}`;
-}
-
-function renderChips() {
-  const kinds = ["interview", "exam", "assignment", "event", "personal", "routine"].filter(k => items.some(i => i.kind === k));
-  $("kinds").innerHTML = kinds.map(k => `<button class="chip k-${k}" data-kind="${k}" aria-pressed="${filt.kinds.has(k)}"><span class="sw"></span>${LABEL[k]}</button>`).join("");
-  const courses = [...new Set(items.map(i => i.course || "Other"))].sort((a, b) => a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b));
-  $("courses").innerHTML = courses.map(c => `<button class="chip" data-course="${esc(c)}" aria-pressed="${filt.courses.has(c)}">${c === "Other" ? "Interviews & events" : esc(c)}</button>`).join("");
-}
-
-function renderAll() { renderHero(); renderChips(); renderDays(); renderCal(); renderMail(); }
-
-/* clicking a calendar day scrolls the left pane to it; scrolling the left pane moves the highlight */
-let spy;
-function observeDays() {
-  spy?.disconnect();
-  spy = new IntersectionObserver(es => {
-    if (Date.now() < lockSpy) return;
-    const top = es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-    if (!top) return;
-    const k = top.target.dataset.k;
-    if (k !== selected) { selected = k; syncCal(); }
-  }, { rootMargin: "0px 0px -70% 0px" });
-  document.querySelectorAll(".day").forEach(el => spy.observe(el));
-}
-let lockSpy = 0;
-function syncCal() {
-  const d = new Date(selected + "T12:00");
-  if (d.getMonth() !== view.getMonth() || d.getFullYear() !== view.getFullYear()) { view = new Date(d.getFullYear(), d.getMonth(), 1); renderCal(); return; }
-  document.querySelectorAll(".cd-day").forEach(b => b.classList.toggle("sel", b.dataset.day === selected));
-}
-function goDay(k) {
-  selected = k; syncCal();
-  let el = $("d-" + k);
-  if (!el) {  // a free day that's hidden, or a past day: jump to the nearest shown day after it
-    el = [...document.querySelectorAll(".day")].find(x => x.dataset.k >= k);
-  }
-  if (!el) return;
-  lockSpy = Date.now() + 900;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
-}
-
-/* ---------- detail drawer ---------- */
-function ics(i) {
-  const dt = (d, t) => d.replace(/-/g, "") + (t ? "T" + t.replace(":", "") + "00" : "");
-  const start = i.start || "23:00", end = i.end || (i.start ? null : "23:59");
-  let endT = end; if (!endT) { const d = when(i); d.setMinutes(d.getMinutes() + 30); endT = `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-  const desc = [i.course, i.note, i.url, i.desc].filter(Boolean).join("\\n").replace(/[,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
-  const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//upnext//EN", "BEGIN:VEVENT", `UID:${i.id}@upnext`,
-    `DTSTART;TZID=America/Chicago:${dt(i.date, start)}`, `DTEND;TZID=America/Chicago:${dt(i.date, endT)}`,
-    `SUMMARY:${(i.course ? i.course + ": " : "") + i.title}`.replace(/[,;]/g, m => "\\" + m), `DESCRIPTION:${desc}`,
-    "BEGIN:VALARM", "TRIGGER:-PT1H", "ACTION:DISPLAY", "DESCRIPTION:Reminder", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
-  return "data:text/calendar;charset=utf-8," + encodeURIComponent(body);
-}
-
-const askClaude = text => "https://claude.ai/new?q=" + encodeURIComponent(text.slice(0, 1800));
-function itemPrompt(i) {
-  const w = `${fmtDay(i.date, { weekday: "long", month: "long", day: "numeric" })}, ${timeStr(i)} Central`;
-  const lines = [`I'm a UW–Madison student. Help me with this ${LABEL[i.kind].toLowerCase()}:`,
-    `${i.course ? i.course + ": " : ""}${i.title}`, `When: ${w}`,
-    i.pts != null && `Points: ${i.pts}`, i.how && `Submit via: ${i.how}`, i.note && `Notes: ${i.note}`, i.desc && `Details: ${i.desc}`, i.url && `Canvas: ${i.url}`];
-  const ask = i.kind === "interview" ? "What should I prepare, and what questions are likely?"
-    : i.kind === "assignment" || i.kind === "exam" ? "Help me plan how to get this done and what to focus on." : "What do I need to know or do for this?";
-  return lines.filter(Boolean).join("\n") + "\n\n" + ask;
-}
-
-function windowState(i) {
-  const now = new Date(), o = i.opens && new Date(i.opens), c = i.closes && new Date(i.closes);
-  if (o && o > now) return `Opens ${until(o)}`;
-  if (c && c < now) return "Closed";
-  if (o || c) return "Open now";
-  return "";
-}
-
-function showDrawer(kindCls, html, hash) {
-  $("drawer").className = `drawer open ${kindCls}`;
-  $("drawer").innerHTML = `<button class="dclose" id="dclose" aria-label="Close">Close</button>` + html;
-  $("shade").classList.add("open");
-  if (hash) history.replaceState(null, "", "#" + hash);
-  $("dclose").onclick = closeItem;
-  const cl = $("copylink"); if (cl) cl.onclick = e => { navigator.clipboard?.writeText(location.href).then(() => e.target.textContent = "Copied"); };
-  $("dclose").focus();
-}
-
-function openItem(id, push = true) {
-  const i = items.find(x => x.id === id); if (!i) return;
-  const links = (i.note.match(URL_RE) || []);
-  const meet = links.find(u => /zoom|meet\.google|teams|webex/i.test(u));
-  const facts = [
-    ["When", `${fmtDay(i.date, { weekday: "long", month: "long", day: "numeric" })}, ${timeStr(i)}`],
-    i.course && ["Course", i.courseUrl ? `<a href="${i.courseUrl}" target="_blank" rel="noopener">${esc(i.course)}</a>` : esc(i.course)],
-    i.pts != null && ["Points", esc(i.pts)],
-    i.how && ["Submit via", esc(i.how)],
-    i.ext && ["File types", esc(Array.isArray(i.ext) ? i.ext.join(", ") : i.ext)],
-    i.opens && ["Opens", fmtStamp(i.opens)],
-    i.closes && ["Closes", fmtStamp(i.closes)],
-    windowState(i) && ["Window", windowState(i)],
-    i.email && ["Email", `<a href="${i.email}" target="_blank" rel="noopener">Open in Outlook</a>`],
-  ].filter(Boolean);
-  showDrawer(`k-${i.kind}`, `
-    <span class="tag">${LABEL[i.kind]}</span>
-    <h3 id="dtitle">${esc(i.title)}</h3>
-    <div class="sub">${esc(i.course || "")}</div>
-    <div class="cdbig" data-cd="${i.id}">${until(when(i))}</div>
-    <dl class="facts">${facts.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>
-    ${i.note ? `<div class="desc"><strong>Notes</strong><br>${linkify(i.note)}</div>` : ""}
-    ${i.desc ? `<div class="desc"><strong>Details</strong><br>${linkify(i.desc)}</div>` : ""}
-    <div class="actions">
-      ${i.url ? `<a class="btn primary" href="${i.url}" target="_blank" rel="noopener">Open assignment</a>` : ""}
-      ${i.email ? `<a class="btn primary" href="${i.email}" target="_blank" rel="noopener">Open email</a>` : ""}
-      ${meet ? `<a class="btn primary" href="${meet}" target="_blank" rel="noopener">Join meeting</a>` : ""}
-      ${links.filter(u => u !== meet).map(u => `<a class="btn" href="${u}" target="_blank" rel="noopener">${esc(new URL(u).hostname.replace(/^www\./, ""))}</a>`).join("")}
-      <a class="btn claude" href="${askClaude(itemPrompt(i))}" target="_blank" rel="noopener">Ask Claude about this</a>
-      <a class="btn" href="${ics(i)}" download="${i.id}.ics">Add to calendar</a>
-      <button class="btn" id="copylink">Copy link</button>
-    </div>
-    ${i.done ? `<p class="muted">Marked done on Canvas.</p>` : `<label class="check"><input type="checkbox" id="tick" ${ticked[i.id] ? "checked" : ""}> I've done this (only on this device)</label>`}`,
-    push ? i.id : null);
-  const t = $("tick"); if (t) t.onchange = () => { if (t.checked) ticked[i.id] = 1; else delete ticked[i.id]; store.set(ticked); renderAll(); };
-}
-
-function openMail(n) {
-  const e = mail.important[n]; if (!e) return;
-  const prompt = `I got this email:\nFrom: ${e.from}\nSubject: ${e.subject}\nSummary: ${e.summary}${e.action ? "\nWhat it asks: " + e.action : ""}\n\nWhat should I do next?`;
-  showDrawer(`k-${e.category}`, `
-    <span class="tag">${esc(MAILCAT[e.category] || e.category)}</span>
-    <h3 id="dtitle">${esc(e.subject)}</h3>
-    <div class="sub">${esc(e.from)}</div>
-    <div class="desc"><strong>What it says</strong><br>${esc(e.summary)}</div>
-    ${e.action ? `<div class="desc"><strong>What to do</strong><br>${esc(e.action)}</div>` : ""}
-    ${e.deadline ? `<dl class="facts"><dt>When</dt><dd>${fmtStamp(e.deadline)}</dd></dl>` : ""}
-    <div class="actions">
-      <a class="btn primary" href="${e.url}" target="_blank" rel="noopener">Open email</a>
-      <a class="btn claude" href="${askClaude(prompt)}" target="_blank" rel="noopener">Ask Claude about this</a>
-    </div>`, null);
-}
-
-function closeItem() {
-  $("drawer").classList.remove("open"); $("shade").classList.remove("open");
-  history.replaceState(null, "", location.pathname + location.search);
-}
-
-/* ---------- events ---------- */
-document.addEventListener("click", e => {
-  if (e.target.closest("#drawer")) return;
-  const it = e.target.closest("[data-id]"); if (it) return openItem(it.dataset.id);
-  const ml = e.target.closest("[data-mail]"); if (ml) return openMail(+ml.dataset.mail);
-  const dy = e.target.closest("[data-day]"); if (dy) return goDay(dy.dataset.day);
-  const k = e.target.closest("[data-kind]"); if (k) { const v = k.dataset.kind; filt.kinds.has(v) ? filt.kinds.delete(v) : filt.kinds.add(v); return renderAll(); }
-  const c = e.target.closest("[data-course]"); if (c) { const v = c.dataset.course; filt.courses.has(v) ? filt.courses.delete(v) : filt.courses.add(v); return renderAll(); }
-});
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeItem();
-  if (e.key === "Enter" && e.target.matches(".hero")) openItem(e.target.dataset.id);
-});
-$("shade").onclick = closeItem;
-$("q").oninput = e => { filt.q = e.target.value.trim().toLowerCase(); renderAll(); };
-$("showRoutine").onchange = $("showDone").onchange = $("showFree").onchange = renderAll;
-$("prev").onclick = () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCal(); };
-$("next").onclick = () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCal(); };
-setInterval(() => document.querySelectorAll("[data-cd]").forEach(el => {
-  const i = items.find(x => x.id === el.dataset.cd); if (i) el.textContent = until(when(i));
-}), 30000);
-
-fetch("data.json", { cache: "no-store" }).then(r => r.json()).then(d => {
-  items = d.items.map(i => ({ ...i, id: idOf(i) }));
-  mail = d.mail || null;
-  $("stamp").textContent = "Updated " + fmtStamp(d.updated);
-  renderAll();
-  if (location.hash) openItem(decodeURIComponent(location.hash.slice(1)), false);
-}).catch(() => { $("days").innerHTML = `<p class="empty">Couldn't load data.json.</p>`; });
-</script>
+<script src="time.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

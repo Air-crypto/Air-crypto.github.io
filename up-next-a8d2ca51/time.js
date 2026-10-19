@@ -41,11 +41,17 @@
     const [h, m] = t.split(':').map(Number);
     return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h >= 12 ? 'pm' : 'am'}`;
   };
-  const zoneLabel = i => new Intl.DateTimeFormat('en-US', { timeZone: ZONE, timeZoneName: 'short' })
-    .formatToParts(startOf(i)).find(p => p.type === 'timeZoneName').value;
-  const timeStr = i => !i.start ? (i.allDay ? 'All day' : 'Time not specified')
-    : i.end ? `${fmtTime(i.start)}–${fmtTime(i.end)}${i.endDate && i.endDate !== i.date ? ' (' + i.endDate + ')' : i.end < i.start ? ' (next day)' : ''} ${zoneLabel(i)}`
-    : `${fmtTime(i.start)} ${zoneLabel(i)} · ${['assignment', 'routine'].includes(i.kind) ? 'due' : 'end unknown'}`;
+  const zoneAt = instant => new Intl.DateTimeFormat('en-US', { timeZone: ZONE, timeZoneName: 'short' })
+    .formatToParts(instant).find(p => p.type === 'timeZoneName').value;
+  const zoneLabel = i => zoneAt(startOf(i));
+  function timeStr(i) {
+    if (!i.start) return i.allDay ? 'All day' : 'Time not specified';
+    if (!i.end) return `${fmtTime(i.start)} ${zoneLabel(i)} · ${['assignment', 'routine'].includes(i.kind) ? 'due' : 'end unknown'}`;
+    const startZone = zoneLabel(i), endZone = zoneAt(endOf(i));
+    const suffix = i.endDate && i.endDate !== i.date ? ' (' + i.endDate + ')' : i.end < i.start ? ' (next day)' : '';
+    return startZone === endZone ? `${fmtTime(i.start)}–${fmtTime(i.end)}${suffix} ${startZone}`
+      : `${fmtTime(i.start)} ${startZone}–${fmtTime(i.end)} ${endZone}${suffix}`;
+  }
   function status(i, now = new Date()) {
     if (!i.start) return i.allDay ? (i.date === dateKey(now) ? 'All day today' : 'All-day event') : 'Time not specified';
     const start = startOf(i), end = endOf(i);

@@ -65,3 +65,8 @@ test('existing AfterQuery data exports the verified 11:30–11:50 CDT interval',
   assert.match(T.calendarText({ ...i, id: 'afterquery' }), /DTSTART:20261019T163000Z\r\nDTEND:20261019T165000Z/);
   for (const i of data.items) { T.startOf(i); T.endOf(i); }
 });
+
+test('ranges across a DST transition label both endpoint zones', () => {
+  assert.equal(T.timeStr(item({date:'2026-11-01',start:'00:30',end:'02:30'})), '12:30am CDT–2:30am CST');
+  assert.equal(T.timeStr(item({date:'2026-03-08',start:'01:30',end:'03:30'})), '1:30am CST–3:30am CDT');
+});

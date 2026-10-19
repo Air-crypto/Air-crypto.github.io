@@ -42,14 +42,24 @@
       <details class="panel calendar-panel" id="calendar" open>
         <summary class="calendar-toggle">Calendar <span id="calendarSummary"></span></summary>
         <div class="calendar-body">
-        <div class="section-head"><h2>Calendar</h2><button class="text-btn" id="today">Today</button></div>
+        <div class="section-head"><h2>The next seven days</h2><button class="text-btn" id="today">Today</button></div>
         <div class="cal-head">
-          <button id="prev" aria-label="Previous month">‹</button>
-          <strong id="month"></strong>
-          <button id="next" aria-label="Next month">›</button>
+          <button id="prev" aria-label="Previous seven days">‹</button>
+          <strong id="weekRange"></strong>
+          <button id="next" aria-label="Next seven days">›</button>
         </div>
-        <div class="grid" id="grid"></div>
-        <div class="legend" id="legend"></div>
+        <p class="calendar-zone">America/Chicago · CST / CDT</p>
+        <div class="week-x" id="weekViewport" tabindex="0" role="region" aria-label="Seven-day time grid" aria-describedby="gridHelp">
+          <div class="week-layout">
+            <div class="week-head" id="weekHead"></div>
+            <div class="all-day-grid" id="allDayGrid"></div>
+            <div class="time-scroll" id="timeScroll" tabindex="0" aria-label="Scroll through all 24 hours">
+              <div class="time-grid" id="timeGrid"></div>
+            </div>
+          </div>
+        </div>
+        <p class="grid-help" id="gridHelp">Bars show recorded duration. ◆ Due time · ○ End unknown.<br>Scroll for all hours; swipe sideways for all seven days.</p>
+        <p class="dst-note" id="dstNote" hidden></p>
         <div class="selected-day" id="selectedDay"></div>
         </div>
       </details>
@@ -61,6 +71,8 @@
 <dialog class="drawer" id="drawer" aria-labelledby="dtitle"></dialog>
 
 <script src="time.js"></script>
+<script src="calendar.js"></script>
+<script src="prompt.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

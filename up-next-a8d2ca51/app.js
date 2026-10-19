@@ -4,6 +4,8 @@ const MAILCAT = { rejection: "Rejection", assessment: "Assessment", interview: "
 const $ = id => document.getElementById(id);
 // Calendar arithmetic uses UTC date-only values; event instants use Chicago's IANA zone.
 const T = UpNextTime;
+const C = UpNextCalendar;
+const P = UpNextPrompt;
 const key = d => d.toISOString().slice(0, 10);
 const todayKey = () => T.dateKey(new Date());
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -25,7 +27,7 @@ const store = { get() { try { const v = JSON.parse(localStorage.getItem("upnext-
 let ticked = store.get();
 const isDone = i => i.done || !!ticked[i.id];
 
-let items = [], mail = null, view = new Date(todayKey() + "T12:00:00Z"), selected = todayKey();
+let items = [], mail = null, view = todayKey(), selected = todayKey();
 const filt = { kinds: new Set(), courses: new Set(), q: "" };
 
 function passes(i) {
@@ -59,7 +61,7 @@ function renderHero() {
 
 function rowHtml(i) {
   return `<button class="row k-${i.kind} ${i.kind} ${isDone(i) ? "done" : ""}" data-id="${i.id}">
-    <span class="tm">${i.start ? fmtTime(i.start) : "Time TBD"}</span>
+    <span class="tm">${i.allDay ? "All day" : i.start ? fmtTime(i.start) : "Time TBD"}</span>
     <span><span class="t">${esc(i.title)}</span><br><span class="s">${esc(sub(i))}</span></span>
     <span class="r"><span class="tag">${LABEL[i.kind]}</span><br><span data-cd="${i.id}">${T.status(i)}</span></span></button>`;
 }
@@ -91,26 +93,32 @@ function renderDays() {
   observeDays();
 }
 
-/* right pane: month calendar */
+let gridReady = false;
+/* Forward-looking week: true durations, zero-duration points, and honest date-only entries. */
 function renderCal() {
-  const y = view.getUTCFullYear(), m = view.getUTCMonth(), today = todayKey();
-  $("month").textContent = view.toLocaleDateString("en-US", { timeZone: "UTC", month: "long", year: "numeric" });
-  $("calendarSummary").textContent = $("month").textContent;
-  const start = new Date(Date.UTC(y, m, 1 - new Date(Date.UTC(y, m, 1)).getUTCDay()));
-  const byDay = {}; items.filter(passes).forEach(i => (byDay[i.date] ||= []).push(i));
-  let html = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="dow">${d}</div>`).join("");
-  for (let n = 0; n < 42; n++) {
-    const d = new Date(start); d.setUTCDate(start.getUTCDate() + n);
-    const k = key(d), its = (byDay[k] || []).filter(i => i.kind !== "routine");
-    const title = its.map(i => (i.course ? i.course + ": " : "") + i.title).join("\n");
-    html += `<button aria-pressed="${k === selected}" class="cd-day ${d.getUTCMonth() !== m ? "other" : ""} ${k < today ? "past" : ""} ${k === today ? "today" : ""} ${k === selected ? "sel" : ""}"
-      data-day="${k}" title="${esc(title)}" aria-label="${fmtDay(k, { weekday: "long", month: "long", day: "numeric" })}, ${its.length} items">
-      <span class="num">${d.getUTCDate()}</span>
-      <span class="dots">${its.slice(0, 6).map(i => `<span class="dot k-${i.kind}"></span>`).join("")}</span></button>`;
-  }
-  $("grid").innerHTML = html;
-  const kinds = ["interview", "exam", "assignment", "event", "personal"].filter(k => items.some(i => i.kind === k));
-  $("legend").innerHTML = kinds.map(k => `<span class="k-${k}">${LABEL[k]}</span>`).join("");
+  const yScroll = $("timeScroll").scrollTop, model = C.weekModel(view, items.filter(passes));
+  const endDate = T.addDays(view, 6), range = `${fmtDay(view, { month: "short", day: "numeric" })} – ${fmtDay(endDate, { month: "short", day: "numeric", year: "numeric" })}`;
+  $("weekRange").textContent = range; $("calendarSummary").textContent = range;
+  $("weekHead").innerHTML = `<span class="axis-corner">Time</span>` + model.days.map(d => `<button class="week-day ${d.date === todayKey() ? "today" : ""}" data-day="${d.date}" aria-pressed="${d.date === selected}"><span>${fmtDay(d.date, { weekday: "short" })}</span><b>${fmtDay(d.date, { day: "numeric" })}</b></button>`).join("");
+  $("allDayGrid").innerHTML = `<span class="all-day-label">All day /<br>time TBD</span>` + model.days.map(d => `<div class="all-day-cell">${d.allDay.map(({ item: i, label }) => `<button class="all-day-chip k-${i.kind}" data-id="${i.id}" title="${esc(i.title)} · ${label}"><span>${esc(i.title)}</span><small>${label}</small></button>`).join("")}</div>`).join("");
+  const hourPixels = 48, plotHeight = model.minutes / 60 * hourPixels;
+  $("timeGrid").style.height = `${plotHeight}px`;
+  const ticks = Array.from({ length: model.minutes / 60 }, (_, h) => `<span class="hour-label" style="top:${h * hourPixels}px">${fmtTime(`${String(h % 24).padStart(2, "0")}:00`).replace(":00", "")}</span>`).join("");
+  $("timeGrid").innerHTML = `<div class="time-axis">${ticks}</div>` + model.days.map(d => {
+    const bar = b => {
+      const i = b.item, caption = `${i.title} · ${timeStr(i)}${b.continuesBefore ? " · continues from previous day" : ""}${b.continuesAfter ? " · continues next day" : ""}`;
+      return `<button class="event-bar k-${i.kind}" data-id="${i.id}" data-duration="${b.end - b.start}" data-lane="${b.lane}" style="top:${b.start / 60 * hourPixels}px;height:${(b.end - b.start) / 60 * hourPixels}px;left:calc(${b.lane / b.lanes * 100}% + 2px);width:calc(${100 / b.lanes}% - 4px)" aria-label="${esc(caption)}" title="${esc(caption)}"><span>${b.continuesBefore ? "↑ " : ""}${esc(i.title)}${b.continuesAfter ? " ↓" : ""}</span>${b.end - b.start >= 45 ? `<small>${fmtTime(i.start)}</small>` : ""}</button>`;
+    };
+    const point = p => `<button class="time-point k-${p.item.kind} ${p.type}" data-id="${p.item.id}" data-minute="${p.minute}" style="top:${p.minute / 60 * hourPixels}px;left:calc(${p.lane / p.lanes * 100}% + 2px);width:calc(${100 / p.lanes}% - 4px)" aria-label="${esc(p.item.title)} · ${esc(timeStr(p.item))}" title="${esc(p.item.title)} · ${esc(timeStr(p.item))}"><span class="point-symbol">${p.type === "deadline" ? "◆" : "○"}</span><span>${esc(p.item.title)}</span></button>`;
+    const dst = d.minutes !== 1440;
+    const localTicks = dst ? d.ticks.map(t => `<span class="dst-clock" style="top:${t.minute / 60 * hourPixels}px">${esc(t.label)}</span>`).join("") : "";
+    return `<div class="time-day ${d.date === todayKey() ? "today" : ""} ${dst ? "dst-day" : ""}" data-grid-day="${d.date}" style="--day-height:${d.minutes / 60 * hourPixels}px">${localTicks}${d.bars.map(bar).join("")}${d.points.map(point).join("")}</div>`;
+  }).join("");
+  const dstDays = model.days.filter(d => d.minutes !== 1440);
+  $("dstNote").hidden = !dstDays.length;
+  $("dstNote").textContent = dstDays.map(d => `${fmtDay(d.date)} has ${d.minutes / 60} hours because of DST. Labels inside that day show the actual Chicago clock.`).join(" ");
+  $("timeScroll").scrollTop = gridReady ? yScroll : 8 * hourPixels;
+  gridReady = true;
   renderSelectedDay();
 }
 
@@ -159,9 +167,7 @@ function observeDays() {
 }
 let lockSpy = 0;
 function syncCal() {
-  const d = new Date(selected + "T12:00:00Z");
-  if (d.getUTCMonth() !== view.getUTCMonth() || d.getUTCFullYear() !== view.getUTCFullYear()) { view = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)); renderCal(); return; }
-  document.querySelectorAll(".cd-day").forEach(b => { b.classList.toggle("sel", b.dataset.day === selected); b.setAttribute("aria-pressed", b.dataset.day === selected); });
+  document.querySelectorAll(".week-day").forEach(b => b.setAttribute("aria-pressed", b.dataset.day === selected));
 }
 function goDay(k) {
   selected = k; syncCal(); renderSelectedDay();
@@ -177,15 +183,22 @@ function goDay(k) {
 /* ---------- detail drawer ---------- */
 function ics(i) { return "data:text/calendar;charset=utf-8," + encodeURIComponent(T.calendarText(i)); }
 
-const askClaude = text => "https://claude.ai/new?q=" + encodeURIComponent(text.slice(0, 1800));
-function itemPrompt(i) {
-  const w = `${fmtDay(i.date, { weekday: "long", month: "long", day: "numeric" })}, ${timeStr(i)} (America/Chicago)`;
-  const lines = [`I'm a UW–Madison student. Help me with this ${LABEL[i.kind].toLowerCase()}:`,
-    `${i.course ? i.course + ": " : ""}${i.title}`, `When: ${w}`,
-    i.pts != null && `Points: ${i.pts}`, i.how && `Submit via: ${i.how}`, i.note && `Notes: ${i.note}`, i.desc && `Details: ${i.desc}`, i.url && `Canvas: ${i.url}`];
-  const ask = i.kind === "interview" ? "What should I prepare, and what questions are likely?"
-    : i.kind === "assignment" || i.kind === "exam" ? "Help me plan how to get this done and what to focus on." : "What do I need to know or do for this?";
-  return lines.filter(Boolean).join("\n") + "\n\n" + ask;
+function chatReviewHtml() {
+  return `<section class="chat-review" id="chatReview" hidden aria-labelledby="promptLabel">
+    <h4 id="promptLabel">Review your ChatGPT prompt</h4>
+    <p>Copy this into your current dot to continue there, or open ChatGPT in a new tab and paste it. Nothing is sent automatically.</p>
+    <label class="sr-only" for="chatPrompt">Prompt to review and edit</label><textarea id="chatPrompt" rows="12" spellcheck="false"></textarea>
+    <div class="actions"><button class="btn primary" id="copyPrompt">Copy prompt</button><a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a></div>
+    <p class="save-status muted" id="promptStatus" role="status">This page cannot send a prompt to your existing dot conversation. Paste the prompt there yourself.</p>
+  </section>`;
+}
+function bindChatPrompt(prompt) {
+  $("chatPrompt").value = prompt;
+  $("askChatGPT").onclick = () => { $("chatReview").hidden = false; $("askChatGPT").setAttribute("aria-expanded", "true"); $("chatPrompt").focus({ preventScroll: true }); $("chatPrompt").setSelectionRange(0, 0); $("chatPrompt").scrollTop = 0; $("chatReview").scrollIntoView({ block: "nearest", behavior: "smooth" }); };
+  $("copyPrompt").onclick = async () => {
+    try { if (!navigator.clipboard) throw new Error("Clipboard unavailable"); await navigator.clipboard.writeText($("chatPrompt").value); $("promptStatus").textContent = "Prompt copied. Paste it into your current dot or a new ChatGPT chat, then review and send it yourself."; }
+    catch { $("chatPrompt").focus(); $("chatPrompt").select(); $("promptStatus").textContent = "Clipboard unavailable. The full prompt is selected; copy it manually and paste it into ChatGPT."; }
+  };
 }
 
 function windowState(i) {
@@ -237,19 +250,20 @@ function openItem(id, push = true) {
       ${i.email ? `<a class="btn primary" href="${safeUrl(i.email)}" target="_blank" rel="noopener">Open email</a>` : ""}
       ${meet ? `<a class="btn primary" href="${safeUrl(meet)}" target="_blank" rel="noopener">Join meeting</a>` : ""}
       ${links.filter(u => u !== meet).map(u => `<a class="btn" href="${safeUrl(u)}" target="_blank" rel="noopener">${esc(new URL(u).hostname.replace(/^www\./, ""))}</a>`).join("")}
-      <a class="btn claude" href="${askClaude(itemPrompt(i))}" target="_blank" rel="noopener">Ask Claude about this</a>
+      <button class="btn chatgpt" id="askChatGPT" aria-expanded="false" aria-controls="chatReview">Ask ChatGPT</button>
       <a class="btn" href="${ics(i)}" download="${i.id}.ics">Add to calendar</a>
       <button class="btn" id="copylink">Copy link</button>
     </div>
+    ${chatReviewHtml()}
     ${i.done ? `<p class="muted">Marked done on Canvas.</p>` : `<label class="check"><input type="checkbox" id="tick" ${ticked[i.id] ? "checked" : ""}> Completed · saved on this device only</label>`}`,
     push ? i.id : null);
+  bindChatPrompt(P.itemPrompt(i, items));
   $("drawer").insertAdjacentHTML("beforeend", `<p class="save-status muted" id="saveStatus" role="status"></p>`);
   const t = $("tick"); if (t) t.onchange = () => { if (t.checked) ticked[i.id] = 1; else delete ticked[i.id]; const saved = store.set(ticked); renderAll(); $("saveStatus").textContent = saved ? "Saved on this device. Other devices are not synced." : "Storage unavailable. This check lasts only while this page is open."; };
 }
 
 function openMail(n) {
   const e = mail.important[n]; if (!e) return;
-  const prompt = `I got this email:\nFrom: ${e.from}\nSubject: ${e.subject}\nSummary: ${e.summary}${e.action ? "\nWhat it asks: " + e.action : ""}\n\nWhat should I do next?`;
   showDrawer(`k-${e.category}`, `
     <span class="tag">${esc(MAILCAT[e.category] || e.category)}</span>
     <h3 id="dtitle">${esc(e.subject)}</h3>
@@ -259,8 +273,9 @@ function openMail(n) {
     ${e.deadline ? `<dl class="facts"><dt>When</dt><dd>${fmtStamp(e.deadline)}</dd></dl>` : ""}
     <div class="actions">
       <a class="btn primary" href="${safeUrl(e.url)}" target="_blank" rel="noopener">Open email</a>
-      <a class="btn claude" href="${askClaude(prompt)}" target="_blank" rel="noopener">Ask Claude about this</a>
-    </div>`, null);
+      <button class="btn chatgpt" id="askChatGPT" aria-expanded="false" aria-controls="chatReview">Ask ChatGPT</button>
+    </div>${chatReviewHtml()}`, null);
+  bindChatPrompt(P.mailPrompt(e));
 }
 
 function closeItem() {
@@ -290,12 +305,12 @@ const mobileLayout = matchMedia("(max-width:720px)");
 $("calendar").open = !mobileLayout.matches;
 mobileLayout.addEventListener("change", e => { $("calendar").open = !e.matches; });
 document.querySelector(".calendar-shortcut").onclick = () => { $("calendar").open = true; };
-$("today").onclick = () => { view = new Date(todayKey() + "T12:00:00Z"); renderCal(); goDay(todayKey()); };
+$("today").onclick = () => { view = todayKey(); renderCal(); goDay(todayKey()); };
 $("resetFilters").onclick = () => { filt.kinds.clear(); filt.courses.clear(); filt.q = ""; $("q").value = ""; ["showRoutine", "showFree", "showDone"].forEach(id => $(id).checked = false); renderAll(); };
 $("q").oninput = e => { filt.q = e.target.value.trim().toLowerCase(); renderAll(); };
 $("showRoutine").onchange = $("showDone").onchange = $("showFree").onchange = renderAll;
-$("prev").onclick = () => { view = new Date(Date.UTC(view.getUTCFullYear(), view.getUTCMonth() - 1, 1)); renderCal(); };
-$("next").onclick = () => { view = new Date(Date.UTC(view.getUTCFullYear(), view.getUTCMonth() + 1, 1)); renderCal(); };
+$("prev").onclick = () => { view = T.addDays(view, -7); renderCal(); };
+$("next").onclick = () => { view = T.addDays(view, 7); renderCal(); };
 let renderedDate = todayKey(), boundaryTimer;
 function refreshClock() {
   renderHero();

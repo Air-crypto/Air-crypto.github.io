@@ -181,8 +181,6 @@ function goDay(k) {
 }
 
 /* ---------- detail drawer ---------- */
-function ics(i) { return "data:text/calendar;charset=utf-8," + encodeURIComponent(T.calendarText(i)); }
-
 function chatReviewHtml() {
   return `<section class="chat-review" id="chatReview" hidden aria-labelledby="promptLabel">
     <h4 id="promptLabel">Review your ChatGPT prompt</h4>
@@ -251,7 +249,6 @@ function openItem(id, push = true) {
       ${meet ? `<a class="btn primary" href="${safeUrl(meet)}" target="_blank" rel="noopener">Join meeting</a>` : ""}
       ${links.filter(u => u !== meet).map(u => `<a class="btn" href="${safeUrl(u)}" target="_blank" rel="noopener">${esc(new URL(u).hostname.replace(/^www\./, ""))}</a>`).join("")}
       <button class="btn chatgpt" id="askChatGPT" aria-expanded="false" aria-controls="chatReview">Ask ChatGPT</button>
-      <a class="btn" href="${ics(i)}" download="${i.id}.ics">Add to calendar</a>
       <button class="btn" id="copylink">Copy link</button>
     </div>
     ${chatReviewHtml()}

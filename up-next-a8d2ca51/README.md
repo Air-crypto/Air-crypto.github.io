@@ -20,8 +20,8 @@ Open `http://127.0.0.1:8765`. The page retains the timeline, calendar, details, 
 - A missing end means unknown duration. Such items remain eligible through their Chicago date and are labeled as unknown after starting, rather than claiming to be in progress. Assignments and attendance use a due-time label. A missing start says “Time not specified.” Only `allDay: true` explicitly means all day.
 - An end earlier than its start means the following day. An optional `endDate` can specify a later end date. Equal or invalid intervals are rejected.
 - Modern Chicago IANA rules validate CST/CDT offsets. Nonexistent spring-forward wall times are rejected. Repeated fall-back times select the earlier occurrence; a source needing the second occurrence must be resolved explicitly before adding it.
-- ICS exports timed events as absolute UTC instants, using the Chicago DST offset on each endpoint. Known durations get `DTEND`; unknown durations omit both `DTEND` and `DURATION` and explain that uncertainty in the description. Calendar clients may choose their own display duration for such entries.
-- An item without a start exports as a date-only placeholder with an exclusive next-day end. Unless explicitly all day, its description says the time is unspecified.
+- Calendar-export controls are not exposed in the interface. The retained internal ICS formatter represents timed events as absolute UTC instants, using the Chicago DST offset on each endpoint. Known durations get `DTEND`; unknown durations omit both `DTEND` and `DURATION` and explain that uncertainty in the description. Calendar clients may choose their own display duration for such entries.
+- The internal formatter represents an item without a start as a date-only placeholder with an exclusive next-day end. Unless explicitly all day, its description says the time is unspecified.
 - Existing `opens`, `closes`, and update timestamps carry explicit offsets and display in Chicago time.
 
 The October 19, 2026 AfterQuery end is corrected to the verified 11:50 AM CDT (16:50 UTC), with its 11:30 AM start preserved. This is the only data-field change.

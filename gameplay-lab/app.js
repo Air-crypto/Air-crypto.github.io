@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const LAB = window.LAB;
+  const INITIAL_HASH = location.hash;  // before the first render rewrites it
   const $ = id => document.getElementById(id);
   const finite = Number.isFinite;
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -223,7 +224,7 @@
     $('cohort-chips').innerHTML = lead.map(chip).join('')
       + (rest.length ? `<button class="more" data-more="1" aria-expanded="${showOld}">${showOld ? 'Hide' : 'Show'} older and stopped (${rest.length})</button>` : '')
       + (showOld ? rest.map(chip).join('') : '');
-    $('cohort-chips').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; st.reward = g.default_reward_id; render(); });
+    $('cohort-chips').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; st.cohortPicked = true; st.reward = g.default_reward_id; render(); });
     $('cohort-chips').querySelectorAll('[data-more]').forEach(b => b.onclick = () => { st.showOld = !showOld; if (!st.showOld && rest.includes(st.cohort)) st.cohort = lead[0] || st.cohort; render(); });
     const cohortNote = (LAB.cohort_notes || {})[st.cohort], info = cohortInfo(st.cohort);
     const warn = info.status === 'current' ? '' : (info.status === 'superseded' ? `Superseded by ${info.superseded_by}, a newer version of this sweep.`
@@ -1041,7 +1042,10 @@
       const find = k => k ? (EPS.find(e => e.game + '|' + e.id === k) || {}).i ?? null : null;
       st.ep = find(keep[0]); st.cmp = [find(keep[1]), find(keep[2])];
       if (!game(st.game)) setGame(GAMES[0].id);
-      if (!gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
+      // a link to a cohort that only the live server has (or the live default) wins over the archive's choice
+      const asked = (INITIAL_HASH.match(/^#\/runs\/([^/]+)\/([^/]+)/) || []).map(decodeURIComponent);
+      if (asked[1] === st.game && gameEps().some(e => e.cohort === asked[2])) st.cohort = asked[2];
+      else if (!st.cohortPicked || !gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
       startLive();
       render();
     } catch (err) {

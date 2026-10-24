@@ -1156,7 +1156,7 @@
     if (runState.integrations && Date.now() - runState.integrationsAt < 600000) return;
     try {
       runState.integrations = (await api('api/integrations')).integrations; runState.integrationsAt = Date.now();
-      $('add-games').innerHTML = runState.integrations.map(x => `<option value="${esc(x.game)}">${esc(prettyGame(x.game))}${x.registered ? ', already added' : ''}</option>`).join('');
+      $('add-games').innerHTML = runState.integrations.map(x => `<option value="${esc(x.game)}">${esc(prettyGame(x.game))}${x.registered ? ', already added' : x.core === false ? ', no working emulator here' : ''}</option>`).join('');
       $('add-game').placeholder = `Search ${runState.integrations.length.toLocaleString()} supported games`;
       addHint();
     } catch (err) { $('add-hint').textContent = 'Could not load the supported games list; adding still works by ROM hash.'; }
@@ -1165,7 +1165,7 @@
     const v = $('add-game').value.trim(), list = runState.integrations || [];
     const hit = list.find(x => x.game === v);
     $('add-hint').textContent = !v ? 'Leave blank to identify the game from the ROM alone.'
-      : hit ? (hit.registered ? `Already in the Game list as ${hit.registered}.` : `${prettyGame(hit.game)} is supported. The ROM must be this game.`)
+      : hit ? (hit.registered ? `Already in the Game list as ${hit.registered}.` : hit.core === false ? `The ${hit.system} emulator core does not load on this machine, so this game cannot be added yet.` : `${prettyGame(hit.game)} is supported. The ROM must be this game.`)
       : 'Pick a name from the list, or leave blank.';
   }
   async function uploadRom(file, expect) {

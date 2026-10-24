@@ -19,6 +19,9 @@
   };
   const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
+  // BASE is '' when the data comes from the page's own server, or the live server URL when the hosted page shows live data.
+  let BASE = '';
+  const u = p => !p || /^(https?:|data:|blob:)/.test(p) ? p : BASE + p;
   const GAMES = LAB.games;
   const EPS = LAB.episodes;
   const cache = new Map();
@@ -31,7 +34,7 @@
   function load(i) {
     if (cache.has(i)) return Promise.resolve(cache.get(i));
     if (LAB.live) {
-      return fetch('live/ep/' + String(i).padStart(3, '0') + '.json', {cache: 'no-store'})
+      return fetch(u('live/ep/' + String(i).padStart(3, '0') + '.json'), {cache: 'no-store'})
         .then(r => { if (!r.ok) throw new Error('Could not load episode ' + i); return r.json(); })
         .then(d => { cache.set(i, d); return d; });
     }
@@ -123,10 +126,12 @@
     let h = '#/runs/' + st.game + '/' + encodeURIComponent(st.cohort || '');
     if (st.view === 'episode' && st.ep != null) h = '#/ep/' + st.ep + '/' + st.step;
     if (st.view === 'compare' && st.cmp[0] != null) h = '#/cmp/' + st.cmp[0] + '/' + st.cmp[1];
+    if (st.view === 'run') h = '#/run';
     if (location.hash !== h) history.replaceState(null, '', h);
   }
   function readHash() {
     const p = location.hash.replace(/^#\/?/, '').split('/');
+    if (p[0] === 'run') { st.view = 'run'; return; }
     if (p[0] === 'ep' && EPS[+p[1]]) {
       const e = EPS[+p[1]];
       setGame(e.game); st.cohort = e.cohort; st.view = 'episode'; st.ep = e.i; st.step = +p[2] || 0;
@@ -162,10 +167,11 @@
 
   function render() {
     renderBar();
-    for (const v of ['runs', 'episode', 'compare']) $(v + '-view').hidden = st.view !== v;
+    for (const v of ['runs', 'episode', 'compare', 'run']) $(v + '-view').hidden = st.view !== v;
     if (st.view === 'runs') renderRuns();
     if (st.view === 'episode') openEpisode(st.ep, st.step);
     if (st.view === 'compare') renderCompare();
+    if (st.view === 'run') renderRunView();
     writeHash();
   }
 
@@ -199,7 +205,8 @@
     sel.disabled = !g.rewards.length;
     $('cohort-chips').innerHTML = cohorts.map(c => `<button data-c="${esc(c)}" class="${c === st.cohort ? 'on' : ''}">${esc(c)}<small>${gameEps().filter(e => e.cohort === c).length}</small></button>`).join('');
     $('cohort-chips').querySelectorAll('button').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; render(); });
-    $('cohort-note').textContent = cohorts.length > 1 ? 'Each cohort ran under its own protocol, so returns are never pooled across cohorts. Pick one at a time.' : '';
+    const cohortNote = (LAB.cohort_notes || {})[st.cohort];
+    $('cohort-note').textContent = (cohorts.length > 1 ? 'Each cohort ran under its own protocol, so returns are never pooled across cohorts. Pick one at a time.' : '') + (cohortNote ? ' This cohort: ' + cohortNote : '');
 
     const returns = list.filter(e => e.eligible && finite(e.returns[st.reward]?.total)).map(e => e.returns[st.reward].total);
     const best = returns.length ? Math.max(...returns) : null;
@@ -360,12 +367,12 @@
     $('stage-empty').hidden = true; frame.hidden = false; diff.hidden = true; video.hidden = true;
     let meta = '';
     if (st.media === 'frame') {
-      frame.src = s.obs.img; frame.alt = `Returned observation ${s.seq}`;
+      frame.src = u(s.obs.img); frame.alt = `Returned observation ${s.seq}`;
       meta = `Observation #${s.seq}, lossless capture`;
     } else if (st.media === 'input') {
       const last = inputs[inputs.length - 1];
-      if (last) { frame.src = last.img; frame.alt = `Exact JPEG model input, observation ${last.seq}`; meta = `Exact JPEG sent to the model, observation #${last.seq}` + (inputs.length > 1 ? ` (${inputs.length} images in request)` : ''); }
-      else if (prev) { frame.src = prev.obs.img; frame.alt = `Input observation ${prev.seq}`; meta = `Input observation #${prev.seq}. Exact request bytes were not saved for this episode.`; }
+      if (last) { frame.src = u(last.img); frame.alt = `Exact JPEG model input, observation ${last.seq}`; meta = `Exact JPEG sent to the model, observation #${last.seq}` + (inputs.length > 1 ? ` (${inputs.length} images in request)` : ''); }
+      else if (prev) { frame.src = u(prev.obs.img); frame.alt = `Input observation ${prev.seq}`; meta = `Input observation #${prev.seq}. Exact request bytes were not saved for this episode.`; }
       else { frame.hidden = true; $('stage-empty').hidden = false; $('stage-empty').textContent = 'This is the reset observation. Nothing came before it.'; }
     } else if (st.media === 'diff') {
       frame.hidden = true; diff.hidden = false;
@@ -387,11 +394,11 @@
     const token = ++diffToken;
     const ctx = diff.getContext('2d', {willReadFrequently: true});
     try {
-      const cur = await getImg(s.obs.img);
+      const cur = await getImg(u(s.obs.img));
       if (token !== diffToken) return;
       diff.width = cur.naturalWidth; diff.height = cur.naturalHeight;
       if (!prev) { ctx.drawImage(cur, 0, 0); return; }
-      const old = await getImg(prev.obs.img);
+      const old = await getImg(u(prev.obs.img));
       if (token !== diffToken) return;
       ctx.drawImage(old, 0, 0, diff.width, diff.height);
       const a = ctx.getImageData(0, 0, diff.width, diff.height);
@@ -414,7 +421,7 @@
 
   function setupVideo(d) {
     if (d.video_info) {
-      if (video.getAttribute('src') !== d.video_info.src) { video.src = d.video_info.src; video.load(); }
+      if (video.getAttribute('src') !== u(d.video_info.src)) { video.src = u(d.video_info.src); video.load(); }
     } else { video.pause(); video.removeAttribute('src'); video.load(); }
   }
   function seekVideo(gameMs) {
@@ -492,7 +499,7 @@
   async function verify(btn) {
     btn.disabled = true; btn.textContent = 'Checking';
     try {
-      const buf = await (await fetch(btn.dataset.verify)).arrayBuffer();
+      const buf = await (await fetch(u(btn.dataset.verify))).arrayBuffer();
       const hex = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(x => x.toString(16).padStart(2, '0')).join('');
       btn.textContent = hex === btn.dataset.sha ? 'Hash matches' : 'Hash differs';
       btn.style.color = hex === btn.dataset.sha ? css('--up') : css('--down');
@@ -576,7 +583,7 @@
     if (!r.reasoning && !r.content) h += '<p class="muted" style="margin-top:8px">The model returned a tool call with no visible text.</p>';
     if (r.tool_calls?.length) h += `<h3 style="margin-top:10px">Tool call</h3>${r.tool_calls.map(c => `<pre class="json">${esc(c.name)} ${esc(c.arguments)}</pre>`).join('')}`;
     h += '</div>';
-    if (m.inputs.length) h += `<div class="blk"><h3>Images in the request</h3><div class="thumbs">${m.inputs.map(x => `<button data-input="${esc(x.img)}" data-seq="${x.seq}" title="Show on stage"><img src="${esc(x.img)}" alt="Model input ${x.seq}" loading="lazy"><span>#${x.seq}</span></button>`).join('')}</div><p class="muted" style="font-size:13px">Exact JPEG bytes the model received, oldest first.</p></div>`;
+    if (m.inputs.length) h += `<div class="blk"><h3>Images in the request</h3><div class="thumbs">${m.inputs.map(x => `<button data-input="${esc(u(x.img))}" data-seq="${x.seq}" title="Show on stage"><img src="${esc(u(x.img))}" alt="Model input ${x.seq}" loading="lazy"><span>#${x.seq}</span></button>`).join('')}</div><p class="muted" style="font-size:13px">Exact JPEG bytes the model received, oldest first.</p></div>`;
     if (m.prompt) h += `<div class="blk"><h3>Prompt text for this call</h3><details class="sub"><summary>Show ${fmt(m.prompt.length, 0)} characters</summary><pre class="json">${esc(m.prompt)}</pre></details>${D.system_prompt ? `<details class="sub"><summary>System prompt (same for the episode)</summary><pre class="json">${esc(D.system_prompt)}</pre></details>` : ''}</div>`;
     if (m.request) h += `<div class="blk"><h3>Request settings</h3><details class="sub"><summary>Tools, limits and routing</summary><pre class="json">${esc(JSON.stringify(m.request, null, 1))}</pre></details></div>`;
     h += `<div class="blk"><p class="hash">request sha256 ${esc(m.request_sha256)}<br>response sha256 ${esc(m.response_sha256 || '–')}</p><p class="muted" style="font-size:13px">Hashes refer to the exact saved files. Image bytes inside the request are replaced by their hashes on this page.</p></div>`;
@@ -757,7 +764,7 @@
   }
   function stateLane(t, h, steps, xs, X) {
     let out = '';
-    const key = D.game === 'airstriker' ? 'score' : D.game === 'shattered' ? 'hp' : null;
+    const key = steps.some(s => finite(s.state?.score)) ? 'score' : steps.some(s => finite(s.state?.hp)) ? 'hp' : null;
     if (!key || !steps.some(s => finite(s.state?.[key]))) return `<text class="lane-sub" x="${X(0) + 8}" y="${t + h / 2 + 4}">No game state telemetry recorded</text>`;
     const vals = steps.map(s => s.state?.[key]);
     const fin = vals.filter(finite);
@@ -766,7 +773,7 @@
     let d = '';
     steps.forEach((s, i) => { if (finite(vals[i]) && finite(xs[i])) d += (d ? 'H' + X(xs[i]) + 'V' : 'M' + X(xs[i]) + ',') + Y(vals[i]); });
     out += `<path d="${d}" fill="none" stroke="${css('--muted')}" stroke-width="1.5"/>`;
-    const second = D.game === 'airstriker' ? 'lives' : 'depth';
+    const second = key === 'score' ? 'lives' : 'depth';
     let last = null;
     steps.forEach((s, i) => {
       const v = s.state?.[second];
@@ -849,7 +856,7 @@
       const i = cmpIndex(d, pos), s = d.steps_data[i], rw = st.reward ? s.rewards[st.reward] : null;
       const after = pos > Math.max(...d.steps_data.map((x, j) => axisOf(d, x, j, st.cmpAxis)).filter(finite));
       $('cmp-panel-' + k).innerHTML = `<h2>${esc(modelName(d))} <span class="chip">${esc(d.effort)}</span> <span class="chip">${esc(runName(d))}</span></h2>
-        <div class="stage ${d.game !== 'veloren' ? 'pixel' : ''}" style="margin-top:8px"><img src="${esc(s.obs.img)}" alt="${esc(epLabel(d))} observation ${s.seq}"></div>
+        <div class="stage ${d.game !== 'veloren' ? 'pixel' : ''}" style="margin-top:8px"><img src="${esc(u(s.obs.img))}" alt="${esc(epLabel(d))} observation ${s.seq}"></div>
         <div class="cap"><span><b>#${s.seq}</b> ${esc(actionText(s, true))}${after ? ' <span class="chip">episode ended</span>' : ''}</span>
         <span class="muted">${rw ? `cumulative reward ${fmt(rw.c, 3)}` : 'no reward'}, wall ${sec(s.wall)}${finite(s.game) ? ', game ' + sec(s.game, 2) : ''}</span>
         <span><a href="#/ep/${d.i}/${i}">Open this step in Episode view</a></span></div>`;
@@ -953,10 +960,11 @@
     if (polling) return;
     polling = true;
     try {
-      const idx = await (await fetch('live/index.json', {cache: 'no-store'})).json();
+      const idx = await (await fetch(u('live/index.json'), {cache: 'no-store'})).json();
       const before = new Map(EPS.map(e => [e.i, e.live?.version]));
       GAMES.splice(0, GAMES.length, ...idx.games);
       EPS.splice(0, EPS.length, ...idx.episodes);
+      LAB.cohort_notes = idx.cohort_notes || LAB.cohort_notes;
       if (!game(st.game)) setGame(GAMES[0].id);
       if (!gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
       const changed = i => i != null && before.get(i) !== EPS[i]?.live?.version;
@@ -967,6 +975,7 @@
       if (st.view === 'runs') renderRuns();
       if (st.view === 'episode' && changed(st.ep)) await refreshEpisode();
       if (st.view === 'compare' && st.cmp.some(changed)) { st.cmp.forEach(i => cache.delete(i)); await renderCompare(); }
+      if (st.view === 'run' && !runState.busy) { try { runState.status = await api('api/status'); renderQueue(); } catch (e) { /* keep last */ } }
       liveNote();
     } catch (err) {
       $('live-badge').hidden = false;
@@ -975,11 +984,153 @@
     }
     polling = false;
   }
-  if (LAB.live) {
+  let pollTimer = null;
+  function startLive() {
     $('live-badge').hidden = false;
+    $('live-badge').classList.remove('stale');
     $('live-badge').textContent = 'Live';
-    setInterval(poll, LAB.poll_ms || 2000);
+    $('run-tab').hidden = false;
+    if (!pollTimer) pollTimer = setInterval(poll, LAB.poll_ms || 2000);
   }
+  if (LAB.live) startLive();
+
+  // The hosted page shows live data when live.json names a reachable live server.
+  async function tryRemoteLive() {
+    if (LAB.live) return;
+    try {
+      const cfg = await (await fetch('live.json', {cache: 'no-store'})).json();
+      if (!cfg.url) return;
+      const base = cfg.url.replace(/\/?$/, '/');
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 5000);
+      const idx = await (await fetch(base + 'live/index.json', {cache: 'no-store', signal: ctl.signal})).json();
+      clearTimeout(timer);
+      const key = i => i != null && EPS[i] ? EPS[i].game + '|' + EPS[i].id : null;
+      const keep = [st.ep, st.cmp[0], st.cmp[1]].map(key);
+      BASE = base;
+      Object.assign(LAB, {live: true, poll_ms: idx.poll_ms, notes: idx.notes, cohort_notes: idx.cohort_notes, markers: idx.markers || LAB.markers});
+      GAMES.splice(0, GAMES.length, ...idx.games);
+      EPS.splice(0, EPS.length, ...idx.episodes);
+      cache.clear(); D = null;
+      const find = k => k ? (EPS.find(e => e.game + '|' + e.id === k) || {}).i ?? null : null;
+      st.ep = find(keep[0]); st.cmp = [find(keep[1]), find(keep[2])];
+      if (!game(st.game)) setGame(GAMES[0].id);
+      if (!gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
+      startLive();
+      render();
+    } catch (err) {
+      $('live-badge').hidden = false;
+      $('live-badge').classList.add('stale');
+      $('live-badge').textContent = 'Archive; live server offline';
+    }
+  }
+
+  // ---------- run requests ----------
+  const runState = {models: [], modelsAt: 0, status: null, busy: false};
+  const tokenKey = 'gameplay-lab-token';
+  function savedToken() { try { return localStorage.getItem(tokenKey) || ''; } catch (e) { return ''; } }
+  function saveToken(v) { try { v ? localStorage.setItem(tokenKey, v) : localStorage.removeItem(tokenKey); } catch (e) { /* private mode */ } }
+  if (location.hash.startsWith('#token=')) {
+    saveToken(decodeURIComponent(location.hash.slice(7)));
+    history.replaceState(null, '', '#/run');
+  }
+  async function api(path, body) {
+    const opts = body === undefined ? {cache: 'no-store'} : {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Lab-Token': $('run-token').value.trim()}, body: JSON.stringify(body)};
+    const r = await fetch(u(path), opts);
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    return data;
+  }
+  async function renderRunView() {
+    const off = $('run-offline');
+    if (!$('run-token').value) $('run-token').value = savedToken();
+    if (!LAB.live) {
+      off.hidden = false; off.textContent = 'The live server is offline, so runs cannot be requested right now. The archive stays browsable.';
+      $('run-form').hidden = true; return;
+    }
+    try {
+      runState.status = await api('api/status');
+      if (!runState.status.enabled) throw new Error('Run requests are turned off on the live server.');
+      if (!runState.models.length || Date.now() - runState.modelsAt > 600000) {
+        runState.models = (await api('api/models')).models; runState.modelsAt = Date.now();
+        fillModels();
+      }
+      off.hidden = true; $('run-form').hidden = false;
+      const g = $('run-game');
+      if (!g.options.length) g.innerHTML = runState.status.games.map(x => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join('');
+      renderQueue();
+    } catch (err) {
+      off.hidden = false; off.textContent = err.message; $('run-form').hidden = true;
+    }
+  }
+  function fillModels() {
+    const q = $('run-filter').value.trim().toLowerCase(), sel = $('run-model'), keep = sel.value;
+    const rows = runState.models.filter(m => !q || (m.id + ' ' + m.name).toLowerCase().includes(q));
+    sel.innerHTML = rows.map(m => `<option value="${esc(m.id)}"${m.allowed ? '' : ' disabled'}>${esc(m.name)}  ($${fmt(m.prompt_per_m, 3)} / $${fmt(m.completion_per_m, 3)} per M)${m.allowed ? '' : ', too costly per call'}</option>`).join('');
+    if (rows.some(m => m.id === keep)) sel.value = keep;
+    else { const first = rows.find(m => m.allowed); if (first) sel.value = first.id; }
+    fillEffort();
+  }
+  function fillEffort() {
+    const m = runState.models.find(x => x.id === $('run-model').value);
+    const efforts = (m?.efforts || []).filter(e => e !== 'none');
+    const keep = $('run-effort').value;
+    $('run-effort').innerHTML = '<option value="">default</option>' + efforts.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
+    $('run-effort').value = efforts.includes(keep) ? keep : (efforts.includes('low') ? 'low' : '');
+    estimate();
+  }
+  function estimate() {
+    const m = runState.models.find(x => x.id === $('run-model').value);
+    if (!m) { $('run-estimate').textContent = 'Pick a model.'; return; }
+    const n = +$('run-repeats').value;
+    // rough: about 60 calls per five-minute episode, about 4,000 prompt and 300 completion tokens each
+    const typical = n * 60 * (4000 * m.prompt_per_m + 300 * m.completion_per_m) / 1e6;
+    const cap = Math.ceil(m.worst_case_call_usd + 2);
+    $('run-estimate').textContent = `About $${typical.toFixed(2)} for ${n} episode${n > 1 ? 's' : ''} (rough). Hard cap for this request: $${cap}, because each call first reserves its worst case of $${m.worst_case_call_usd.toFixed(2)}.`;
+  }
+  function renderQueue() {
+    const st2 = runState.status;
+    if (!st2) return;
+    const acct = st2.account || {};
+    $('run-budget').innerHTML = [
+      ['$' + fmt(+st2.committed_usd, 2), 'spent or held by requested runs'],
+      ['$' + fmt(+st2.total_cap_usd, 0), 'total cap for requested runs'],
+      [finite(acct.limit_remaining) ? '$' + fmt(acct.limit_remaining, 2) : (finite(acct.usage) ? '$' + fmt(acct.usage, 2) + ' used' : '–'), finite(acct.limit_remaining) ? 'left on the OpenRouter key' : 'OpenRouter key usage'],
+      [st2.queue.filter(i => ['queued', 'planning', 'running'].includes(i.status)).length, 'open requests'],
+    ].map(([b, t]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(t)}</span></div>`).join('');
+    const rows = [...st2.queue].reverse();
+    $('run-queue').innerHTML = `<thead><tr><th>#</th><th>Game</th><th>Model</th><th>Effort</th><th class="r">Episodes</th><th>Status</th><th class="r">Cap</th><th class="r">Spent or held</th><th></th></tr></thead><tbody>${rows.length ? rows.map(i => {
+      const open = ['queued', 'planning', 'running'].includes(i.status);
+      const cls = i.status === 'running' || i.status === 'planning' ? 'live' : i.status === 'finished' ? 'ok' : i.status === 'queued' ? '' : 'warn';
+      return `<tr><td>${i.id}</td><td>${esc((runState.status.games.find(g => g.id === i.game) || {}).label || i.game)}</td><td>${esc(i.model.split('/').pop())}</td><td>${esc(i.effort || 'default')}</td><td class="r">${i.repeats}</td>
+        <td><span class="chip ${cls}">${esc(i.status)}</span>${i.stop_requested ? ' <span class="chip warn">stop requested</span>' : ''}</td><td class="r">$${esc(i.budget_usd)}</td><td class="r">${i.spent_or_held_usd ? '$' + fmt(+i.spent_or_held_usd, 4) : '–'}</td>
+        <td><div class="row-btns">${i.status !== 'queued' ? `<button data-cohort="${esc(i.cohort)}" data-game="${esc(i.game)}">Episodes</button>` : ''}${open ? `<button data-cancel="${i.id}">${i.status === 'queued' ? 'Cancel' : 'Stop after episode'}</button>` : ''}</div></td></tr>`;
+    }).join('') : '<tr><td colspan="9" class="muted">No requests yet.</td></tr>'}</tbody>`;
+    $('run-queue').querySelectorAll('[data-cohort]').forEach(b => b.onclick = () => { setGame(b.dataset.game); st.cohort = b.dataset.cohort; setView('runs'); });
+    $('run-queue').querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => {
+      b.disabled = true;
+      try { await api('api/runs/' + b.dataset.cancel + '/cancel', {}); } catch (err) { $('run-message').textContent = err.message; $('run-message').className = 'bad'; }
+      renderRunView();
+    });
+  }
+  $('run-filter').oninput = fillModels;
+  $('run-model').onchange = fillEffort;
+  $('run-repeats').onchange = estimate;
+  $('run-token').onchange = () => saveToken($('run-token').value.trim());
+  $('run-form').onsubmit = async ev => {
+    ev.preventDefault();
+    if (runState.busy) return;
+    runState.busy = true; $('run-submit').disabled = true;
+    const msg = $('run-message');
+    try {
+      saveToken($('run-token').value.trim());
+      const item = await api('api/runs', {game: $('run-game').value, model: $('run-model').value, effort: $('run-effort').value || null, repeats: +$('run-repeats').value});
+      msg.className = 'good';
+      msg.textContent = `Queued as request #${item.id} with a $${item.budget_usd} cap. Its episodes will appear under ${item.cohort}.`;
+      renderRunView();
+    } catch (err) { msg.className = 'bad'; msg.textContent = err.message; }
+    runState.busy = false; $('run-submit').disabled = false;
+  };
 
   // ---------- keyboard + resize ----------
   document.addEventListener('keydown', ev => {
@@ -1005,4 +1156,5 @@
 
   readHash();
   render();
+  tryRemoteLive();
 })();

@@ -24,6 +24,7 @@
     <button data-view="runs">Runs</button>
     <button data-view="episode">Episode</button>
     <button data-view="compare">Compare</button>
+    <button data-view="run" id="run-tab" hidden>Run</button>
   </nav>
   <span id="live-badge" class="live-badge" hidden></span>
   <button id="keys-btn" class="ghost keys-btn" aria-haspopup="dialog">Keys</button>
@@ -140,6 +141,32 @@
       <div id="cmp-wave" class="wave"></div>
     </section>
     <div class="table-wrap"><table id="cmp-table" class="cmp-table"></table></div>
+  </section>
+
+  <!-- Run requests -->
+  <section id="run-view" class="view" hidden>
+    <div class="runs-head">
+      <div>
+        <h1>Run a model</h1>
+        <p class="lede">Queue a batch of five-minute episodes. The model sees only screenshots and look, act and wait. Runs go one at a time; new episodes appear under their game with a running tag.</p>
+      </div>
+    </div>
+    <p id="run-offline" class="callout" hidden></p>
+    <form id="run-form" class="run-form" autocomplete="off">
+      <label class="field">Game<select id="run-game"></select></label>
+      <label class="field">Effort<select id="run-effort"></select></label>
+      <label class="field">Episodes<select id="run-repeats"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+      <label class="field">Access token<input id="run-token" type="password" placeholder="Needed to start runs"></label>
+      <label class="field model-field">Model<input id="run-filter" type="search" placeholder="Filter by name"><select id="run-model" size="7"></select></label>
+      <div class="run-side">
+        <p id="run-estimate" class="muted"></p>
+        <button id="run-submit" class="play" type="submit">Queue run</button>
+        <p id="run-message" role="status"></p>
+      </div>
+    </form>
+    <div id="run-budget" class="stats"></div>
+    <h2 class="queue-title">Queue</h2>
+    <div class="table-wrap"><table id="run-queue" class="runs"></table></div>
   </section>
 </main>
 

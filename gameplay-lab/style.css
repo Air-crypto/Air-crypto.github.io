@@ -310,3 +310,9 @@ dialog::backdrop { background: rgba(10, 18, 28, .45); }
   .run-form { grid-template-columns: 1fr 1fr; }
   .run-form .model-field, .run-side, .add-form .field { grid-column: 1 / -1; }
 }
+.probs { display: grid; gap: 3px; }
+.prob { display: grid; grid-template-columns: 80px 1fr 42px; align-items: center; gap: 8px; font-size: 13px; }
+.prob i { display: block; height: 8px; border-radius: 4px; background: var(--line); min-width: 2px; }
+.prob.on i { background: var(--accent); }
+.prob.on span { font-weight: 600; }
+.prob b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }

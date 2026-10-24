@@ -597,13 +597,14 @@
     }
     const r = m.response || {};
     let h = `<div class="blk"><h3>Response</h3><dl class="kv">
-      <dt>Model</dt><dd>${esc(r.model || D.model)}</dd><dt>Provider</dt><dd>${esc(r.provider || '–')}</dd>
+      <dt>Model</dt><dd>${esc(r.model || D.model)}${r.model && D.model && !String(r.model).startsWith(D.model) ? ` <span class="muted">(picked by ${esc(D.model)})</span>` : ''}</dd><dt>Provider</dt><dd>${esc(r.provider || '–')}</dd>
       <dt>Finish</dt><dd>${esc(r.finish || '–')}</dd><dt>API time</dt><dd>${sec(s.timing.api, 2)}</dd>
       <dt>Tokens</dt><dd>${fmt(r.prompt_tokens, 0)} in, ${fmt(r.completion_tokens, 0)} out${finite(r.reasoning_tokens) && r.reasoning_tokens ? `, ${fmt(r.reasoning_tokens, 0)} reasoning` : ''}</dd>
       <dt>Cost</dt><dd>${usd(r.cost)}</dd></dl>`;
     if (r.error || m.provider_error) h += `<div class="callout bad">Provider error: ${esc(JSON.stringify(r.error || m.provider_error))}</div>`;
     if (r.reasoning) h += `<h3 style="margin-top:10px">Reasoning text</h3><p class="prose">${esc(r.reasoning)}</p>`;
     if (r.content) h += `<h3 style="margin-top:10px">Message text</h3><p class="prose">${esc(r.content)}</p>`;
+    if (r.decision) h += `<h3 style="margin-top:10px">Decision probabilities</h3>${Object.entries(r.decision).map(([q, a]) => `<p class="muted" style="margin:6px 0 2px">${esc(q)}${finite(a.confidence) ? `, confidence ${fmt(a.confidence, 2)}` : ''}</p><div class="probs">${Object.entries(a.probabilities || {}).sort((x, y) => y[1] - x[1]).map(([k, v]) => `<div class="prob${k === a.choice ? ' on' : ''}"><span>${esc(k)}</span><i style="width:${Math.round(100 * v)}%"></i><b>${fmt(v, 2)}</b></div>`).join('')}</div>`).join('')}<p class="muted" style="font-size:13px">A decision model picks options instead of calling tools; <code>examples/decision_policy.py</code> turns the pick into the act or wait call shown on the Step tab.</p>`;
     if (!r.reasoning && !r.content) h += '<p class="muted" style="margin-top:8px">The model returned a tool call with no visible text.</p>';
     if (r.tool_calls?.length) h += `<h3 style="margin-top:10px">Tool call</h3>${r.tool_calls.map(c => `<pre class="json">${esc(c.name)} ${esc(c.arguments)}</pre>`).join('')}`;
     h += '</div>';
@@ -1098,7 +1099,7 @@
   function fillModels() {
     const q = $('run-filter').value.trim().toLowerCase(), sel = $('run-model'), keep = sel.value;
     const rows = runState.models.filter(m => !q || (m.id + ' ' + m.name).toLowerCase().includes(q));
-    sel.innerHTML = rows.map(m => `<option value="${esc(m.id)}"${m.allowed ? '' : ' disabled'}>${esc(m.name)}  ($${fmt(m.prompt_per_m, 3)} / $${fmt(m.completion_per_m, 3)} per M)${m.allowed ? '' : ', too costly per call'}</option>`).join('');
+    sel.innerHTML = rows.map(m => `<option value="${esc(m.id)}"${m.allowed ? '' : ' disabled'}>${esc(m.name)}${m.kind === 'router' ? '  (router: picks the model per call)' : m.kind === 'decision' ? `  (decision model, $${fmt(m.prompt_per_m, 3)} per M in)` : `  ($${fmt(m.prompt_per_m, 3)} / $${fmt(m.completion_per_m, 3)} per M)`}${m.allowed ? '' : ', too costly per call'}</option>`).join('');
     if (rows.some(m => m.id === keep)) sel.value = keep;
     else { const first = rows.find(m => m.allowed); if (first) sel.value = first.id; }
     fillEffort();
@@ -1116,7 +1117,8 @@
     if (!m) { $('run-estimate').textContent = 'Pick a model.'; return; }
     const n = +$('run-repeats').value;
     // rough: about 60 calls per five-minute episode, about 4,000 prompt and 300 completion tokens each
-    const typical = n * 60 * (4000 * m.prompt_per_m + 300 * m.completion_per_m) / 1e6;
+    // routers bill the model they pick; use the ceiling they are held to
+    const typical = n * 60 * (m.kind === 'router' ? 4000 * 4 + 300 * 20 : 4000 * m.prompt_per_m + 300 * m.completion_per_m) / 1e6;
     const cap = Math.ceil(m.worst_case_call_usd + 2);
     $('run-estimate').textContent = `About $${typical.toFixed(2)} for ${n} episode${n > 1 ? 's' : ''} (rough). Hard cap for this request: $${cap}, because each call first reserves its worst case of $${m.worst_case_call_usd.toFixed(2)}.`;
   }

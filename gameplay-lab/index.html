@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gameplay Lab episodes</title>
+<meta name="description" content="Step through screenshot-only agent episodes in Airstriker, Shattered Pixel Dungeon and Veloren: frames, actions, model calls, timing and deterministic rewards on one timeline.">
+<meta name="theme-color" content="#1b2735">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b2735'/%3E%3Cpath d='M4 22h6l3-12 4 16 3-8h8' fill='none' stroke='%23f0a63a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>window.LAB_INDEX = function (d) { window.LAB = d; };</script>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="#/runs" aria-label="Gameplay Lab, back to runs">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 21h6l3-11 4 15 3-8h10"/></svg>
+    <span>Gameplay Lab</span>
+  </a>
+  <nav id="game-tabs" class="games" aria-label="Game"></nav>
+  <nav class="views" aria-label="View">
+    <button data-view="runs">Runs</button>
+    <button data-view="episode">Episode</button>
+    <button data-view="compare">Compare</button>
+  </nav>
+  <span id="live-badge" class="live-badge" hidden></span>
+  <button id="keys-btn" class="ghost keys-btn" aria-haspopup="dialog">Keys</button>
+</header>
+
+<main>
+  <!-- Runs -->
+  <section id="runs-view" class="view" hidden>
+    <div class="runs-head">
+      <div>
+        <h1 id="runs-title"></h1>
+        <p id="runs-scope" class="lede"></p>
+      </div>
+      <label class="field">Reward version<select id="reward-select"></select></label>
+    </div>
+    <div id="cohort-chips" class="chips" role="group" aria-label="Cohort"></div>
+    <p id="cohort-note" class="cohort-note"></p>
+    <div id="runs-stats" class="stats"></div>
+    <div class="table-wrap"><table id="runs-table" class="runs"></table></div>
+    <details class="notes"><summary>How to read these numbers</summary><div id="dataset-notes"></div></details>
+  </section>
+
+  <!-- Episode -->
+  <section id="episode-view" class="view" hidden>
+    <div class="ep-head">
+      <div class="ep-pick">
+        <button id="ep-prev" class="ghost" aria-label="Previous episode" title="Previous episode ([)">&#8249;</button>
+        <select id="ep-select" aria-label="Episode"></select>
+        <button id="ep-next" class="ghost" aria-label="Next episode" title="Next episode (])">&#8250;</button>
+      </div>
+      <div id="ep-title" class="ep-title"></div>
+      <dl id="ep-facts" class="facts"></dl>
+    </div>
+    <div id="ep-loading" class="loading" hidden>Loading episode data</div>
+    <div id="ep-body" class="ep-body">
+      <div class="stage-col">
+        <div class="stage-tools">
+          <div id="media-seg" class="seg" role="group" aria-label="Frame source">
+            <button data-media="frame" title="Lossless observation returned after the action (1)">Returned frame</button>
+            <button data-media="input" title="Exact JPEG the model received before choosing this action (2)">Model input</button>
+            <button data-media="diff" title="Pixels that changed since the input observation (3)">Changes</button>
+            <button data-media="video" title="Continuous emulator capture (4)">Video</button>
+          </div>
+          <span id="frame-meta" class="frame-meta"></span>
+        </div>
+        <div id="stage" class="stage">
+          <img id="frame" alt="">
+          <canvas id="diff" hidden></canvas>
+          <video id="video" hidden controls preload="metadata" playsinline></video>
+          <p id="stage-empty" class="stage-empty" hidden></p>
+        </div>
+        <div class="transport">
+          <button id="first" class="ghost" aria-label="First step" title="First step (Home)">&#8676;</button>
+          <button id="back" class="ghost" aria-label="Previous step" title="Previous step (Left)">&#8592;</button>
+          <button id="play" class="play" aria-label="Play" title="Play or pause (Space)">Play</button>
+          <button id="fwd" class="ghost" aria-label="Next step" title="Next step (Right)">&#8594;</button>
+          <button id="last" class="ghost" aria-label="Last step" title="Last step (End)">&#8677;</button>
+          <input id="scrub" type="range" min="0" max="0" value="0" aria-label="Step">
+          <select id="speed" aria-label="Playback speed"><option value="1">1 step/s</option><option value="2" selected>2 step/s</option><option value="4">4 step/s</option><option value="8">8 step/s</option></select>
+          <output id="clock" class="clock"></output>
+        </div>
+        <p id="live-note" class="live-note" hidden></p>
+        <section class="wave-wrap" aria-label="Episode timeline">
+          <div class="wave-tools">
+            <h2>Timeline</h2>
+            <div id="axis-seg" class="seg small" role="group" aria-label="Time axis">
+              <button data-axis="wall" title="Elapsed wall-clock time, including model thinking">Wall time</button>
+              <button data-axis="game" title="In-game clock: emulator time or logical turns">Game time</button>
+              <button data-axis="step" title="One slot per observation">Steps</button>
+            </div>
+            <button id="next-mark" class="ghost small" title="Jump to the next marker (Shift+Right)">Next marker</button>
+          </div>
+          <div id="wave" class="wave"></div>
+          <div id="wave-legend" class="legend wave-legend"></div>
+          <div id="wave-tip" class="tip" hidden></div>
+        </section>
+      </div>
+      <aside class="inspector" aria-label="Step inspector">
+        <div id="insp-tabs" class="tabs" role="tablist">
+          <button role="tab" data-tab="step">Step</button>
+          <button role="tab" data-tab="model">Model call</button>
+          <button role="tab" data-tab="review">Review</button>
+          <button role="tab" data-tab="episode">Episode</button>
+          <button role="tab" data-tab="raw">Raw</button>
+        </div>
+        <div id="insp-body" class="insp-body" role="tabpanel"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Compare -->
+  <section id="compare-view" class="view" hidden>
+    <div class="cmp-head">
+      <label class="field a">Episode A<select id="cmp-a"></select></label>
+      <label class="field b">Episode B<select id="cmp-b"></select></label>
+      <div class="field">Align by
+        <div id="cmp-axis" class="seg small" role="group" aria-label="Align by">
+          <button data-axis="wall">Wall time</button><button data-axis="game">Game time</button><button data-axis="step">Steps</button>
+        </div>
+      </div>
+    </div>
+    <p id="cmp-warn" class="cohort-note" hidden></p>
+    <div class="transport cmp-transport">
+      <button id="cmp-play" class="play">Play</button>
+      <input id="cmp-scrub" type="range" min="0" max="0" step="0.01" value="0" aria-label="Aligned position">
+      <output id="cmp-clock" class="clock"></output>
+    </div>
+    <div class="cmp-grid">
+      <div id="cmp-panel-0" class="cmp-panel a"></div>
+      <div id="cmp-panel-1" class="cmp-panel b"></div>
+    </div>
+    <section class="wave-wrap">
+      <div class="wave-tools"><h2>Cumulative reward and markers</h2><div id="cmp-legend" class="legend"></div></div>
+      <div id="cmp-wave" class="wave"></div>
+    </section>
+    <div class="table-wrap"><table id="cmp-table" class="cmp-table"></table></div>
+  </section>
+</main>
+
+<dialog id="keys">
+  <h2>Keyboard</h2>
+  <dl class="keys-list">
+    <dt>Left / Right</dt><dd>Previous or next step</dd>
+    <dt>Shift + Left / Right</dt><dd>Previous or next marker</dd>
+    <dt>Space</dt><dd>Play or pause</dd>
+    <dt>Home / End</dt><dd>First or last step</dd>
+    <dt>[ and ]</dt><dd>Previous or next episode</dd>
+    <dt>1 2 3 4</dt><dd>Returned frame, model input, changes, video</dd>
+    <dt>W G S</dt><dd>Wall time, game time or step axis</dd>
+    <dt>?</dt><dd>Show this list</dd>
+  </dl>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<script src="data/index.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

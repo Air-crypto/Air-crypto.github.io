@@ -1,0 +1,1008 @@
+// Gameplay Lab episode viewer. Plain JS, no build step.
+(() => {
+  'use strict';
+  const LAB = window.LAB;
+  const $ = id => document.getElementById(id);
+  const finite = Number.isFinite;
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const fmt = (v, p = 2) => finite(v) ? v.toLocaleString('en-US', {maximumFractionDigits: p}) : '–';
+  const sec = (ms, p = 1) => finite(ms) ? (ms / 1000).toFixed(p) + ' s' : '–';
+  const dur = ms => {
+    if (!finite(ms)) return '–';
+    const s = ms / 1000;
+    return s < 60 ? s.toFixed(1) + ' s' : Math.floor(s / 60) + ' m ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
+  };
+  const usd = v => finite(v) ? '$' + (v < 0.01 ? v.toFixed(4) : v.toFixed(3)) : '–';
+  const median = a => {
+    const v = a.filter(finite).sort((x, y) => x - y);
+    return v.length ? (v[(v.length - 1) >> 1] + v[v.length >> 1]) / 2 : null;
+  };
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const GAMES = LAB.games;
+  const EPS = LAB.episodes;
+  const cache = new Map();
+  const waiting = new Map();
+  window.LAB_EP = d => {
+    cache.set(d.i, d);
+    (waiting.get(d.i) || []).forEach(f => f(d));
+    waiting.delete(d.i);
+  };
+  function load(i) {
+    if (cache.has(i)) return Promise.resolve(cache.get(i));
+    if (LAB.live) {
+      return fetch('live/ep/' + String(i).padStart(3, '0') + '.json', {cache: 'no-store'})
+        .then(r => { if (!r.ok) throw new Error('Could not load episode ' + i); return r.json(); })
+        .then(d => { cache.set(i, d); return d; });
+    }
+    return new Promise((resolve, reject) => {
+      const first = !waiting.has(i);
+      waiting.set(i, [...(waiting.get(i) || []), resolve]);
+      if (!first) return;
+      const s = document.createElement('script');
+      s.src = 'data/ep/' + String(i).padStart(3, '0') + '.js';
+      s.onerror = () => reject(new Error('Could not load episode ' + i));
+      document.body.appendChild(s);
+    });
+  }
+
+  // ---------- vocabulary ----------
+  const MARKS = {
+    reward_up: {label: 'Reward gained', color: '--up', text: 'The selected reward version went up at this step.'},
+    reward_down: {label: 'Reward lost', color: '--down', text: 'The selected reward version went down at this step.'},
+    life_lost: {label: 'Life lost', color: '--down', text: 'The spare-lives counter went down between the input and returned observation.'},
+    damage: {label: 'Damage', color: '--down', text: 'Hero HP went down between the input and returned observation.'},
+    no_change: {label: 'No visible change', color: '--mark', text: 'The returned frame is byte-identical to the previous observation after an act or wait.'},
+    repeat: {label: 'Repeated action', color: '--throttle', text: 'The same requested action ran at least ' + LAB.markers.repeat_run + ' times in a row.'},
+    not_delivered: {label: 'Not delivered', color: '--down', text: 'The receipt says this input was not delivered to the game.'},
+    slow: {label: 'Slow decision', color: '--api', text: 'Decision gap of ' + LAB.markers.slow_gap_ms / 1000 + ' s or more between observations.'},
+    terminal: {label: 'Episode end', color: '--ink', text: 'The environment reported a terminal or truncated status here.'},
+  };
+  const MARK_ORDER = ['reward_up', 'reward_down', 'life_lost', 'damage', 'no_change', 'repeat', 'not_delivered', 'slow', 'terminal'];
+  const TOOL_COLOR = {act: '--act', wait: '--wait', look: '--look', reset: '--reset'};
+  const outcomeText = e => {
+    if (e.live?.running) return 'running';
+    const v = e.reviewed || e.outcome || 'unknown';
+    return String(v).replaceAll('_', ' ');
+  };
+  const outcomeClass = e => {
+    const v = String(e.reviewed || e.outcome || '');
+    if (e.live?.running) return 'live';
+    if (!e.complete) return 'warn';
+    if (/loss|death/.test(v)) return 'bad';
+    if (/timeout|time_limit/.test(v)) return '';
+    return 'ok';
+  };
+  const modelName = e => String(e.model).split('/').pop();
+  const runName = e => e.repeat ? 'run ' + e.repeat : e.label;
+  const epLabel = e => `${modelName(e)}, ${e.effort}, ${runName(e)}`;
+  const game = id => GAMES.find(g => g.id === id);
+  const rewardDef = (g, id) => game(g).rewards.find(r => r.id === id);
+  const gameClockLabel = d => d.game_clock?.field === 'game_ticks' ? 'turns' : 's';
+
+  function actionText(s, long) {
+    if (!s || s.tool === 'reset') return 'Reset';
+    if (s.tool === 'look') return 'Look';
+    const a = s.req || {};
+    if (a.ui) return 'UI ' + (a.ui.click || (a.ui.drag_to ? 'drag' : 'hover'));
+    const parts = [...(a.buttons || [])];
+    const stick = (v, n) => v && (Math.abs(v[0]) > .01 || Math.abs(v[1]) > .01) ? `${n}(${fmt(v[0], 2)},${fmt(v[1], 2)})` : null;
+    [stick(a.left_stick, 'L'), stick(a.right_stick, 'R')].forEach(x => x && parts.push(x));
+    const what = parts.length ? parts.join('+') : (s.tool === 'wait' ? 'Wait' : 'Neutral');
+    return long && a.duration_ms ? `${what} for ${a.duration_ms} ms` : what;
+  }
+  function delivery(s) {
+    if (s.tool === 'reset') return {text: 'Reset observation', cls: ''};
+    if (s.tool === 'look') return {text: 'Observation only, no input', cls: ''};
+    if (s.executed === true) return {text: 'Delivered (receipt)', cls: 'good'};
+    if (s.executed === false) return {text: 'Not delivered', cls: 'bad'};
+    return {text: 'No delivery receipt in this recording', cls: ''};
+  }
+
+  // ---------- state + routing ----------
+  if (!GAMES.length) {
+    document.querySelector('.views').hidden = true;
+    $('runs-view').hidden = false;
+    $('runs-view').innerHTML = '<div class="waiting"><h1>Waiting for the first episode</h1><p>No recordings yet in the run folders this server watches. The page checks every two seconds.</p></div>';
+    if (LAB.live) setInterval(() => fetch('live/index.json', {cache: 'no-store'}).then(r => r.json()).then(d => { if (d.games.length) location.reload(); }).catch(() => {}), LAB.poll_ms || 2000);
+    return;
+  }
+  const firstGame = GAMES[0].id;
+  const st = {
+    view: 'runs', game: firstGame, cohort: game(firstGame).default_cohort_id, reward: game(firstGame).default_reward_id,
+    ep: null, step: 0, axis: 'wall', media: 'frame', tab: 'step', playing: null,
+    cmp: [null, null], cmpAxis: 'wall', cmpPos: 0, cmpTimer: null,
+  };
+  function setGame(id) {
+    if (st.game === id) return;
+    st.game = id;
+    st.cohort = game(id).default_cohort_id;
+    st.reward = game(id).default_reward_id;
+  }
+  function writeHash() {
+    let h = '#/runs/' + st.game + '/' + encodeURIComponent(st.cohort || '');
+    if (st.view === 'episode' && st.ep != null) h = '#/ep/' + st.ep + '/' + st.step;
+    if (st.view === 'compare' && st.cmp[0] != null) h = '#/cmp/' + st.cmp[0] + '/' + st.cmp[1];
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  function readHash() {
+    const p = location.hash.replace(/^#\/?/, '').split('/');
+    if (p[0] === 'ep' && EPS[+p[1]]) {
+      const e = EPS[+p[1]];
+      setGame(e.game); st.cohort = e.cohort; st.view = 'episode'; st.ep = e.i; st.step = +p[2] || 0;
+    } else if (p[0] === 'cmp' && EPS[+p[1]] && EPS[+p[2]]) {
+      setGame(EPS[+p[1]].game); st.view = 'compare'; st.cmp = [+p[1], +p[2]];
+    } else if (p[0] === 'runs' && game(p[1])) {
+      setGame(p[1]); st.view = 'runs';
+      const c = decodeURIComponent(p[2] || '');
+      if (c && EPS.some(e => e.game === p[1] && e.cohort === c)) st.cohort = c;
+    }
+  }
+
+  function gameEps() { return EPS.filter(e => e.game === st.game); }
+  function cohortEps() { return gameEps().filter(e => e.cohort === st.cohort); }
+
+  function renderBar() {
+    $('game-tabs').innerHTML = GAMES.map(g => `<button data-game="${g.id}" class="${g.id === st.game ? 'on' : ''}">${esc(g.label)}<span class="count">${EPS.filter(e => e.game === g.id).length}</span></button>`).join('');
+    $('game-tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
+      stopPlay(); setGame(b.dataset.game);
+      if (st.view === 'episode') { st.ep = cohortEps()[0]?.i ?? gameEps()[0].i; st.step = 0; }
+      if (st.view === 'compare') st.cmp = [null, null];
+      render();
+    });
+    document.querySelectorAll('.views button').forEach(b => b.classList.toggle('on', b.dataset.view === st.view));
+  }
+  function setView(v) {
+    stopPlay(); stopCmp();
+    st.view = v;
+    if (v === 'episode' && st.ep == null) { st.ep = (cohortEps()[0] || gameEps()[0]).i; st.step = 0; }
+    render();
+  }
+  document.querySelectorAll('.views button').forEach(b => b.onclick = () => setView(b.dataset.view));
+
+  function render() {
+    renderBar();
+    for (const v of ['runs', 'episode', 'compare']) $(v + '-view').hidden = st.view !== v;
+    if (st.view === 'runs') renderRuns();
+    if (st.view === 'episode') openEpisode(st.ep, st.step);
+    if (st.view === 'compare') renderCompare();
+    writeHash();
+  }
+
+  // ---------- runs ----------
+  function spark(values, w = 130, h = 30) {
+    const pts = values.map((v, i) => [i, v]).filter(p => finite(p[1]));
+    if (pts.length < 2) return `<svg class="spark" viewBox="0 0 ${w} ${h}"><line x1="2" x2="${w - 2}" y1="${h / 2}" y2="${h / 2}" stroke="${css('--line')}" stroke-dasharray="3 3"/></svg>`;
+    const n = values.length - 1 || 1;
+    const lo = Math.min(0, ...pts.map(p => p[1])), hi = Math.max(1e-9, ...pts.map(p => p[1]));
+    const x = i => 2 + i / n * (w - 4), y = v => h - 3 - (v - lo) / (hi - lo || 1) * (h - 6);
+    let d = '';
+    pts.forEach((p, k) => { d += (k ? 'H' + x(p[0]).toFixed(1) + 'V' : 'M' + x(p[0]).toFixed(1) + ',') + y(p[1]).toFixed(1); });
+    const zero = lo < 0 ? `<line x1="2" x2="${w - 2}" y1="${y(0)}" y2="${y(0)}" stroke="${css('--line')}"/>` : '';
+    const last = pts[pts.length - 1];
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true">${zero}<path d="${d}" fill="none" stroke="${css('--accent')}" stroke-width="1.6"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2.4" fill="${last[1] < 0 ? css('--down') : css('--accent')}"/></svg>`;
+  }
+  function markSummary(flags) {
+    return MARK_ORDER.filter(k => flags[k] && k !== 'terminal').map(k => `<span class="mk" title="${esc(MARKS[k].label)}"><i style="background:${css(MARKS[k].color)}"></i>${flags[k]}</span>`).join('');
+  }
+  function renderRuns() {
+    const g = game(st.game), list = cohortEps();
+    const cohorts = [...new Set(gameEps().map(e => e.cohort))];
+    $('runs-title').textContent = g.label;
+    const def = rewardDef(st.game, st.reward);
+    $('runs-scope').textContent = def
+      ? `${def.label}: ${def.description || ''}`
+      : 'No deterministic reward exists for this archive. Archived annotation scores are excluded, so trajectories, actions and timing are what you can inspect here.';
+    const sel = $('reward-select');
+    sel.innerHTML = g.rewards.length ? g.rewards.map(r => `<option value="${esc(r.id)}">${esc(r.label)}</option>`).join('') : '<option value="">None for this game</option>';
+    sel.value = st.reward || '';
+    sel.disabled = !g.rewards.length;
+    $('cohort-chips').innerHTML = cohorts.map(c => `<button data-c="${esc(c)}" class="${c === st.cohort ? 'on' : ''}">${esc(c)}<small>${gameEps().filter(e => e.cohort === c).length}</small></button>`).join('');
+    $('cohort-chips').querySelectorAll('button').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; render(); });
+    $('cohort-note').textContent = cohorts.length > 1 ? 'Each cohort ran under its own protocol, so returns are never pooled across cohorts. Pick one at a time.' : '';
+
+    const returns = list.filter(e => e.eligible && finite(e.returns[st.reward]?.total)).map(e => e.returns[st.reward].total);
+    const best = returns.length ? Math.max(...returns) : null;
+    const cost = list.reduce((a, e) => a + (e.cost || 0), 0);
+    const anyCost = list.some(e => finite(e.cost));
+    const stats = [
+      [list.length, 'episodes in cohort'],
+      [list.filter(e => e.complete).length, 'complete endpoints'],
+      [st.reward ? fmt(median(returns)) : '–', st.reward ? `median return, n=${returns.length}` : 'no deterministic reward'],
+      [st.reward ? fmt(best) : '–', 'best complete return'],
+      [sec(median(list.map(e => e.api_median)), 2), 'median API response'],
+      [anyCost ? usd(cost) : '–', anyCost ? 'model spend in episodes' : 'spend not recorded'],
+    ];
+    $('runs-stats').innerHTML = stats.map(([b, s]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join('');
+
+    const groups = new Map();
+    for (const e of list) { const k = e.model + '\0' + e.effort; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
+    const head = `<thead><tr><th>Run</th><th>Outcome</th><th class="r">Return</th><th>Cumulative reward by step</th><th class="r">Wall time</th><th class="r">Steps</th><th class="r">API median</th><th class="r">Spend</th><th>Markers</th><th></th></tr></thead>`;
+    let body = '';
+    for (const es of groups.values()) {
+      const e0 = es[0];
+      const gr = es.filter(e => e.eligible && finite(e.returns[st.reward]?.total)).map(e => e.returns[st.reward].total);
+      body += `<tr class="group"><td colspan="10"><span class="gname">${esc(modelName(e0))}</span> <span class="chip">${esc(e0.effort)}</span> <span class="gstat">${es.length} run${es.length > 1 ? 's' : ''}${st.reward ? `, median return ${fmt(median(gr))} (n=${gr.length})` : ''}</span></td></tr>`;
+      for (const e of es) {
+        const ret = e.returns[st.reward];
+        const retCell = !st.reward ? '–' : finite(ret?.total) ? fmt(ret.total) : `Unknown<small>${finite(ret?.observed) ? 'observed prefix ' + fmt(ret.observed) : 'incomplete'}</small>`;
+        body += `<tr class="ep" data-i="${e.i}" tabindex="0"><td>${esc(runName(e))}${e.video ? ' <span class="chip" title="Continuous gameplay video recorded">video</span>' : ''}</td>
+          <td><span class="chip ${outcomeClass(e)}">${esc(outcomeText(e))}</span>${!e.eligible && !e.live ? ' <span class="chip warn" title="Excluded from comparisons">excluded</span>' : ''}</td>
+          <td class="r ret">${retCell}</td><td>${st.reward ? spark(e.spark[st.reward] || []) : '<span class="muted">No reward</span>'}</td>
+          <td class="r">${dur(e.duration_ms)}</td><td class="r">${e.steps}</td><td class="r">${sec(e.api_median, 2)}</td><td class="r">${usd(e.cost)}</td>
+          <td><div class="marks">${markSummary(e.flags)}</div></td>
+          <td><div class="row-btns"><button data-cmp="0" data-i="${e.i}" title="Compare as A">A</button><button data-cmp="1" data-i="${e.i}" title="Compare as B">B</button></div></td></tr>`;
+      }
+    }
+    $('runs-table').innerHTML = head + '<tbody>' + body + '</tbody>';
+    $('runs-table').querySelectorAll('tr.ep').forEach(tr => {
+      const open = () => { st.ep = +tr.dataset.i; st.step = 0; setView('episode'); };
+      tr.onclick = ev => { if (!ev.target.closest('button')) open(); };
+      tr.onkeydown = ev => { if (ev.key === 'Enter') open(); };
+    });
+    $('runs-table').querySelectorAll('[data-cmp]').forEach(b => b.onclick = () => {
+      const side = +b.dataset.cmp;
+      st.cmp[side] = +b.dataset.i;
+      if (st.cmp[1 - side] == null) st.cmp[1 - side] = list.find(e => e.i !== +b.dataset.i)?.i ?? +b.dataset.i;
+      setView('compare');
+    });
+    const legend = MARK_ORDER.filter(k => k !== 'terminal').map(k => `<li><b>${esc(MARKS[k].label)}</b>: ${esc(MARKS[k].text)}</li>`).join('');
+    $('dataset-notes').innerHTML = `<p>Markers are heuristics that point at steps worth a look. They are not scores.</p><ul>${legend}</ul><p>Measurement notes from the export:</p><ul>${LAB.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul><p class="hash">Source analysis sha256 ${esc(LAB.source.analysis_sha256)}, exported ${esc(LAB.created_at)}</p>`;
+  }
+  $('reward-select').onchange = ev => { st.reward = ev.target.value || null; render(); };
+
+  // ---------- episode ----------
+  let D = null; // loaded episode detail
+  const axisOf = (d, s, i, axis) => axis === 'step' ? i : axis === 'game'
+    ? (d.game_clock?.field === 'game_ticks' ? s.ticks : finite(s.game) ? s.game / 1000 : null)
+    : s.wall / 1000;
+  const hasGameAxis = d => !!d.game_clock && d.steps_data.some((s, i) => finite(axisOf(d, s, i, 'game')));
+  function axisName(d, axis) {
+    if (axis === 'step') return 'Observation index';
+    if (axis === 'game') return d.game_clock?.field === 'game_ticks' ? 'Game time (logical turns)' : 'Emulator time (s)';
+    return 'Wall time (s)';
+  }
+
+  async function openEpisode(i, step) {
+    if (i == null) return;
+    const summary = EPS[i];
+    renderEpisodeHead(summary);
+    $('ep-loading').hidden = cache.has(i);
+    let d;
+    try { d = await load(i); } catch (err) { $('ep-loading').hidden = false; $('ep-loading').textContent = err.message + '. Check that the data folder sits next to index.html.'; return; }
+    if (st.ep !== i || st.view !== 'episode') return;
+    $('ep-loading').hidden = true;
+    D = d;
+    if (st.axis === 'game' && !hasGameAxis(d)) st.axis = 'wall';
+    if (st.media === 'video' && !d.video_info) st.media = 'frame';
+    $('stage').classList.toggle('pixel', d.game !== 'veloren');
+    $('scrub').max = d.steps_data.length - 1;
+    setupVideo(d);
+    if (LAB.live && d.live?.running && !step) step = d.steps_data.length - 1;
+    selectStep(Math.min(step || 0, d.steps_data.length - 1), {seekVideo: true});
+  }
+
+  function renderEpisodeHead(e) {
+    const list = gameEps();
+    const byCohort = [...new Set(list.map(x => x.cohort))];
+    $('ep-select').innerHTML = byCohort.map(c => `<optgroup label="${esc(c)}">${list.filter(x => x.cohort === c).map(x => `<option value="${x.i}">${esc(epLabel(x))}</option>`).join('')}</optgroup>`).join('');
+    $('ep-select').value = e.i;
+    $('ep-title').innerHTML = `<h1>${esc(modelName(e))}</h1><span class="chip">${esc(e.effort)}</span><span class="chip">${esc(runName(e))}</span><span class="chip">${esc(e.cohort)}</span><span class="chip ${outcomeClass(e)}">${esc(outcomeText(e))}</span>${!e.complete && !e.live?.running ? '<span class="chip warn">incomplete endpoint</span>' : ''}${e.complete && !e.eligible ? '<span class="chip warn">excluded from comparison</span>' : ''}`;
+    const ret = e.returns[st.reward];
+    const facts = [
+      ['Return', !st.reward ? 'no reward' : finite(ret?.total) ? fmt(ret.total) : 'unknown' + (finite(ret?.observed) ? ` (${fmt(ret.observed)} seen)` : '')],
+      ['Wall time', dur(e.duration_ms)],
+      ['Game time', finite(e.game_duration_ms) ? dur(e.game_duration_ms) : finite(e.game_turns) ? fmt(e.game_turns) + ' turns' : '–'],
+      ['Steps', e.steps],
+      ['API median', sec(e.api_median, 2)],
+      ['Spend', usd(e.cost)],
+    ];
+    if (e.tokens) facts.push(['Tokens in / out', fmt(e.tokens.prompt, 0) + ' / ' + fmt(e.tokens.completion, 0)]);
+    $('ep-facts').innerHTML = facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    const pos = list.findIndex(x => x.i === e.i);
+    $('ep-prev').disabled = pos <= 0;
+    $('ep-next').disabled = pos >= list.length - 1;
+  }
+  function stepEpisode(delta) {
+    const list = gameEps(), pos = list.findIndex(x => x.i === st.ep), next = list[pos + delta];
+    if (!next) return;
+    stopPlay(); st.ep = next.i; st.cohort = next.cohort; st.step = 0; render();
+  }
+  $('ep-select').onchange = ev => { stopPlay(); st.ep = +ev.target.value; st.cohort = EPS[st.ep].cohort; st.step = 0; render(); };
+  $('ep-prev').onclick = () => stepEpisode(-1);
+  $('ep-next').onclick = () => stepEpisode(1);
+
+  function stepAt(seq) { return D.steps_data.findIndex(s => s.seq === seq); }
+  function inputStep(s) { return s.input_seq == null ? null : D.steps_data[stepAt(s.input_seq)]; }
+
+  function selectStep(i, opts = {}) {
+    if (!D) return;
+    i = Math.max(0, Math.min(i, D.steps_data.length - 1));
+    st.step = i;
+    const s = D.steps_data[i];
+    $('scrub').value = i;
+    updateClock(i);
+    renderMedia();
+    renderInspector();
+    drawWave();
+    if (opts.seekVideo && st.media === 'video' && D.video_info && finite(s.game)) seekVideo(s.game);
+    liveNote();
+    writeHash();
+  }
+
+  function updateClock(i) {
+    const s = D.steps_data[i];
+    const gameClock = D.game_clock?.field === 'game_ticks' ? (finite(s.ticks) ? `, turn ${fmt(s.ticks)}` : '') : finite(s.game) ? `, game ${sec(s.game, 2)}` : '';
+    $('clock').textContent = `Step ${i} of ${D.steps_data.length - 1}, wall ${sec(s.wall, 1)}${gameClock}`;
+  }
+
+  // media
+  const frame = $('frame'), diff = $('diff'), video = $('video');
+  function setMediaButtons() {
+    document.querySelectorAll('#media-seg button').forEach(b => {
+      b.classList.toggle('on', b.dataset.media === st.media);
+      if (b.dataset.media === 'video') { b.disabled = !D?.video_info; b.title = D?.video_info ? 'Continuous emulator capture (4)' : 'No continuous capture for this episode'; }
+    });
+  }
+  document.querySelectorAll('#media-seg button').forEach(b => b.onclick = () => setMedia(b.dataset.media));
+  function setMedia(m) {
+    if (m === 'video' && !D?.video_info) return;
+    if (st.media === 'video' && m !== 'video') video.pause();
+    st.media = m;
+    renderMedia();
+    if (m === 'video') { const s = D.steps_data[st.step]; if (finite(s.game)) seekVideo(s.game); }
+  }
+  function renderMedia() {
+    setMediaButtons();
+    const s = D.steps_data[st.step];
+    const inputs = s.model?.inputs || [];
+    const prev = inputStep(s);
+    $('stage-empty').hidden = true; frame.hidden = false; diff.hidden = true; video.hidden = true;
+    let meta = '';
+    if (st.media === 'frame') {
+      frame.src = s.obs.img; frame.alt = `Returned observation ${s.seq}`;
+      meta = `Observation #${s.seq}, lossless capture`;
+    } else if (st.media === 'input') {
+      const last = inputs[inputs.length - 1];
+      if (last) { frame.src = last.img; frame.alt = `Exact JPEG model input, observation ${last.seq}`; meta = `Exact JPEG sent to the model, observation #${last.seq}` + (inputs.length > 1 ? ` (${inputs.length} images in request)` : ''); }
+      else if (prev) { frame.src = prev.obs.img; frame.alt = `Input observation ${prev.seq}`; meta = `Input observation #${prev.seq}. Exact request bytes were not saved for this episode.`; }
+      else { frame.hidden = true; $('stage-empty').hidden = false; $('stage-empty').textContent = 'This is the reset observation. Nothing came before it.'; }
+    } else if (st.media === 'diff') {
+      frame.hidden = true; diff.hidden = false;
+      meta = prev ? `Pixels that changed from #${prev.seq} to #${s.seq}` : 'Reset observation has no earlier frame';
+      drawDiff(prev, s);
+    } else if (st.media === 'video') {
+      frame.hidden = true; video.hidden = false;
+      meta = 'Continuous capture on the emulator clock. Model thinking time is not shown as gameplay.';
+    }
+    $('frame-meta').textContent = meta;
+  }
+  const imgCache = new Map();
+  function getImg(src) {
+    if (!imgCache.has(src)) imgCache.set(src, new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; }));
+    return imgCache.get(src);
+  }
+  let diffToken = 0;
+  async function drawDiff(prev, s) {
+    const token = ++diffToken;
+    const ctx = diff.getContext('2d', {willReadFrequently: true});
+    try {
+      const cur = await getImg(s.obs.img);
+      if (token !== diffToken) return;
+      diff.width = cur.naturalWidth; diff.height = cur.naturalHeight;
+      if (!prev) { ctx.drawImage(cur, 0, 0); return; }
+      const old = await getImg(prev.obs.img);
+      if (token !== diffToken) return;
+      ctx.drawImage(old, 0, 0, diff.width, diff.height);
+      const a = ctx.getImageData(0, 0, diff.width, diff.height);
+      ctx.drawImage(cur, 0, 0);
+      const b = ctx.getImageData(0, 0, diff.width, diff.height);
+      let changed = 0;
+      for (let p = 0; p < b.data.length; p += 4) {
+        const dlt = Math.abs(a.data[p] - b.data[p]) + Math.abs(a.data[p + 1] - b.data[p + 1]) + Math.abs(a.data[p + 2] - b.data[p + 2]);
+        const g = (b.data[p] * .3 + b.data[p + 1] * .59 + b.data[p + 2] * .11) * .35;
+        if (dlt > 24) { changed++; b.data[p] = 255; b.data[p + 1] = 150; b.data[p + 2] = 30; }
+        else { b.data[p] = b.data[p + 1] = b.data[p + 2] = g; }
+      }
+      ctx.putImageData(b, 0, 0);
+      $('frame-meta').textContent = `Changed pixels from #${prev.seq} to #${s.seq}: ${(changed / (b.data.length / 4) * 100).toFixed(1)}% of the frame`;
+    } catch (err) {
+      diff.hidden = true; $('stage-empty').hidden = false;
+      $('stage-empty').textContent = 'The change view needs the page served over http(s). Opened from a local file, the browser blocks pixel reads.';
+    }
+  }
+
+  function setupVideo(d) {
+    if (d.video_info) {
+      if (video.getAttribute('src') !== d.video_info.src) { video.src = d.video_info.src; video.load(); }
+    } else { video.pause(); video.removeAttribute('src'); video.load(); }
+  }
+  function seekVideo(gameMs) {
+    const t = gameMs / 1000;
+    const go = () => { video.currentTime = Math.min(t, finite(video.duration) ? video.duration : t); };
+    if (video.readyState >= 1) go(); else video.addEventListener('loadedmetadata', go, {once: true});
+  }
+  let videoSync = false;
+  video.addEventListener('timeupdate', () => {
+    if (!D?.frames || st.media !== 'video' || videoSync) return;
+    const t = video.currentTime * 1000, f = D.frames;
+    let k = 0;
+    while (k + 1 < f.game_ms.length && f.game_ms[k + 1] <= t + .5) k++;
+    const seq = f.seq[k];
+    // while playing, follow the latest observation at or before the video time
+    let idx = 0;
+    D.steps_data.forEach((s, i) => { if (finite(s.game) && s.game <= t + .5) idx = i; });
+    if (!video.paused && idx !== st.step) { st.step = idx; $('scrub').value = idx; updateClock(idx); renderInspector(); writeHash(); }
+    videoCursor = {k, seq};
+    drawWave();
+    const sc = f.score[k], lv = f.lives[k], tot = st.reward && f.totals[st.reward] ? f.totals[st.reward][k] : null;
+    $('frame-meta').textContent = `Frame ${k}, game ${sec(f.game_ms[k], 2)}, score ${fmt(sc)}, spare lives ${fmt(lv)}${finite(tot) ? ', reward ' + fmt(tot) : ''}${f.eligible[k] ? '' : ', late frame excluded from reward'}`;
+  });
+  let videoCursor = null;
+
+  // transport
+  $('scrub').oninput = ev => { stopPlay(); selectStep(+ev.target.value, {seekVideo: true}); };
+  $('back').onclick = () => { stopPlay(); selectStep(st.step - 1, {seekVideo: true}); };
+  $('fwd').onclick = () => { stopPlay(); selectStep(st.step + 1, {seekVideo: true}); };
+  $('first').onclick = () => { stopPlay(); selectStep(0, {seekVideo: true}); };
+  $('last').onclick = () => { stopPlay(); selectStep(1e9, {seekVideo: true}); };
+  $('play').onclick = () => st.playing ? stopPlay() : startPlay();
+  $('speed').onchange = () => { if (st.playing) { stopPlay(); startPlay(); } };
+  function startPlay() {
+    if (!D) return;
+    if (st.media === 'video') { video.play(); $('play').textContent = 'Pause'; st.playing = 'video'; video.onpause = () => { if (st.playing === 'video') stopPlay(); }; return; }
+    if (st.step >= D.steps_data.length - 1) selectStep(0);
+    $('play').textContent = 'Pause';
+    st.playing = setInterval(() => {
+      if (st.step >= D.steps_data.length - 1) return stopPlay();
+      selectStep(st.step + 1);
+    }, 1000 / +$('speed').value);
+  }
+  function stopPlay() {
+    if (st.playing === 'video') video.pause();
+    else if (st.playing) clearInterval(st.playing);
+    st.playing = null;
+    $('play').textContent = 'Play';
+  }
+  function jumpMark(dir) {
+    if (!D) return;
+    const has = s => s.flags.some(f => f !== 'terminal');
+    for (let i = st.step + dir; i >= 0 && i < D.steps_data.length; i += dir) if (has(D.steps_data[i])) { stopPlay(); selectStep(i, {seekVideo: true}); return; }
+  }
+  $('next-mark').onclick = () => jumpMark(1);
+
+  // inspector
+  document.querySelectorAll('#insp-tabs button').forEach(b => b.onclick = () => { st.tab = b.dataset.tab; renderInspector(); });
+  function renderInspector() {
+    const s = D.steps_data[st.step];
+    document.querySelectorAll('#insp-tabs button').forEach(b => {
+      b.classList.toggle('on', b.dataset.tab === st.tab);
+      b.setAttribute('aria-selected', b.dataset.tab === st.tab);
+      const dot = (b.dataset.tab === 'review' && s.review) || (b.dataset.tab === 'model' && s.model && (s.model.response?.content || s.model.response?.reasoning || s.note));
+      b.innerHTML = b.textContent + (dot ? '<span class="dot" aria-label="has notes"></span>' : '');
+    });
+    const body = $('insp-body');
+    body.innerHTML = ({step: stepTab, model: modelTab, review: reviewTab, episode: episodeTab, raw: rawTab})[st.tab](s);
+    body.querySelectorAll('[data-input]').forEach(b => b.onclick = () => { setMedia('input'); frame.src = b.dataset.input; $('frame-meta').textContent = 'Exact JPEG model input, observation #' + b.dataset.seq; });
+    body.querySelectorAll('[data-verify]').forEach(b => b.onclick = () => verify(b));
+    body.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => selectStep(+b.dataset.goto, {seekVideo: true}));
+    const on = body.querySelector('.log li.on');
+    if (on) body.scrollTop = Math.max(0, on.offsetTop - body.clientHeight / 2);
+  }
+  async function verify(btn) {
+    btn.disabled = true; btn.textContent = 'Checking';
+    try {
+      const buf = await (await fetch(btn.dataset.verify)).arrayBuffer();
+      const hex = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(x => x.toString(16).padStart(2, '0')).join('');
+      btn.textContent = hex === btn.dataset.sha ? 'Hash matches' : 'Hash differs';
+      btn.style.color = hex === btn.dataset.sha ? css('--up') : css('--down');
+    } catch (e) { btn.textContent = 'Needs http(s)'; }
+  }
+  function timeBar(t) {
+    const parts = [['throttle', '--throttle', 'Throttle'], ['api', '--api', 'API response'], ['tool', '--tool', 'Tool HTTP']];
+    const known = parts.reduce((a, [k]) => a + (finite(t[k]) ? t[k] : 0), 0);
+    const total = Math.max(known, finite(t.gap) ? t.gap : 0) || 1;
+    const bar = parts.filter(([k]) => finite(t[k]) && t[k] > 0).map(([k, c, n]) => `<span title="${n} ${sec(t[k], 2)}" style="width:${t[k] / total * 100}%;background:${css(c)}"></span>`).join('');
+    return `<div class="timebar">${bar}</div><div class="legend">${parts.map(([k, c, n]) => `<span><i style="background:${css(c)}"></i>${n} ${sec(t[k], 2)}</span>`).join('')}</div>
+      <dl class="kv" style="margin-top:8px"><dt>Decision gap</dt><dd>${sec(t.gap, 2)} <span class="muted">(includes the above plus orchestration; do not add them)</span></dd><dt>Requested hold</dt><dd>${finite(t.req) ? t.req + ' ms' : '–'}</dd>${finite(t.frame_age) ? `<dt>Frame age at response</dt><dd>${fmt(t.frame_age, 0)} ms</dd>` : ''}</dl>`;
+  }
+  function stateDiff(prev, s) {
+    const keys = [...new Set([...Object.keys(prev?.state || {}), ...Object.keys(s.state || {})])].filter(k => k !== 'maxHp');
+    if (!keys.length) return '<p class="muted">No game state telemetry for this game.</p>';
+    const names = {score: 'Score', lives: 'Spare lives', stage: 'Stage', gameover: 'Game-over flag', depth: 'Floor', kills: 'Kills', goldCollected: 'Gold collected', logicalTime: 'Game turns', hp: 'Hero HP'};
+    return `<table class="diff-table">${keys.map(k => {
+      const a = prev?.state?.[k], b = s.state?.[k], ch = prev && a !== b;
+      return `<tr><td>${esc(names[k] || k)}</td><td class="r ${ch ? 'ch' : ''}">${prev ? fmt(a) + ' → ' : ''}${fmt(b)}${k === 'hp' && finite(s.state.maxHp) ? ' / ' + s.state.maxHp : ''}</td></tr>`;
+    }).join('')}</table><p class="muted" style="font-size:13px;margin:6px 0 0">Diagnostics from game state. They are not part of the reward unless the reward version says so.</p>`;
+  }
+  function stepTab(s) {
+    const prev = inputStep(s);
+    const dl = delivery(s);
+    const a = s.req || {};
+    let h = `<div class="blk"><h3>Action ${prev ? `chosen from observation #${prev.seq}` : ''}</h3>`;
+    if (s.tool === 'reset') h += '<p class="big">Reset</p><p class="muted">Initial observation from the harness. No policy decision came before it.</p>';
+    else {
+      h += `<div class="btn-chips"><span class="big" style="color:${css(TOOL_COLOR[s.tool] || '--ink')}">${esc(s.tool)}</span>${(a.buttons || []).map(b => `<span class="key">${esc(b)}</span>`).join('')}${a.duration_ms ? `<span class="muted">${a.duration_ms} ms</span>` : ''}</div>`;
+      const sticks = ['left_stick', 'right_stick'].filter(k => a[k] && (Math.abs(a[k][0]) > .01 || Math.abs(a[k][1]) > .01));
+      if (sticks.length) h += `<p>${sticks.map(k => `${k.replace('_', ' ')} (${fmt(a[k][0])}, ${fmt(a[k][1])})`).join(', ')}</p>`;
+      if (a.ui) h += `<pre class="json">${esc(JSON.stringify(a.ui, null, 1))}</pre>`;
+      if (s.note) h += `<div class="callout good">Model note: ${esc(s.note)}</div>`;
+      h += `<div class="callout ${dl.cls}">${esc(dl.text)}${receiptLine(s.receipt)}</div>`;
+    }
+    h += '</div>';
+    if (prev && (s.tool === 'act' || s.tool === 'wait')) {
+      const same = prev.obs.sha === s.obs.sha;
+      h += `<div class="blk"><h3>Effect on the screen</h3>${same ? '<div class="callout">Returned frame is identical to the input frame.</div>' : '<p>Returned frame differs from the input frame. Use <b>Changes</b> to see where.</p>'}</div>`;
+    }
+    const rid = st.reward, rw = rid ? s.rewards[rid] : null;
+    h += `<div class="blk"><h3>Reward${rid ? ', ' + esc(rewardDef(D.game, rid)?.label || rid) : ''}</h3>`;
+    if (!rid) h += `<p class="muted">${esc(D.reward_unavailable_reason || 'No deterministic reward version for this game.')}</p>`;
+    else if (!rw) h += '<p class="muted">Not scored at this step.</p>';
+    else {
+      h += `<p class="big" style="color:${rw.v > 0 ? css('--up') : rw.v < 0 ? css('--down') : 'inherit'}">${rw.v > 0 ? '+' : ''}${fmt(rw.v, 3)} <span class="muted" style="font-size:15px;font-weight:400">cumulative ${fmt(rw.c, 3)}${!D.complete ? ', observed prefix' : ''}</span></p>`;
+      if (rw.parts.length) h += `<dl class="kv">${rw.parts.map(p => `<dt>${esc(String(p.type).replaceAll('_', ' '))}</dt><dd>${p.v > 0 ? '+' : ''}${fmt(p.v, 3)}</dd>`).join('')}</dl>`;
+      const others = Object.entries(s.rewards).filter(([k]) => k !== rid && k !== 'raw');
+      if (others.length || s.rewards.raw) h += `<p class="muted" style="font-size:13px">${others.map(([k, v]) => `${esc(rewardDef(D.game, k)?.label || k)} ${fmt(v.v, 3)} (cum ${fmt(v.c, 3)})`).join('; ')}${s.rewards.raw ? `${others.length ? '; ' : ''}environment reward ${fmt(s.rewards.raw.v, 3)}` : ''}</p>`;
+    }
+    h += '</div>';
+    h += `<div class="blk"><h3>Game state</h3>${stateDiff(prev, s)}</div>`;
+    if (s.tool !== 'reset') h += `<div class="blk"><h3>Where the time went</h3>${timeBar(s.timing)}</div>`;
+    const marks = s.flags.filter(f => MARKS[f]);
+    if (marks.length) h += `<div class="blk"><h3>Markers</h3>${marks.map(f => `<p><b style="color:${css(MARKS[f].color)}">${esc(MARKS[f].label)}.</b> ${esc(MARKS[f].text)}</p>`).join('')}</div>`;
+    h += `<div class="blk"><h3>Frame</h3><p class="hash">sha256 ${esc(s.obs.sha)}<button class="verify ghost" data-verify="${esc(s.obs.img)}" data-sha="${esc(s.obs.sha)}">Verify</button></p></div>`;
+    return h;
+  }
+  function receiptLine(r) {
+    if (!r) return '';
+    if (finite(r.emulator_frames_executed)) return `: ${r.emulator_frames_executed} of ${r.emulator_frames_requested} emulator frames ran${r.emulator_frames_executed < r.emulator_frames_requested ? ' (cut short)' : ''}.`;
+    if (r.native_receipt) return r.native_receipt.deadline_expired ? ': native input hit the deadline.' : ': native input sent.';
+    return '.';
+  }
+  function modelTab(s) {
+    const m = s.model;
+    if (!m) {
+      if (s.tool === 'reset') return '<p class="muted">The reset observation has no model call.</p>';
+      return `<p class="muted">${D.game === 'veloren' ? 'This archived episode did not save exact model requests and responses. The action and timing on the Step tab come from the recording.' : 'No saved model request maps to this step.'}</p>`;
+    }
+    const r = m.response || {};
+    let h = `<div class="blk"><h3>Response</h3><dl class="kv">
+      <dt>Model</dt><dd>${esc(r.model || D.model)}</dd><dt>Provider</dt><dd>${esc(r.provider || '–')}</dd>
+      <dt>Finish</dt><dd>${esc(r.finish || '–')}</dd><dt>API time</dt><dd>${sec(s.timing.api, 2)}</dd>
+      <dt>Tokens</dt><dd>${fmt(r.prompt_tokens, 0)} in, ${fmt(r.completion_tokens, 0)} out${finite(r.reasoning_tokens) && r.reasoning_tokens ? `, ${fmt(r.reasoning_tokens, 0)} reasoning` : ''}</dd>
+      <dt>Cost</dt><dd>${usd(r.cost)}</dd></dl>`;
+    if (r.error || m.provider_error) h += `<div class="callout bad">Provider error: ${esc(JSON.stringify(r.error || m.provider_error))}</div>`;
+    if (r.reasoning) h += `<h3 style="margin-top:10px">Reasoning text</h3><p class="prose">${esc(r.reasoning)}</p>`;
+    if (r.content) h += `<h3 style="margin-top:10px">Message text</h3><p class="prose">${esc(r.content)}</p>`;
+    if (!r.reasoning && !r.content) h += '<p class="muted" style="margin-top:8px">The model returned a tool call with no visible text.</p>';
+    if (r.tool_calls?.length) h += `<h3 style="margin-top:10px">Tool call</h3>${r.tool_calls.map(c => `<pre class="json">${esc(c.name)} ${esc(c.arguments)}</pre>`).join('')}`;
+    h += '</div>';
+    if (m.inputs.length) h += `<div class="blk"><h3>Images in the request</h3><div class="thumbs">${m.inputs.map(x => `<button data-input="${esc(x.img)}" data-seq="${x.seq}" title="Show on stage"><img src="${esc(x.img)}" alt="Model input ${x.seq}" loading="lazy"><span>#${x.seq}</span></button>`).join('')}</div><p class="muted" style="font-size:13px">Exact JPEG bytes the model received, oldest first.</p></div>`;
+    if (m.prompt) h += `<div class="blk"><h3>Prompt text for this call</h3><details class="sub"><summary>Show ${fmt(m.prompt.length, 0)} characters</summary><pre class="json">${esc(m.prompt)}</pre></details>${D.system_prompt ? `<details class="sub"><summary>System prompt (same for the episode)</summary><pre class="json">${esc(D.system_prompt)}</pre></details>` : ''}</div>`;
+    if (m.request) h += `<div class="blk"><h3>Request settings</h3><details class="sub"><summary>Tools, limits and routing</summary><pre class="json">${esc(JSON.stringify(m.request, null, 1))}</pre></details></div>`;
+    h += `<div class="blk"><p class="hash">request sha256 ${esc(m.request_sha256)}<br>response sha256 ${esc(m.response_sha256 || '–')}</p><p class="muted" style="font-size:13px">Hashes refer to the exact saved files. Image bytes inside the request are replaced by their hashes on this page.</p></div>`;
+    return h;
+  }
+  function reviewTab(s) {
+    let h = '';
+    h += s.review ? `<div class="blk"><h3>Reviewer note for observation #${s.seq}</h3><p class="prose">${esc(s.review)}</p></div>` : `<div class="blk"><p class="muted">No per-frame review note for this step.</p></div>`;
+    const withNotes = D.steps_data.map((x, i) => [x, i]).filter(([x]) => x.review);
+    if (withNotes.length) h += `<div class="blk"><h3>Review log, ${withNotes.length} of ${D.steps_data.length} observations</h3><ol class="log">${withNotes.map(([x, i]) => `<li class="${i === st.step ? 'on' : ''}"><button class="ghost" data-goto="${i}">#${x.seq}</button><span>${esc(x.review)}</span></li>`).join('')}</ol></div>`;
+    const r = D.review_summary;
+    if (r) h += `<div class="blk"><h3>Episode review</h3><dl class="kv"><dt>Method</dt><dd>${esc(r.method || '–')}</dd><dt>Classification</dt><dd>${esc(String(r.classification || '–').replaceAll('_', ' '))}</dd></dl>${r.conclusion ? `<p class="prose" style="margin-top:8px">${esc(r.conclusion)}</p>` : ''}${r.exclusion ? `<div class="callout">${esc(r.exclusion)}</div>` : ''}</div>`;
+    if (!r && !withNotes.length) h += '<div class="blk"><p class="muted">This episode has no independent review attached.</p></div>';
+    return h;
+  }
+  function episodeTab() {
+    const e = D;
+    let h = `<div class="blk"><h3>Outcome</h3><dl class="kv"><dt>Recorded</dt><dd>${esc(String(e.outcome || '–').replaceAll('_', ' '))}</dd><dt>Reviewed</dt><dd>${esc(String(e.reviewed || '–').replaceAll('_', ' '))}</dd><dt>Complete</dt><dd>${e.complete ? 'yes' : 'no'}</dd><dt>In comparisons</dt><dd>${e.eligible ? 'yes' : 'no'}</dd>${finite(e.time_limit_ms) ? `<dt>Time limit</dt><dd>${dur(e.time_limit_ms)}</dd>` : ''}${finite(e.pre_reset_cooldown_ms) ? `<dt>Cooldown before reset</dt><dd>${sec(e.pre_reset_cooldown_ms)} (outside the episode clock)</dd>` : ''}</dl>${e.reason ? `<p class="prose" style="margin-top:8px">${esc(e.reason)}</p>` : ''}</div>`;
+    if (e.unreturned_requests.length) {
+      h += `<div class="blk"><h3>Requests with no returned observation</h3>${e.unreturned_requests.map(r => {
+        const why = r.dispatch_state !== 'committed' ? 'Prepared, not dispatched' + (r.not_dispatched_reason ? ': ' + r.not_dispatched_reason : '') : r.provider_error ? 'Provider error' : r.response ? 'Model answered, no game step followed' : 'Dispatched, no response saved';
+        const calls = (r.response?.tool_calls || []).map(c => c.name + ' ' + c.arguments).join('; ');
+        return `<div class="callout"><b>After observation #${esc(r.input_seq)}</b>: ${esc(why)}. API ${sec(r.api_ms, 2)}.${calls ? `<br>Tool call: <code>${esc(calls)}</code>` : ''}${r.response?.content ? `<br>${esc(r.response.content)}` : ''}${r.provider_error ? `<br>${esc(JSON.stringify(r.provider_error))}` : ''}</div>`;
+      }).join('')}</div>`;
+    }
+    const defs = game(e.game).rewards;
+    if (defs.length) h += `<div class="blk"><h3>Reward versions</h3>${defs.map(d => `<p><b>${esc(d.label)}</b>: ${esc(d.description || '')}${d.limitation ? ` <span class="muted">Limit: ${esc(d.limitation)}</span>` : ''}</p>`).join('')}</div>`;
+    if (e.video_info) h += `<div class="blk"><h3>Video</h3><p>${esc(e.video_info.coverage || '')}. ${esc(e.video_info.derivation || '')}</p><p class="hash">mp4 sha256 ${esc(e.video_info.sha)}</p></div>`;
+    if (e.conditions && Object.keys(e.conditions).length) h += `<div class="blk"><h3>Cohort conditions</h3><dl class="kv">${Object.entries(e.conditions).map(([k, v]) => `<dt>${esc(k.replaceAll('_', ' '))}</dt><dd>${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</dd>`).join('')}</dl></div>`;
+    h += `<div class="blk"><h3>Provenance</h3><details class="sub"><summary>Source files and hashes</summary><pre class="json">${esc(JSON.stringify(e.source, null, 1))}</pre></details><p class="hash">episode ${esc(e.id)}</p></div>`;
+    return h;
+  }
+  function rawTab(s) {
+    const copy = {...s};
+    if (copy.model) copy.model = {...copy.model, response_raw: copy.model.response_raw, messages: '[see Model call tab]'};
+    return `<pre class="json" style="max-height:none">${esc(JSON.stringify(copy, null, 1))}</pre>`;
+  }
+
+  // ---------- timeline ----------
+  const LANES = [
+    {id: 'obs', label: 'Observations', h: 18},
+    {id: 'act', label: 'Actions', h: 26},
+    {id: 'time', label: 'Decision time', h: 34},
+    {id: 'reward', label: 'Reward', h: 56},
+    {id: 'state', label: 'Game state', h: 42},
+    {id: 'marks', label: 'Markers', h: 20},
+  ];
+  function svgEl(markup, w, h, label) { return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(label)}">${markup}</svg>`; }
+  function drawWave() {
+    if (!D || st.view !== 'episode') return;
+    document.querySelectorAll('#axis-seg button').forEach(b => {
+      b.classList.toggle('on', b.dataset.axis === st.axis);
+      if (b.dataset.axis === 'game') b.disabled = !hasGameAxis(D);
+    });
+    const host = $('wave'), W = Math.max(320, host.clientWidth), LW = W < 600 ? 74 : 112, R = 12, x0 = LW + 6, pw = W - x0 - R;
+    const steps = D.steps_data, axis = st.axis;
+    const xs = steps.map((s, i) => axisOf(D, s, i, axis));
+    const max = Math.max(1e-9, ...xs.filter(finite));
+    const X = v => x0 + (finite(v) ? v : 0) / max * pw;
+    let y = 4, out = '';
+    const tops = {};
+    for (const L of LANES) { tops[L.id] = y; y += L.h + 6; }
+    const H = y + 18;
+    // lane backgrounds and labels
+    for (const L of LANES) {
+      const t = tops[L.id];
+      out += `<rect x="${x0}" y="${t}" width="${pw}" height="${L.h}" fill="${css('--panel-2')}" rx="3"/>`;
+      out += `<text class="lane-label" x="${LW - 4}" y="${t + L.h / 2 + 4}" text-anchor="end">${L.label}</text>`;
+    }
+    // grid
+    const ticks = niceTicks(max, Math.max(3, Math.floor(pw / 90)));
+    for (const t of ticks) {
+      out += `<line x1="${X(t)}" x2="${X(t)}" y1="4" y2="${y - 6}" stroke="${css('--grid')}"/>`;
+      out += `<text class="axis-text" x="${X(t)}" y="${y + 8}" text-anchor="middle">${fmt(t, 1)}</text>`;
+    }
+    out += `<text class="axis-text" x="${W - R}" y="${y + 8}" text-anchor="end" opacity="0">.</text>`;
+    // observations
+    const to = tops.obs;
+    steps.forEach((s, i) => {
+      if (!finite(xs[i])) return;
+      const end = s.status && s.status !== 'running';
+      out += `<line x1="${X(xs[i])}" x2="${X(xs[i])}" y1="${to + 3}" y2="${to + 15}" stroke="${end ? css('--down') : css('--muted')}" stroke-width="${end ? 2.5 : 1}"/>`;
+    });
+    // actions
+    const ta = tops.act;
+    steps.forEach((s, i) => {
+      if (!i || !finite(xs[i])) return;
+      const pi = steps.findIndex(p => p.seq === s.input_seq);
+      const xa = X(finite(xs[pi]) ? xs[pi] : xs[i - 1]), xb = X(xs[i]);
+      const w = Math.max(1.5, xb - xa - 1);
+      const color = css(TOOL_COLOR[s.tool] || '--wait');
+      const op = s.executed === false ? .35 : 1;
+      out += `<rect x="${xb - w}" y="${ta + 2}" width="${w}" height="${22}" fill="${color}" opacity="${op}" rx="2"/>`;
+      const label = actionText(s);
+      if (w > label.length * 5.6 + 6) out += `<text class="act-text" x="${xb - w + 4}" y="${ta + 17}">${esc(label)}</text>`;
+    });
+    // decision time
+    const tt = tops.time, th = 34;
+    if (axis === 'wall') {
+      steps.forEach((s, i) => {
+        if (!i) return;
+        const pi = steps.findIndex(p => p.seq === s.input_seq);
+        let cur = (pi >= 0 ? steps[pi].wall : steps[i - 1].wall) / 1000;
+        for (const [k, c] of [['throttle', '--throttle'], ['api', '--api'], ['tool', '--tool']]) {
+          const v = s.timing[k];
+          if (!finite(v) || v <= 0) continue;
+          const w = Math.max(.8, v / 1000 / max * pw);
+          out += `<rect x="${X(cur)}" y="${tt + 6}" width="${w}" height="${22}" fill="${css(c)}" opacity=".9"/>`;
+          cur += v / 1000;
+        }
+      });
+    } else {
+      const gaps = steps.map(s => s.timing.gap).filter(finite);
+      const gmax = Math.max(1, ...gaps);
+      const bw = Math.max(1.5, Math.min(8, pw / steps.length * .6));
+      steps.forEach((s, i) => {
+        if (!i || !finite(xs[i])) return;
+        let base = tt + th - 2;
+        for (const [k, c] of [['throttle', '--throttle'], ['api', '--api'], ['tool', '--tool']]) {
+          const v = s.timing[k];
+          if (!finite(v) || v <= 0) continue;
+          const hh = v / gmax * (th - 6);
+          out += `<rect x="${X(xs[i]) - bw / 2}" y="${base - hh}" width="${bw}" height="${hh}" fill="${css(c)}"/>`;
+          base -= hh;
+        }
+        if (finite(s.timing.gap)) out += `<line x1="${X(xs[i]) - bw}" x2="${X(xs[i]) + bw}" y1="${tt + th - 2 - s.timing.gap / gmax * (th - 6)}" y2="${tt + th - 2 - s.timing.gap / gmax * (th - 6)}" stroke="${css('--ink')}" stroke-width="1"/>`;
+      });
+      out += `<text class="lane-sub" x="${LW - 4}" y="${tt + th - 2}" text-anchor="end">max ${sec(gmax, 0)}</text>`;
+    }
+    // reward
+    const tr = tops.reward, rh = 56, rid = st.reward;
+    if (!rid) out += `<text class="lane-sub" x="${x0 + 8}" y="${tr + rh / 2 + 4}">No deterministic reward for this game</text>`;
+    else {
+      const vals = steps.map(s => s.rewards[rid]?.c);
+      const fin = vals.filter(finite);
+      if (!fin.length) out += `<text class="lane-sub" x="${x0 + 8}" y="${tr + rh / 2 + 4}">Not scored</text>`;
+      else {
+        const lo = Math.min(0, ...fin), hi = Math.max(lo + 1, ...fin);
+        const Y = v => tr + rh - 5 - (v - lo) / (hi - lo) * (rh - 10);
+        if (lo < 0) out += `<line x1="${x0}" x2="${x0 + pw}" y1="${Y(0)}" y2="${Y(0)}" stroke="${css('--line')}" stroke-dasharray="3 3"/>`;
+        let d = '';
+        steps.forEach((s, i) => { if (finite(vals[i]) && finite(xs[i])) d += (d ? 'H' + X(xs[i]) + 'V' : 'M' + X(xs[i]) + ',') + Y(vals[i]); });
+        out += `<path d="${d}" fill="none" stroke="${css('--accent')}" stroke-width="2"/>`;
+        steps.forEach((s, i) => {
+          const v = s.rewards[rid]?.v;
+          if (!finite(v) || !v || !finite(xs[i])) return;
+          const cx = X(xs[i]), cy = Y(vals[i]);
+          out += v > 0 ? `<path d="M${cx},${cy - 7}l5,8h-10z" fill="${css('--up')}"/>` : `<path d="M${cx},${cy + 7}l5,-8h-10z" fill="${css('--down')}"/>`;
+        });
+        out += `<text class="lane-sub" x="${LW - 4}" y="${tr + 12}" text-anchor="end">${fmt(hi)}</text><text class="lane-sub" x="${LW - 4}" y="${tr + rh - 2}" text-anchor="end">${fmt(lo)}</text>`;
+      }
+    }
+    // game state
+    out += stateLane(tops.state, 42, steps, xs, X);
+    // markers
+    const tm = tops.marks;
+    steps.forEach((s, i) => {
+      const f = s.flags.filter(k => k !== 'terminal');
+      if (!f.length || !finite(xs[i])) return;
+      f.slice(0, 3).forEach((k, j) => { out += `<circle cx="${X(xs[i])}" cy="${tm + 5 + j * 5}" r="3" fill="${css(MARKS[k].color)}"/>`; });
+    });
+    // cursor
+    const sx = X(xs[st.step]);
+    let vx = null;
+    if (st.media === 'video' && videoCursor && D.frames) {
+      const k = videoCursor.k, f = D.frames;
+      vx = axis === 'game' && D.game_clock?.field !== 'game_ticks' ? X(f.game_ms[k] / 1000) : axis === 'wall' ? X(f.wall_ms[k] / 1000) : null;
+    }
+    out += `<line x1="${sx}" x2="${sx}" y1="2" y2="${y - 4}" stroke="${css('--ink')}" stroke-width="1.5"/>`;
+    out += `<rect x="${sx - 3}" y="0" width="6" height="5" fill="${css('--ink')}"/>`;
+    if (finite(vx)) out += `<line x1="${vx}" x2="${vx}" y1="2" y2="${y - 4}" stroke="${css('--mark')}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    out += `<text class="axis-text" x="${x0}" y="${y + 8}" text-anchor="start" opacity="0">.</text>`;
+    out += `<text class="lane-sub" x="${LW - 4}" y="${y + 8}" text-anchor="end">${esc(axisName(D, axis))}</text>`;
+    out += `<rect class="hit" x="${x0}" y="0" width="${pw}" height="${y}" fill="transparent"/>`;
+    host.innerHTML = svgEl(out, W, H, 'Episode timeline');
+    $('wave-legend').innerHTML = [['--act', 'act'], ['--wait', 'wait'], ['--look', 'look'], ['--throttle', 'throttle'], ['--api', 'API'], ['--tool', 'tool HTTP'], ['--up', 'reward up'], ['--down', 'reward down or loss'], ['--mark', 'no visible change']].map(([c, n]) => `<span><i style="background:${css(c)}"></i>${n}</span>`).join('');
+    wireWave(host.querySelector('svg'), xs, X, x0, pw, max);
+  }
+  function stateLane(t, h, steps, xs, X) {
+    let out = '';
+    const key = D.game === 'airstriker' ? 'score' : D.game === 'shattered' ? 'hp' : null;
+    if (!key || !steps.some(s => finite(s.state?.[key]))) return `<text class="lane-sub" x="${X(0) + 8}" y="${t + h / 2 + 4}">No game state telemetry recorded</text>`;
+    const vals = steps.map(s => s.state?.[key]);
+    const fin = vals.filter(finite);
+    const lo = key === 'hp' ? 0 : Math.min(...fin), hi = key === 'hp' ? Math.max(...steps.map(s => s.state?.maxHp).filter(finite), ...fin) : Math.max(lo + 1, ...fin);
+    const Y = v => t + h - 5 - (v - lo) / (hi - lo || 1) * (h - 18);
+    let d = '';
+    steps.forEach((s, i) => { if (finite(vals[i]) && finite(xs[i])) d += (d ? 'H' + X(xs[i]) + 'V' : 'M' + X(xs[i]) + ',') + Y(vals[i]); });
+    out += `<path d="${d}" fill="none" stroke="${css('--muted')}" stroke-width="1.5"/>`;
+    const second = D.game === 'airstriker' ? 'lives' : 'depth';
+    let last = null;
+    steps.forEach((s, i) => {
+      const v = s.state?.[second];
+      if (!finite(v) || v === last || !finite(xs[i])) return;
+      out += `<text class="state-text" x="${X(xs[i]) + 2}" y="${t + 11}">${second === 'lives' ? 'lives ' : 'floor '}${v}</text>`;
+      last = v;
+    });
+    out += `<text class="lane-sub" x="${X(0) - 10}" y="${t + h - 2}" text-anchor="end">${key === 'hp' ? 'HP' : 'score'}</text>`;
+    return out;
+  }
+  function niceTicks(max, n) {
+    const raw = max / n, mag = Math.pow(10, Math.floor(Math.log10(raw || 1))), f = raw / mag;
+    const step = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag;
+    const out = [];
+    for (let v = 0; v <= max + 1e-9; v += step) out.push(+v.toFixed(6));
+    return out;
+  }
+  function nearest(xs, X, px) {
+    let best = 0, bd = Infinity;
+    xs.forEach((v, i) => { if (!finite(v)) return; const d = Math.abs(X(v) - px); if (d < bd) { bd = d; best = i; } });
+    return best;
+  }
+  function wireWave(svg, xs, X) {
+    const tip = $('wave-tip');
+    const toLocal = ev => { const r = svg.getBoundingClientRect(); return (ev.clientX - r.left) * (svg.viewBox.baseVal.width / r.width); };
+    svg.addEventListener('pointermove', ev => {
+      const i = nearest(xs, X, toLocal(ev)), s = D.steps_data[i];
+      const rw = st.reward ? s.rewards[st.reward] : null;
+      tip.hidden = false;
+      tip.innerHTML = `<b>#${s.seq} ${esc(actionText(s, true))}</b>wall ${sec(s.wall)}${finite(s.game) ? ', game ' + sec(s.game, 2) : ''}${rw ? `<br>reward ${fmt(rw.v, 3)}, cumulative ${fmt(rw.c, 3)}` : ''}${s.tool !== 'reset' ? `<br>API ${sec(s.timing.api, 2)}, gap ${sec(s.timing.gap, 2)}` : ''}${s.flags.filter(f => MARKS[f]).map(f => '<br>' + esc(MARKS[f].label)).join('')}`;
+      const wr = $('wave').parentElement.getBoundingClientRect();
+      let left = ev.clientX - wr.left + 14;
+      if (left + 300 > wr.width) left = ev.clientX - wr.left - 300;
+      tip.style.left = Math.max(4, left) + 'px';
+      tip.style.top = (ev.clientY - wr.top + 14) + 'px';
+    });
+    svg.addEventListener('pointerleave', () => { tip.hidden = true; });
+    svg.addEventListener('click', ev => { stopPlay(); selectStep(nearest(xs, X, toLocal(ev)), {seekVideo: true}); });
+  }
+  document.querySelectorAll('#axis-seg button').forEach(b => b.onclick = () => { st.axis = b.dataset.axis; drawWave(); });
+
+  // ---------- compare ----------
+  const cmpD = [null, null];
+  async function renderCompare() {
+    const list = gameEps();
+    if (!list.length) return;
+    const pool = cohortEps().length > 1 ? cohortEps() : list;
+    for (let k = 0; k < 2; k++) if (st.cmp[k] == null || EPS[st.cmp[k]].game !== st.game) st.cmp[k] = pool[Math.min(k, pool.length - 1)].i;
+    const opts = [...new Set(list.map(e => e.cohort))].map(c => `<optgroup label="${esc(c)}">${list.filter(e => e.cohort === c).map(e => `<option value="${e.i}">${esc(epLabel(e))}</option>`).join('')}</optgroup>`).join('');
+    $('cmp-a').innerHTML = opts; $('cmp-b').innerHTML = opts;
+    $('cmp-a').value = st.cmp[0]; $('cmp-b').value = st.cmp[1];
+    const [a, b] = await Promise.all(st.cmp.map(load));
+    if (st.view !== 'compare') return;
+    cmpD[0] = a; cmpD[1] = b;
+    const gameOK = hasGameAxis(a) && hasGameAxis(b) && a.game_clock?.field === b.game_clock?.field;
+    document.querySelectorAll('#cmp-axis button').forEach(x => { x.classList.toggle('on', x.dataset.axis === st.cmpAxis); if (x.dataset.axis === 'game') x.disabled = !gameOK; });
+    if (st.cmpAxis === 'game' && !gameOK) { st.cmpAxis = 'wall'; return renderCompare(); }
+    const warn = [];
+    if (a.cohort !== b.cohort) warn.push('These episodes come from different cohorts, so timing and protocol conditions can differ.');
+    if (a.i === b.i) warn.push('Both sides show the same episode.');
+    $('cmp-warn').hidden = !warn.length; $('cmp-warn').textContent = warn.join(' ');
+    const max = Math.max(...[a, b].map(d => Math.max(0, ...d.steps_data.map((s, i) => axisOf(d, s, i, st.cmpAxis)).filter(finite))));
+    $('cmp-scrub').max = max; $('cmp-scrub').step = st.cmpAxis === 'step' ? 1 : .01;
+    st.cmpPos = Math.min(st.cmpPos, max);
+    renderCmpTable(a, b);
+    setCmpPos(st.cmpPos);
+    writeHash();
+  }
+  function cmpIndex(d, pos) {
+    let k = 0;
+    d.steps_data.forEach((s, i) => { const v = axisOf(d, s, i, st.cmpAxis); if (finite(v) && v <= pos + 1e-9) k = i; });
+    return k;
+  }
+  function setCmpPos(pos) {
+    st.cmpPos = pos;
+    $('cmp-scrub').value = pos;
+    $('cmp-clock').textContent = st.cmpAxis === 'step' ? `Observation ${Math.round(pos)}` : `${fmt(pos, 1)} ${st.cmpAxis === 'game' ? gameClockLabel(cmpD[0]) : 's'} ${st.cmpAxis === 'game' ? 'game time' : 'wall time'}`;
+    cmpD.forEach((d, k) => {
+      if (!d) return;
+      const i = cmpIndex(d, pos), s = d.steps_data[i], rw = st.reward ? s.rewards[st.reward] : null;
+      const after = pos > Math.max(...d.steps_data.map((x, j) => axisOf(d, x, j, st.cmpAxis)).filter(finite));
+      $('cmp-panel-' + k).innerHTML = `<h2>${esc(modelName(d))} <span class="chip">${esc(d.effort)}</span> <span class="chip">${esc(runName(d))}</span></h2>
+        <div class="stage ${d.game !== 'veloren' ? 'pixel' : ''}" style="margin-top:8px"><img src="${esc(s.obs.img)}" alt="${esc(epLabel(d))} observation ${s.seq}"></div>
+        <div class="cap"><span><b>#${s.seq}</b> ${esc(actionText(s, true))}${after ? ' <span class="chip">episode ended</span>' : ''}</span>
+        <span class="muted">${rw ? `cumulative reward ${fmt(rw.c, 3)}` : 'no reward'}, wall ${sec(s.wall)}${finite(s.game) ? ', game ' + sec(s.game, 2) : ''}</span>
+        <span><a href="#/ep/${d.i}/${i}">Open this step in Episode view</a></span></div>`;
+    });
+    drawCmpWave();
+  }
+  function drawCmpWave() {
+    const host = $('cmp-wave'), W = Math.max(320, host.clientWidth), LW = W < 600 ? 40 : 60, x0 = LW + 6, R = 12, pw = W - x0 - R;
+    const [a, b] = cmpD; if (!a || !b) return;
+    const ax = st.cmpAxis, rid = st.reward;
+    const sets = [a, b].map(d => d.steps_data.map((s, i) => axisOf(d, s, i, ax)));
+    const max = Math.max(1e-9, ...sets.flat().filter(finite));
+    const X = v => x0 + v / max * pw;
+    const rh = 150, mh = 14;
+    let out = '';
+    out += `<rect x="${x0}" y="4" width="${pw}" height="${rh}" fill="${css('--panel-2')}" rx="3"/>`;
+    for (const t of niceTicks(max, Math.max(3, Math.floor(pw / 90)))) out += `<line x1="${X(t)}" x2="${X(t)}" y1="4" y2="${4 + rh + 2 * (mh + 4)}" stroke="${css('--grid')}"/><text class="axis-text" x="${X(t)}" y="${rh + 2 * (mh + 4) + 18}" text-anchor="middle">${fmt(t, 1)}</text>`;
+    if (rid) {
+      const all = [a, b].flatMap(d => d.steps_data.map(s => s.rewards[rid]?.c)).filter(finite);
+      const lo = Math.min(0, ...all), hi = Math.max(lo + 1, ...all);
+      const Y = v => 4 + rh - 6 - (v - lo) / (hi - lo) * (rh - 14);
+      if (lo < 0) out += `<line x1="${x0}" x2="${x0 + pw}" y1="${Y(0)}" y2="${Y(0)}" stroke="${css('--line')}" stroke-dasharray="3 3"/>`;
+      out += `<text class="lane-sub" x="${LW}" y="16" text-anchor="end">${fmt(hi)}</text><text class="lane-sub" x="${LW}" y="${rh}" text-anchor="end">${fmt(lo)}</text>`;
+      [a, b].forEach((d, k) => {
+        let p = '';
+        d.steps_data.forEach((s, i) => { const v = s.rewards[rid]?.c, x = sets[k][i]; if (finite(v) && finite(x)) p += (p ? 'H' + X(x) + 'V' : 'M' + X(x) + ',') + Y(v); });
+        out += `<path d="${p}" fill="none" stroke="${css(k ? '--b' : '--a')}" stroke-width="2.2"/>`;
+        const endI = d.steps_data.length - 1, ev = d.steps_data[endI].rewards[rid]?.c;
+        if (finite(ev) && finite(sets[k][endI])) out += `<circle cx="${X(sets[k][endI])}" cy="${Y(ev)}" r="4" fill="${css(k ? '--b' : '--a')}"/>`;
+      });
+    } else out += `<text class="lane-sub" x="${x0 + 8}" y="${rh / 2}">No deterministic reward for this game</text>`;
+    [a, b].forEach((d, k) => {
+      const ty = 4 + rh + 4 + k * (mh + 4);
+      out += `<rect x="${x0}" y="${ty}" width="${pw}" height="${mh}" fill="${css('--panel-2')}" rx="3"/><text class="lane-label" x="${LW}" y="${ty + 11}" text-anchor="end" fill="${css(k ? '--b' : '--a')}">${k ? 'B' : 'A'}</text>`;
+      d.steps_data.forEach((s, i) => {
+        const f = s.flags.filter(x => x !== 'terminal');
+        if (f.length && finite(sets[k][i])) out += `<circle cx="${X(sets[k][i])}" cy="${ty + mh / 2}" r="3" fill="${css(MARKS[f[0]].color)}"/>`;
+        if (s.status && s.status !== 'running' && finite(sets[k][i])) out += `<line x1="${X(sets[k][i])}" x2="${X(sets[k][i])}" y1="${ty}" y2="${ty + mh}" stroke="${css('--down')}" stroke-width="2.5"/>`;
+      });
+    });
+    const H = rh + 2 * (mh + 4) + 26;
+    out += `<line x1="${X(st.cmpPos)}" x2="${X(st.cmpPos)}" y1="2" y2="${H - 22}" stroke="${css('--ink')}" stroke-width="1.5"/>`;
+    out += `<rect x="${x0}" y="0" width="${pw}" height="${H - 20}" fill="transparent"/>`;
+    host.innerHTML = svgEl(out, W, H, 'Cumulative reward for both episodes');
+    const svg = host.querySelector('svg');
+    svg.addEventListener('click', ev => { const r = svg.getBoundingClientRect(); const px = (ev.clientX - r.left) * (W / r.width); stopCmp(); setCmpPos(Math.max(0, Math.min(max, (px - x0) / pw * max))); });
+    $('cmp-legend').innerHTML = [a, b].map((d, k) => `<span><i style="background:${css(k ? '--b' : '--a')}"></i>${k ? 'B' : 'A'}: ${esc(epLabel(d))}</span>`).join('') + (rid ? `<span>${esc(rewardDef(a.game, rid)?.label || '')}</span>` : '') + `<span>x axis: ${esc(axisName(a, ax))}</span>`;
+  }
+  function renderCmpTable(a, b) {
+    const ret = d => { const r = d.returns[st.reward]; return !st.reward ? '–' : finite(r?.total) ? fmt(r.total) : 'unknown'; };
+    const rows = [
+      ['Outcome', d => outcomeText(d)], ['Return', ret], ['Wall time', d => dur(d.duration_ms)], ['Game time', d => finite(d.game_duration_ms) ? dur(d.game_duration_ms) : finite(d.game_turns) ? fmt(d.game_turns) + ' turns' : '–'],
+      ['Steps', d => d.steps], ['API median', d => sec(d.api_median, 2)], ['Decision gap median', d => sec(d.gap_median, 2)], ['Spend', d => usd(d.cost)],
+      ...MARK_ORDER.filter(k => k !== 'terminal' && (a.flags[k] || b.flags[k])).map(k => [MARKS[k].label, d => d.flags[k] || 0]),
+    ];
+    $('cmp-table').innerHTML = `<thead><tr><th></th><th>A</th><th>B</th></tr></thead><tbody>${rows.map(([n, f]) => `<tr><td>${esc(n)}</td><td>${esc(f(a))}</td><td>${esc(f(b))}</td></tr>`).join('')}</tbody>`;
+  }
+  $('cmp-a').onchange = ev => { stopCmp(); st.cmp[0] = +ev.target.value; renderCompare(); };
+  $('cmp-b').onchange = ev => { stopCmp(); st.cmp[1] = +ev.target.value; renderCompare(); };
+  document.querySelectorAll('#cmp-axis button').forEach(b => b.onclick = () => { stopCmp(); st.cmpAxis = b.dataset.axis; st.cmpPos = 0; renderCompare(); });
+  $('cmp-scrub').oninput = ev => { stopCmp(); setCmpPos(+ev.target.value); };
+  $('cmp-play').onclick = () => {
+    if (st.cmpTimer) return stopCmp();
+    const max = +$('cmp-scrub').max;
+    if (st.cmpPos >= max) setCmpPos(0);
+    $('cmp-play').textContent = 'Pause';
+    const inc = st.cmpAxis === 'step' ? 1 : st.cmpAxis === 'wall' ? 2 : (cmpD[0]?.game_clock?.field === 'game_ticks' ? 1 : .5);
+    st.cmpTimer = setInterval(() => { const n = Math.min(max, st.cmpPos + inc); setCmpPos(n); if (n >= max) stopCmp(); }, 250);
+  };
+  function stopCmp() { if (st.cmpTimer) clearInterval(st.cmpTimer); st.cmpTimer = null; $('cmp-play').textContent = 'Play'; }
+
+  // ---------- live mode ----------
+  function liveNote() {
+    const note = $('live-note');
+    const e = st.ep != null ? EPS[st.ep] : null;
+    if (!LAB.live || !D || !e?.live) { note.hidden = true; return; }
+    note.hidden = false;
+    if (!e.live.running) { note.innerHTML = 'Episode finished. Export the run to add offline rewards, reviews and video.'; return; }
+    const p = (D.pending || [])[0];
+    let text = '<b>Running.</b> ';
+    if (p && !p.answered) text += `Model call in flight after observation #${esc(p.input_seq)}` + (finite(p.age_s) ? ` (sent ${p.age_s.toFixed(1)} s ago)` : '') + '.';
+    else if (p) text += `Model answered after observation #${esc(p.input_seq)}; waiting for the game step.`;
+    else text += 'Waiting for the next step.';
+    const following = st.step >= D.steps_data.length - 1;
+    const html = text + (following ? ' The view follows new steps.' : ` <button class="ghost small" data-follow>Jump to latest (#${D.steps_data[D.steps_data.length - 1].seq})</button>`);
+    if (note.innerHTML !== html) note.innerHTML = html;
+  }
+  $('live-note').addEventListener('click', ev => { if (ev.target.closest('[data-follow]') && D) selectStep(D.steps_data.length - 1); });
+  async function refreshEpisode() {
+    const i = st.ep, follow = !D || D.i !== i || st.step >= D.steps_data.length - 1;
+    cache.delete(i);
+    const d = await load(i);
+    if (st.ep !== i || st.view !== 'episode') return;
+    D = d;
+    renderEpisodeHead(EPS[i]);
+    $('scrub').max = d.steps_data.length - 1;
+    selectStep(follow ? d.steps_data.length - 1 : Math.min(st.step, d.steps_data.length - 1));
+  }
+  let polling = false;
+  async function poll() {
+    if (polling) return;
+    polling = true;
+    try {
+      const idx = await (await fetch('live/index.json', {cache: 'no-store'})).json();
+      const before = new Map(EPS.map(e => [e.i, e.live?.version]));
+      GAMES.splice(0, GAMES.length, ...idx.games);
+      EPS.splice(0, EPS.length, ...idx.episodes);
+      if (!game(st.game)) setGame(GAMES[0].id);
+      if (!gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
+      const changed = i => i != null && before.get(i) !== EPS[i]?.live?.version;
+      $('live-badge').hidden = false;
+      $('live-badge').classList.remove('stale');
+      $('live-badge').textContent = 'Live, ' + EPS.filter(e => e.live?.running).length + ' running';
+      renderBar();
+      if (st.view === 'runs') renderRuns();
+      if (st.view === 'episode' && changed(st.ep)) await refreshEpisode();
+      if (st.view === 'compare' && st.cmp.some(changed)) { st.cmp.forEach(i => cache.delete(i)); await renderCompare(); }
+      liveNote();
+    } catch (err) {
+      $('live-badge').hidden = false;
+      $('live-badge').classList.add('stale');
+      $('live-badge').textContent = 'Live server not reachable';
+    }
+    polling = false;
+  }
+  if (LAB.live) {
+    $('live-badge').hidden = false;
+    $('live-badge').textContent = 'Live';
+    setInterval(poll, LAB.poll_ms || 2000);
+  }
+
+  // ---------- keyboard + resize ----------
+  document.addEventListener('keydown', ev => {
+    if (ev.target.closest('input, select, textarea') && !(ev.target.type === 'range' && st.view === 'episode')) return;
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (ev.key === '?') { $('keys').showModal(); return; }
+    if (st.view !== 'episode' || !D) return;
+    const k = ev.key;
+    if (k === 'ArrowRight' || k === 'ArrowLeft') { ev.preventDefault(); const dir = k === 'ArrowRight' ? 1 : -1; if (ev.shiftKey) jumpMark(dir); else { stopPlay(); selectStep(st.step + dir, {seekVideo: true}); } }
+    else if (k === ' ') { ev.preventDefault(); st.playing ? stopPlay() : startPlay(); }
+    else if (k === 'Home') { ev.preventDefault(); selectStep(0, {seekVideo: true}); }
+    else if (k === 'End') { ev.preventDefault(); selectStep(1e9, {seekVideo: true}); }
+    else if (k === '[') stepEpisode(-1);
+    else if (k === ']') stepEpisode(1);
+    else if (k >= '1' && k <= '4') setMedia(['frame', 'input', 'diff', 'video'][+k - 1]);
+    else if ('wgs'.includes(k.toLowerCase())) { const a = {w: 'wall', g: 'game', s: 'step'}[k.toLowerCase()]; if (a !== 'game' || hasGameAxis(D)) { st.axis = a; drawWave(); } }
+  });
+  $('keys-btn').onclick = () => $('keys').showModal();
+  let rt = null;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (st.view === 'episode') drawWave(); if (st.view === 'compare') drawCmpWave(); }, 120); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => render());
+  window.addEventListener('hashchange', () => { const before = location.hash; readHash(); if (location.hash === before) render(); });
+
+  readHash();
+  render();
+})();

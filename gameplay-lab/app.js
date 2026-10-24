@@ -121,6 +121,7 @@
     st.game = id;
     st.cohort = game(id).default_cohort_id;
     st.reward = game(id).default_reward_id;
+    st.showOld = false;
   }
   function writeHash() {
     let h = '#/runs/' + st.game + '/' + encodeURIComponent(st.cohort || '');
@@ -147,7 +148,7 @@
   function gameEps() { return EPS.filter(e => e.game === st.game); }
   // cohort status comes from the export or live server (current, superseded, older, stopped, check)
   const STATUS_TEXT = {current: 'Latest run of this game', superseded: 'Superseded by a newer version', older: 'Older protocol',
-    stopped: 'Stopped early (see its note).', check: 'Infrastructure check, not a model comparison.'};
+    stopped: 'Stopped early; its note below says why.', check: 'Infrastructure check, not a model comparison.'};
   const cohortInfo = c => (LAB.cohorts || {})[c] || {status: 'current'};
   function orderedCohorts() {
     const all = [...new Set(gameEps().map(e => e.cohort))];
@@ -203,6 +204,9 @@
   }
   function renderRuns() {
     const g = game(st.game), list = cohortEps();
+    // live-only cohorts carry just the recorded reward; switch to it instead of showing blanks
+    const scored = id => list.some(e => finite(e.returns?.[id]?.total) || finite(e.returns?.[id]?.observed));
+    if (st.reward && !scored(st.reward) && st.reward !== 'raw' && scored('raw') && rewardDef(st.game, 'raw')) st.reward = 'raw';
     const cohorts = orderedCohorts();
     $('runs-title').textContent = g.label;
     const def = rewardDef(st.game, st.reward);
@@ -219,7 +223,7 @@
     $('cohort-chips').innerHTML = lead.map(chip).join('')
       + (rest.length ? `<button class="more" data-more="1" aria-expanded="${showOld}">${showOld ? 'Hide' : 'Show'} older and stopped (${rest.length})</button>` : '')
       + (showOld ? rest.map(chip).join('') : '');
-    $('cohort-chips').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; render(); });
+    $('cohort-chips').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; st.reward = g.default_reward_id; render(); });
     $('cohort-chips').querySelectorAll('[data-more]').forEach(b => b.onclick = () => { st.showOld = !showOld; if (!st.showOld && rest.includes(st.cohort)) st.cohort = lead[0] || st.cohort; render(); });
     const cohortNote = (LAB.cohort_notes || {})[st.cohort], info = cohortInfo(st.cohort);
     const warn = info.status === 'current' ? '' : (info.status === 'superseded' ? `Superseded by ${info.superseded_by}, a newer version of this sweep.`
@@ -985,6 +989,7 @@
       GAMES.splice(0, GAMES.length, ...idx.games);
       EPS.splice(0, EPS.length, ...idx.episodes);
       LAB.cohort_notes = idx.cohort_notes || LAB.cohort_notes;
+      LAB.cohorts = idx.cohorts || LAB.cohorts;
       if (!game(st.game)) setGame(GAMES[0].id);
       if (!gameEps().some(e => e.cohort === st.cohort)) st.cohort = game(st.game).default_cohort_id;
       const changed = i => i != null && before.get(i) !== EPS[i]?.live?.version;
@@ -1028,7 +1033,7 @@
       const key = i => i != null && EPS[i] ? EPS[i].game + '|' + EPS[i].id : null;
       const keep = [st.ep, st.cmp[0], st.cmp[1]].map(key);
       BASE = base;
-      Object.assign(LAB, {live: true, poll_ms: idx.poll_ms, notes: idx.notes, cohort_notes: idx.cohort_notes, markers: idx.markers || LAB.markers});
+      Object.assign(LAB, {live: true, poll_ms: idx.poll_ms, notes: idx.notes, cohort_notes: idx.cohort_notes, cohorts: idx.cohorts || LAB.cohorts, markers: idx.markers || LAB.markers});
       GAMES.splice(0, GAMES.length, ...idx.games);
       EPS.splice(0, EPS.length, ...idx.episodes);
       cache.clear(); D = null;

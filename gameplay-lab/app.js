@@ -145,6 +145,16 @@
   }
 
   function gameEps() { return EPS.filter(e => e.game === st.game); }
+  // cohort status comes from the export or live server (current, superseded, older, stopped, check)
+  const STATUS_TEXT = {current: 'Latest run of this game', superseded: 'Superseded by a newer version', older: 'Older protocol',
+    stopped: 'Stopped early (see its note).', check: 'Infrastructure check, not a model comparison.'};
+  const cohortInfo = c => (LAB.cohorts || {})[c] || {status: 'current'};
+  function orderedCohorts() {
+    const all = [...new Set(gameEps().map(e => e.cohort))];
+    const rank = {current: 0, superseded: 1, older: 2, check: 3, stopped: 4};
+    return all.map((c, k) => [c, k]).sort((a, b) => (rank[cohortInfo(a[0]).status] ?? 5) - (rank[cohortInfo(b[0]).status] ?? 5)
+      || (cohortInfo(b[0]).started_at || 0) - (cohortInfo(a[0]).started_at || 0) || a[1] - b[1]).map(x => x[0]);
+  }
   function cohortEps() { return gameEps().filter(e => e.cohort === st.cohort); }
 
   function renderBar() {
@@ -193,7 +203,7 @@
   }
   function renderRuns() {
     const g = game(st.game), list = cohortEps();
-    const cohorts = [...new Set(gameEps().map(e => e.cohort))];
+    const cohorts = orderedCohorts();
     $('runs-title').textContent = g.label;
     const def = rewardDef(st.game, st.reward);
     $('runs-scope').textContent = def
@@ -203,9 +213,19 @@
     sel.innerHTML = g.rewards.length ? g.rewards.map(r => `<option value="${esc(r.id)}">${esc(r.label)}</option>`).join('') : '<option value="">None for this game</option>';
     sel.value = st.reward || '';
     sel.disabled = !g.rewards.length;
-    $('cohort-chips').innerHTML = cohorts.map(c => `<button data-c="${esc(c)}" class="${c === st.cohort ? 'on' : ''}">${esc(c)}<small>${gameEps().filter(e => e.cohort === c).length}</small></button>`).join('');
-    $('cohort-chips').querySelectorAll('button').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; render(); });
-    const cohortNote = (LAB.cohort_notes || {})[st.cohort];
+    const lead = cohorts.filter(c => cohortInfo(c).status === 'current'), rest = cohorts.filter(c => cohortInfo(c).status !== 'current');
+    const showOld = st.showOld || rest.includes(st.cohort);
+    const chip = c => `<button data-c="${esc(c)}" class="${c === st.cohort ? 'on' : ''}${cohortInfo(c).status !== 'current' ? ' old' : ''}" title="${esc(STATUS_TEXT[cohortInfo(c).status] || '')}">${esc(c)}<small>${gameEps().filter(e => e.cohort === c).length}</small></button>`;
+    $('cohort-chips').innerHTML = lead.map(chip).join('')
+      + (rest.length ? `<button class="more" data-more="1" aria-expanded="${showOld}">${showOld ? 'Hide' : 'Show'} older and stopped (${rest.length})</button>` : '')
+      + (showOld ? rest.map(chip).join('') : '');
+    $('cohort-chips').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cohort = b.dataset.c; render(); });
+    $('cohort-chips').querySelectorAll('[data-more]').forEach(b => b.onclick = () => { st.showOld = !showOld; if (!st.showOld && rest.includes(st.cohort)) st.cohort = lead[0] || st.cohort; render(); });
+    const cohortNote = (LAB.cohort_notes || {})[st.cohort], info = cohortInfo(st.cohort);
+    const warn = info.status === 'current' ? '' : (info.status === 'superseded' ? `Superseded by ${info.superseded_by}, a newer version of this sweep.`
+      : info.status === 'older' ? `Older protocol, replaced by ${info.superseded_by}.` : STATUS_TEXT[info.status]) + ' Kept for reference; compare with care.';
+    $('cohort-warn').hidden = !warn;
+    $('cohort-warn').textContent = warn;
     $('cohort-note').textContent = (cohorts.length > 1 ? 'Each cohort ran under its own protocol, so returns are never pooled across cohorts. Pick one at a time.' : '') + (cohortNote ? ' This cohort: ' + cohortNote : '');
 
     const returns = list.filter(e => e.eligible && finite(e.returns[st.reward]?.total)).map(e => e.returns[st.reward].total);

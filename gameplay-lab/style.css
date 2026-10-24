@@ -118,6 +118,10 @@ main { max-width: 1600px; margin: 0 auto; padding: 22px 20px 48px; }
 .chips button { border-radius: 999px; padding: 5px 13px; font-size: 14px; }
 .chips button.on { background: var(--ink); color: var(--panel); border-color: var(--ink); }
 .chips button small { color: inherit; opacity: .7; margin-left: 4px; }
+.chips button.old { border-style: dashed; color: var(--muted); }
+.chips button.old.on { background: var(--muted); color: var(--panel); border-color: var(--muted); }
+.chips button.more { border: none; background: none; color: var(--accent); padding-left: 4px; text-decoration: underline; text-underline-offset: 3px; }
+.cohort-warn { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--mark); background: var(--panel); font-size: 13.5px; max-width: 110ch; }
 .cohort-note { font-size: 13.5px; color: var(--muted); max-width: 110ch; margin: 6px 0 0; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 18px 0 22px; }
 .stat { background: var(--panel); padding: 13px 16px; }

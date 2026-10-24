@@ -84,7 +84,8 @@ code, pre { font-family: var(--mono); font-size: 12px; }
 .brand { display: flex; align-items: center; gap: 9px; color: inherit; text-decoration: none; font-weight: 700; font-size: 17px; white-space: nowrap; }
 .brand svg { width: 26px; height: 26px; fill: none; stroke: #f0a63a; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
 .games, .views { display: flex; gap: 2px; }
-.games { margin-left: 8px; }
+.games { margin-left: 8px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.bar button { white-space: nowrap; }
 .bar button { border: 0; background: transparent; color: #a9b7c6; padding: 15px 10px 13px; border-radius: 0; border-bottom: 2px solid transparent; font-weight: 500; }
 .bar button:hover { color: #fff; }
 .bar button.on { color: #fff; border-bottom-color: #f0a63a; }

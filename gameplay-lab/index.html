@@ -164,6 +164,19 @@
         <p id="run-message" role="status"></p>
       </div>
     </form>
+    <form id="add-form" class="run-form add-form" autocomplete="off" hidden>
+      <div class="add-head">
+        <h2>Add a game</h2>
+        <p class="muted">Any Stable Retro game. Give its ROM as an upload or a path on your Mac's Desktop. The server matches the ROM to the game by hash, checks it on the emulator, builds the reward from the game's own score and adds it to the Game list above. Nothing is spent.</p>
+      </div>
+      <label class="field game-field">Game (optional)<input id="add-game" list="add-games" type="search" placeholder="Search the supported games"><datalist id="add-games"></datalist><span id="add-hint" class="muted small"></span></label>
+      <label class="field">ROM file<input id="add-file" type="file"></label>
+      <label class="field">Or its path<input id="add-path" type="text" placeholder="~/Desktop/roms/game.md"></label>
+      <div class="run-side add-side">
+        <button id="add-submit" class="play" type="submit">Add game</button>
+        <p id="add-message" role="status"></p>
+      </div>
+    </form>
     <div id="run-budget" class="stats"></div>
     <h2 class="queue-title">Queue</h2>
     <div class="table-wrap"><table id="run-queue" class="runs"></table></div>

@@ -287,11 +287,21 @@ dialog::backdrop { background: rgba(10, 18, 28, .45); }
 .run-side { grid-column: 3 / 5; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .run-side .play { min-width: 140px; padding: 9px 16px; background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 600; }
 .run-side .play:disabled { opacity: .5; }
-#run-message.bad { color: var(--down); }
-#run-message.good { color: var(--up); }
+#run-message.bad, #add-message.bad { color: var(--down); }
+#run-message.good, #add-message.good { color: var(--up); }
+.add-form { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 22px; }
+.add-head { grid-column: 1 / -1; }
+.add-head h2 { margin: 0 0 4px; font-size: 17px; }
+.add-head p { margin: 0; max-width: 75ch; }
+.add-form .game-field { grid-column: 1 / 3; }
+.add-form .add-side { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 14px; }
+.add-form input[type=file] { padding: 4px 6px; }
+#add-hint { display: block; margin-top: 4px; min-height: 1.2em; }
+.small { font-size: 12.5px; }
+.err-line { display: block; margin-top: 4px; max-width: 46ch; white-space: normal; }
 .queue-title { font-size: 18px; margin: 18px 0 10px; }
 .callout[hidden] { display: none; }
 @media (max-width: 760px) {
   .run-form { grid-template-columns: 1fr 1fr; }
-  .run-form .model-field, .run-side { grid-column: 1 / -1; }
+  .run-form .model-field, .run-side, .add-form .field { grid-column: 1 / -1; }
 }

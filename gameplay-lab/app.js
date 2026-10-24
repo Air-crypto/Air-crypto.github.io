@@ -1026,7 +1026,7 @@
   }
 
   // ---------- run requests ----------
-  const runState = {models: [], modelsAt: 0, status: null, busy: false};
+  const runState = {models: [], modelsAt: 0, status: null, busy: false, integrations: null, gamesKey: ''};
   const tokenKey = 'gameplay-lab-token';
   function savedToken() { try { return localStorage.getItem(tokenKey) || ''; } catch (e) { return ''; } }
   function saveToken(v) { try { v ? localStorage.setItem(tokenKey, v) : localStorage.removeItem(tokenKey); } catch (e) { /* private mode */ } }
@@ -1046,7 +1046,7 @@
     if (!$('run-token').value) $('run-token').value = savedToken();
     if (!LAB.live) {
       off.hidden = false; off.textContent = 'The live server is offline, so runs cannot be requested right now. The archive stays browsable.';
-      $('run-form').hidden = true; return;
+      $('run-form').hidden = true; $('add-form').hidden = true; return;
     }
     try {
       runState.status = await api('api/status');
@@ -1055,13 +1055,20 @@
         runState.models = (await api('api/models')).models; runState.modelsAt = Date.now();
         fillModels();
       }
-      off.hidden = true; $('run-form').hidden = false;
-      const g = $('run-game');
-      if (!g.options.length) g.innerHTML = runState.status.games.map(x => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join('');
+      off.hidden = true; $('run-form').hidden = false; $('add-form').hidden = false;
       renderQueue();
+      loadIntegrations();
     } catch (err) {
-      off.hidden = false; off.textContent = err.message; $('run-form').hidden = true;
+      off.hidden = false; off.textContent = err.message; $('run-form').hidden = true; $('add-form').hidden = true;
     }
+  }
+  function fillGames() {
+    const games = runState.status.games, key = games.map(x => x.id).join(',');
+    if (key === runState.gamesKey) return;
+    const g = $('run-game'), keep = g.value;
+    g.innerHTML = games.map(x => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join('');
+    if (games.some(x => x.id === keep)) g.value = keep;
+    runState.gamesKey = key;
   }
   function fillModels() {
     const q = $('run-filter').value.trim().toLowerCase(), sel = $('run-model'), keep = sel.value;
@@ -1098,14 +1105,24 @@
       [finite(acct.limit_remaining) ? '$' + fmt(acct.limit_remaining, 2) : (finite(acct.usage) ? '$' + fmt(acct.usage, 2) + ' used' : '–'), finite(acct.limit_remaining) ? 'left on the OpenRouter key' : 'OpenRouter key usage'],
       [st2.queue.filter(i => ['queued', 'planning', 'running'].includes(i.status)).length, 'open requests'],
     ].map(([b, t]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(t)}</span></div>`).join('');
+    fillGames();
     const rows = [...st2.queue].reverse();
+    const chip = s => `<span class="chip ${s === 'running' || s === 'planning' ? 'live' : s === 'finished' ? 'ok' : s === 'queued' ? '' : 'warn'}">${esc(s)}</span>`;
     $('run-queue').innerHTML = `<thead><tr><th>#</th><th>Game</th><th>Model</th><th>Effort</th><th class="r">Episodes</th><th>Status</th><th class="r">Cap</th><th class="r">Spent or held</th><th></th></tr></thead><tbody>${rows.length ? rows.map(i => {
+      if (i.kind === 'add_game') {
+        const name = i.result ? i.result.label : (i.expect ? prettyGame(i.expect) : i.rom_name);
+        const detail = i.status === 'finished' ? `Matched ${esc(i.result.game)}; ${i.result.smoke_run.distinct_frames} distinct frames in the check run` : i.error ? esc(i.error) : (i.status === 'running' ? 'Matching the ROM and checking it on the emulator' : '');
+        return `<tr><td>${i.id}</td><td>${esc(name)}</td><td>Add game</td><td>–</td><td class="r">–</td>
+          <td>${chip(i.status)}${detail ? `<span class="muted small err-line">${detail}</span>` : ''}</td><td class="r">–</td><td class="r">$0</td>
+          <td><div class="row-btns">${i.status === 'finished' && runState.status.games.some(g => g.id === i.result.id) ? `<button data-runit="${esc(i.result.id)}">Run it</button>` : ''}${i.status === 'queued' ? `<button data-cancel="${i.id}">Cancel</button>` : ''}</div></td></tr>`;
+      }
       const open = ['queued', 'planning', 'running'].includes(i.status);
       const cls = i.status === 'running' || i.status === 'planning' ? 'live' : i.status === 'finished' ? 'ok' : i.status === 'queued' ? '' : 'warn';
       return `<tr><td>${i.id}</td><td>${esc((runState.status.games.find(g => g.id === i.game) || {}).label || i.game)}</td><td>${esc(i.model.split('/').pop())}</td><td>${esc(i.effort || 'default')}</td><td class="r">${i.repeats}</td>
         <td><span class="chip ${cls}">${esc(i.status)}</span>${i.stop_requested ? ' <span class="chip warn">stop requested</span>' : ''}</td><td class="r">$${esc(i.budget_usd)}</td><td class="r">${i.spent_or_held_usd ? '$' + fmt(+i.spent_or_held_usd, 4) : '–'}</td>
         <td><div class="row-btns">${i.status !== 'queued' ? `<button data-cohort="${esc(i.cohort)}" data-game="${esc(i.game)}">Episodes</button>` : ''}${open ? `<button data-cancel="${i.id}">${i.status === 'queued' ? 'Cancel' : 'Stop after episode'}</button>` : ''}</div></td></tr>`;
     }).join('') : '<tr><td colspan="9" class="muted">No requests yet.</td></tr>'}</tbody>`;
+    $('run-queue').querySelectorAll('[data-runit]').forEach(b => b.onclick = () => { $('run-game').value = b.dataset.runit; $('run-form').scrollIntoView({behavior: 'smooth'}); });
     $('run-queue').querySelectorAll('[data-cohort]').forEach(b => b.onclick = () => { setGame(b.dataset.game); st.cohort = b.dataset.cohort; setView('runs'); });
     $('run-queue').querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => {
       b.disabled = true;
@@ -1113,6 +1130,53 @@
       renderRunView();
     });
   }
+  // ---------- adding games ----------
+  const prettyGame = g => { const p = g.split('-'); return p.length >= 3 ? p.slice(0, -2).join('-').replace(/(?<=[a-z0-9])(?=[A-Z])/g, ' ') + ' (' + p[p.length - 2] + ')' : g; };
+  async function loadIntegrations() {
+    if (runState.integrations && Date.now() - runState.integrationsAt < 600000) return;
+    try {
+      runState.integrations = (await api('api/integrations')).integrations; runState.integrationsAt = Date.now();
+      $('add-games').innerHTML = runState.integrations.map(x => `<option value="${esc(x.game)}">${esc(prettyGame(x.game))}${x.registered ? ', already added' : ''}</option>`).join('');
+      $('add-game').placeholder = `Search ${runState.integrations.length.toLocaleString()} supported games`;
+      addHint();
+    } catch (err) { $('add-hint').textContent = 'Could not load the supported games list; adding still works by ROM hash.'; }
+  }
+  function addHint() {
+    const v = $('add-game').value.trim(), list = runState.integrations || [];
+    const hit = list.find(x => x.game === v);
+    $('add-hint').textContent = !v ? 'Leave blank to identify the game from the ROM alone.'
+      : hit ? (hit.registered ? `Already in the Game list as ${hit.registered}.` : `${prettyGame(hit.game)} is supported. The ROM must be this game.`)
+      : 'Pick a name from the list, or leave blank.';
+  }
+  async function uploadRom(file, expect) {
+    const q = new URLSearchParams({name: file.name});
+    if (expect) q.set('expect', expect);
+    const r = await fetch(u('api/games/upload?' + q), {method: 'POST', headers: {'Content-Type': 'application/octet-stream', 'X-Lab-Token': $('run-token').value.trim()}, body: file});
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    return data;
+  }
+  $('add-game').oninput = addHint;
+  $('add-form').onsubmit = async ev => {
+    ev.preventDefault();
+    const msg = $('add-message'), file = $('add-file').files[0], path = $('add-path').value.trim(), g = $('add-game').value.trim();
+    const expect = (runState.integrations || []).some(x => x.game === g) ? g : null;
+    if (!file && !path) { msg.className = 'bad'; msg.textContent = 'Choose a ROM file or type its path.'; return; }
+    if (g && runState.integrations && !expect) { msg.className = 'bad'; msg.textContent = 'Pick the game from the list, or leave it blank.'; return; }
+    if (!$('run-token').value.trim()) { msg.className = 'bad'; msg.textContent = 'Enter the access token above first.'; return; }
+    $('add-submit').disabled = true; msg.className = ''; msg.textContent = file ? 'Uploading…' : 'Sending…';
+    try {
+      saveToken($('run-token').value.trim());
+      const item = file ? await uploadRom(file, expect) : await api('api/games', {path, expect});
+      msg.className = 'good';
+      msg.textContent = `Adding as job #${item.id}. The checks take about a minute; the game then appears in the Game list above.`;
+      $('add-file').value = ''; $('add-path').value = '';
+      runState.integrationsAt = 0;
+      renderRunView();
+    } catch (err) { msg.className = 'bad'; msg.textContent = err.message; }
+    $('add-submit').disabled = false;
+  };
+
   $('run-filter').oninput = fillModels;
   $('run-model').onchange = fillEffort;
   $('run-repeats').onchange = estimate;

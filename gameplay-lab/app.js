@@ -27,25 +27,41 @@
   const EPS = LAB.episodes;
   const cache = new Map();
   const waiting = new Map();
+  // Static sites pack each episode's images into a few .bin files; cut them out once per episode.
+  async function unpack(d) {
+    if (!d.packs) return d;
+    const bufs = new Map(), urls = new Map();
+    for (const [name, [pack, off, len, type]] of Object.entries(d.packs)) {
+      if (!bufs.has(pack)) bufs.set(pack, fetch(u(pack)).then(r => { if (!r.ok) throw new Error('Could not load ' + pack); return r.arrayBuffer(); }));
+    }
+    for (const [name, [pack, off, len, type]] of Object.entries(d.packs)) {
+      urls.set(name, URL.createObjectURL(new Blob([(await bufs.get(pack)).slice(off, off + len)], {type})));
+    }
+    const walk = x => Array.isArray(x) ? x.map(walk)
+      : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, walk(v)]))
+      : typeof x === 'string' && urls.has(x) ? urls.get(x) : x;
+    const out = walk(d);
+    delete out.packs;
+    return out;
+  }
   window.LAB_EP = d => {
-    cache.set(d.i, d);
-    (waiting.get(d.i) || []).forEach(f => f(d));
-    waiting.delete(d.i);
+    const done = (ok, value) => { (waiting.get(d.i) || []).forEach(w => w[ok ? 0 : 1](value)); waiting.delete(d.i); };
+    unpack(d).then(r => { cache.set(r.i, r); done(true, r); }, err => done(false, err));
   };
   function load(i) {
     if (cache.has(i)) return Promise.resolve(cache.get(i));
     if (LAB.live) {
       return fetch(u('live/ep/' + String(i).padStart(3, '0') + '.json'), {cache: 'no-store'})
         .then(r => { if (!r.ok) throw new Error('Could not load episode ' + i); return r.json(); })
-        .then(d => { cache.set(i, d); return d; });
+        .then(unpack).then(d => { cache.set(i, d); return d; });
     }
     return new Promise((resolve, reject) => {
       const first = !waiting.has(i);
-      waiting.set(i, [...(waiting.get(i) || []), resolve]);
+      waiting.set(i, [...(waiting.get(i) || []), [resolve, reject]]);
       if (!first) return;
       const s = document.createElement('script');
       s.src = 'data/ep/' + String(i).padStart(3, '0') + '.js';
-      s.onerror = () => reject(new Error('Could not load episode ' + i));
+      s.onerror = () => { (waiting.get(i) || []).forEach(w => w[1](new Error('Could not load episode ' + i))); waiting.delete(i); };
       document.body.appendChild(s);
     });
   }

@@ -178,18 +178,11 @@
   function cohortEps() { return gameEps().filter(e => e.cohort === st.cohort); }
 
   function renderBar() {
-    $('game-tabs').innerHTML = GAMES.map(g => `<button data-game="${g.id}" class="${g.id === st.game && st.view !== 'home' ? 'on' : ''}">${esc(g.label)}<span class="count">${EPS.filter(e => e.game === g.id).length}</span></button>`).join('');
-    $('game-tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
-      stopPlay(); setGame(b.dataset.game);
-      if (st.view === 'home') st.view = 'runs';
-      if (st.view === 'episode') { st.ep = cohortEps()[0]?.i ?? gameEps()[0].i; st.step = 0; }
-      if (st.view === 'compare') st.cmp = [null, null];
-      render();
-    });
+    // no game row: the game is picked on Home; the crumb names it and leads back there
+    const g = game(st.game), crumb = $('crumb');
+    crumb.hidden = st.view === 'home' || st.view === 'run' || !g;
+    if (g) crumb.innerHTML = `<span class="sep" aria-hidden="true">/</span>${esc(g.label)}`;
     document.querySelectorAll('.views button').forEach(b => b.classList.toggle('on', b.dataset.view === st.view));
-    // keep the selected game visible in the scrolling game row
-    const on = $('game-tabs').querySelector('.on'), row = $('game-tabs');
-    if (on && (on.offsetLeft < row.scrollLeft || on.offsetLeft + on.offsetWidth > row.scrollLeft + row.clientWidth)) row.scrollLeft = on.offsetLeft - 12;
   }
   function setView(v) {
     stopPlay(); stopCmp();
@@ -199,7 +192,11 @@
   }
   document.querySelectorAll('.views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 
+  let shown = '';
   function render() {
+    // a new view or game starts at the top of the page
+    if (shown && shown !== st.view + '|' + st.game) window.scrollTo(0, 0);
+    shown = st.view + '|' + st.game;
     renderBar();
     for (const v of ['home', 'runs', 'episode', 'compare', 'run']) $(v + '-view').hidden = st.view !== v;
     if (st.view === 'home') renderHome();
@@ -256,7 +253,7 @@
       return `<article class="game-card">
         <a class="pic ${g.id !== 'veloren' ? 'pixel' : ''}" href="#/runs/${esc(g.id)}/${encodeURIComponent(g.default_cohort_id || '')}" aria-label="${esc(g.label)} runs">${pic}</a>
         <div class="body">
-          <div class="top"><h3>${esc(g.label)}</h3>${g.test ? `<span class="chip ${/strategy/i.test(g.test) ? 'ok' : ''}">${esc(g.test)}</span>` : ''}${live ? `<span class="chip live">${live} live</span>` : ''}</div>
+          <div class="top"><h3><a href="#/runs/${esc(g.id)}/${encodeURIComponent(g.default_cohort_id || '')}">${esc(g.label)}</a></h3>${g.test ? `<span class="chip ${/strategy/i.test(g.test) ? 'ok' : ''}">${esc(g.test)}</span>` : ''}${live ? `<span class="chip live">${live} live</span>` : ''}</div>
           <p class="muted small">${mine.length} episodes · latest run ${esc(g.default_cohort_id || '–')}${when ? ' · ' + when : ''}</p>
           ${!best ? '<p class="muted small">No scored episodes yet.</p>'
             : best.tie ? `<p class="best">All ${best.tie} scored episodes in the latest run scored <b class="score">${fmt(best.v)}</b> <span class="muted small">${esc(def?.label || 'recorded reward')}</span></p>`

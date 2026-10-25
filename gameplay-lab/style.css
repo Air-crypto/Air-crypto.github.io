@@ -281,6 +281,19 @@ dialog::backdrop { background: rgba(10, 18, 28, .45); }
 .live-badge { font-size: 13px; color: #a9b7c6; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .live-badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #36b77c; }
 .live-badge.stale::before { background: #ec6464; }
+.bar button.live-badge { padding: 15px 8px 13px; font-size: 13px; }
+.bar button.live-badge[aria-expanded="true"] { color: #fff; }
+.live-panel { position: fixed; top: 56px; right: 16px; z-index: 30; width: min(560px, calc(100vw - 32px)); max-height: 70vh; overflow: auto;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.18); padding: 12px 14px; }
+.live-panel h3 { margin: 0 0 8px; font-size: 15px; }
+.live-panel ul { list-style: none; margin: 0; padding: 0; }
+.live-panel li + li { border-top: 1px solid var(--line); }
+.live-panel button.live-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; width: 100%; text-align: left; background: none; border: 0;
+  border-radius: 6px; padding: 8px 6px; color: var(--ink); cursor: pointer; }
+.live-panel button.live-row:hover, .live-panel button.live-row:focus-visible { background: var(--bg); }
+.live-row b { font-weight: 600; }
+.live-row .meta { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
+.live-row .when { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .chip.live { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .live-note { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
 .live-note b { color: var(--accent); font-weight: 600; }

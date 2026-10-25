@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=f0da068f4b0e">
+<link rel="stylesheet" href="style.css?v=29ca5bad0702">
 <script>window.LAB_INDEX = function (d) { window.LAB = d; };</script>
 </head>
 <body>
@@ -26,7 +26,8 @@
     <button data-view="compare">Compare</button>
     <button data-view="run" id="run-tab" hidden>Run</button>
   </nav>
-  <span id="live-badge" class="live-badge" hidden></span>
+  <button id="live-badge" class="live-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="live-panel" title="Show the runs playing now"></button>
+  <div id="live-panel" class="live-panel" role="dialog" aria-label="Runs playing now" hidden></div>
   <button id="keys-btn" class="ghost keys-btn" aria-haspopup="dialog">Keys</button>
 </header>
 
@@ -200,6 +201,6 @@
 </dialog>
 
 <script src="data/index.js"></script>
-<script src="app.js?v=e46f72155ffa"></script>
+<script src="app.js?v=4bc31a473b46"></script>
 </body>
 </html>

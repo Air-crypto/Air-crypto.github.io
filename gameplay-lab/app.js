@@ -999,6 +999,7 @@
       $('live-badge').classList.remove('stale');
       $('live-badge').textContent = 'Live, ' + EPS.filter(e => e.live?.running).length + ' running';
       renderBar();
+      renderLivePanel();
       if (st.view === 'runs') renderRuns();
       if (st.view === 'episode' && changed(st.ep)) await refreshEpisode();
       if (st.view === 'compare' && st.cmp.some(changed)) { st.cmp.forEach(i => cache.delete(i)); await renderCompare(); }
@@ -1020,6 +1021,35 @@
     if (!pollTimer) pollTimer = setInterval(poll, LAB.poll_ms || 2000);
   }
   if (LAB.live) startLive();
+
+  // ---------- running-now panel (opened from the live badge) ----------
+  function renderLivePanel() {
+    const panel = $('live-panel');
+    if (panel.hidden) return;
+    const running = EPS.filter(e => e.live?.running).sort((a, b) => (game(a.game)?.label || '').localeCompare(game(b.game)?.label || '') || modelName(a).localeCompare(modelName(b)));
+    panel.innerHTML = `<h3>Playing now (${running.length})</h3>` + (running.length ? `<ul>${running.map(e => {
+      const r = e.returns?.[game(e.game)?.default_reward_id] || e.returns?.raw || {};
+      const score = finite(r.observed) ? `, reward so far ${fmt(r.observed)}` : '';
+      return `<li><button class="live-row" data-i="${e.i}"><span><b>${esc(game(e.game)?.label || e.game)}</b> · ${esc(modelName(e))} <span class="chip">${esc(e.effort)}</span></span>
+        <span class="when">${dur(e.duration_ms)}</span><span class="meta">${esc(e.cohort)} · ${e.steps} steps${score}</span></button></li>`;
+    }).join('')}</ul>` : '<p class="muted">Nothing is playing right now. Finished runs stay under each game.</p>');
+    panel.querySelectorAll('.live-row').forEach(b => b.onclick = () => {
+      const e = EPS[+b.dataset.i];
+      closeLivePanel();
+      setGame(e.game); st.cohort = e.cohort; st.ep = e.i; st.step = 0;
+      setView('episode');
+    });
+  }
+  function closeLivePanel() { $('live-panel').hidden = true; $('live-badge').setAttribute('aria-expanded', 'false'); }
+  $('live-badge').onclick = ev => {
+    ev.stopPropagation();
+    const open = $('live-panel').hidden;
+    $('live-panel').hidden = !open;
+    $('live-badge').setAttribute('aria-expanded', String(open));
+    renderLivePanel();
+  };
+  document.addEventListener('click', ev => { if (!$('live-panel').hidden && !ev.target.closest('#live-panel')) closeLivePanel(); });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('live-panel').hidden) closeLivePanel(); });
 
   // The hosted page shows live data when live.json names a reachable live server.
   async function tryRemoteLive() {

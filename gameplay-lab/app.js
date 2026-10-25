@@ -1151,7 +1151,7 @@
       if (!cfg.url) return;
       const base = cfg.url.replace(/\/?$/, '/');
       const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), 5000);
+      const timer = setTimeout(() => ctl.abort(), 15000);   // the live index takes longer while many runs play
       const idx = await (await fetch(base + 'live/index.json', {cache: 'no-store', signal: ctl.signal})).json();
       clearTimeout(timer);
       const key = i => i != null && EPS[i] ? EPS[i].game + '|' + EPS[i].id : null;

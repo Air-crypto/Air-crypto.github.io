@@ -4,23 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gameplay Lab episodes</title>
-<meta name="description" content="Step through screenshot-only agent episodes in Airstriker, Shattered Pixel Dungeon and Veloren: frames, actions, model calls, timing and deterministic rewards on one timeline.">
+<meta name="description" content="Screenshot-only AI models playing retro games and Veloren: every frame, action, model call, timing and deterministic reward, step by step.">
 <meta name="theme-color" content="#1b2735">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b2735'/%3E%3Cpath d='M4 22h6l3-12 4 16 3-8h8' fill='none' stroke='%23f0a63a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=29ca5bad0702">
+<link rel="stylesheet" href="style.css?v=d4a9817885e5">
 <script>window.LAB_INDEX = function (d) { window.LAB = d; };</script>
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="#/runs" aria-label="Gameplay Lab, back to runs">
+  <a class="brand" href="#/home" aria-label="Gameplay Lab home">
     <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 21h6l3-11 4 15 3-8h10"/></svg>
     <span>Gameplay Lab</span>
   </a>
   <nav id="game-tabs" class="games" aria-label="Game"></nav>
   <nav class="views" aria-label="View">
+    <button data-view="home">Home</button>
     <button data-view="runs">Runs</button>
     <button data-view="episode">Episode</button>
     <button data-view="compare">Compare</button>
@@ -32,6 +33,29 @@
 </header>
 
 <main>
+  <!-- Home -->
+  <section id="home-view" class="view" hidden>
+    <div class="home-hero">
+      <div class="home-intro">
+        <p class="eyebrow">Gameplay Lab</p>
+        <h1>How well do AI models play games from screenshots alone?</h1>
+        <p class="lede">Each model sees the latest two screenshots and presses buttons with three tools: look, act and wait. Rewards come from the game's own memory through fixed Python code, never from another model. Every frame, model call, action and reward is kept, so you can step through any run.</p>
+        <div class="home-actions">
+          <a id="home-browse" class="btn primary" href="#/runs">Browse runs</a>
+          <a id="home-compare" class="btn" href="#/runs">Compare two runs</a>
+          <a id="home-run" class="btn" href="#/run" hidden>Run a model</a>
+        </div>
+      </div>
+      <div id="home-stats" class="stats home-stats"></div>
+    </div>
+    <div id="home-live" class="home-live" hidden></div>
+    <h2 class="home-h">Games</h2>
+    <div id="home-games" class="game-cards"></div>
+    <h2 class="home-h">Latest runs</h2>
+    <p class="lede home-sub">One row per run. Older and stopped runs stay available under each game.</p>
+    <div class="table-wrap"><table id="home-cohorts" class="runs"></table></div>
+  </section>
+
   <!-- Runs -->
   <section id="runs-view" class="view" hidden>
     <div class="runs-head">
@@ -201,6 +225,6 @@
 </dialog>
 
 <script src="data/index.js"></script>
-<script src="app.js?v=c1152355e4d7"></script>
+<script src="app.js?v=fe327e2c0d17"></script>
 </body>
 </html>

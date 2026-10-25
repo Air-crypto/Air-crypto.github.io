@@ -129,7 +129,7 @@
   }
   const firstGame = GAMES[0].id;
   const st = {
-    view: 'runs', game: firstGame, cohort: game(firstGame).default_cohort_id, reward: game(firstGame).default_reward_id,
+    view: 'home', game: firstGame, cohort: game(firstGame).default_cohort_id, reward: game(firstGame).default_reward_id,
     ep: null, step: 0, axis: 'wall', media: 'frame', tab: 'step', playing: null,
     cmp: [null, null], cmpAxis: 'wall', cmpPos: 0, cmpTimer: null,
   };
@@ -145,11 +145,13 @@
     if (st.view === 'episode' && st.ep != null) h = '#/ep/' + st.ep + '/' + st.step;
     if (st.view === 'compare' && st.cmp[0] != null) h = '#/cmp/' + st.cmp[0] + '/' + st.cmp[1];
     if (st.view === 'run') h = '#/run';
+    if (st.view === 'home') h = '#/home';
     if (location.hash !== h) history.replaceState(null, '', h);
   }
   function readHash() {
     const p = location.hash.replace(/^#\/?/, '').split('/');
     if (p[0] === 'run') { st.view = 'run'; return; }
+    if (p[0] === 'home' || p[0] === '') { st.view = 'home'; return; }
     if (p[0] === 'ep' && EPS[+p[1]]) {
       const e = EPS[+p[1]];
       setGame(e.game); st.cohort = e.cohort; st.view = 'episode'; st.ep = e.i; st.step = +p[2] || 0;
@@ -176,9 +178,10 @@
   function cohortEps() { return gameEps().filter(e => e.cohort === st.cohort); }
 
   function renderBar() {
-    $('game-tabs').innerHTML = GAMES.map(g => `<button data-game="${g.id}" class="${g.id === st.game ? 'on' : ''}">${esc(g.label)}<span class="count">${EPS.filter(e => e.game === g.id).length}</span></button>`).join('');
+    $('game-tabs').innerHTML = GAMES.map(g => `<button data-game="${g.id}" class="${g.id === st.game && st.view !== 'home' ? 'on' : ''}">${esc(g.label)}<span class="count">${EPS.filter(e => e.game === g.id).length}</span></button>`).join('');
     $('game-tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
       stopPlay(); setGame(b.dataset.game);
+      if (st.view === 'home') st.view = 'runs';
       if (st.view === 'episode') { st.ep = cohortEps()[0]?.i ?? gameEps()[0].i; st.step = 0; }
       if (st.view === 'compare') st.cmp = [null, null];
       render();
@@ -195,12 +198,84 @@
 
   function render() {
     renderBar();
-    for (const v of ['runs', 'episode', 'compare', 'run']) $(v + '-view').hidden = st.view !== v;
+    for (const v of ['home', 'runs', 'episode', 'compare', 'run']) $(v + '-view').hidden = st.view !== v;
+    if (st.view === 'home') renderHome();
     if (st.view === 'runs') renderRuns();
     if (st.view === 'episode') openEpisode(st.ep, st.step);
     if (st.view === 'compare') renderCompare();
     if (st.view === 'run') renderRunView();
     writeHash();
+  }
+
+  // ---------- home ----------
+  function bestOf(eps, g) {
+    const id = g.default_reward_id;
+    let best = null, values = [];
+    for (const e of eps) {
+      const r = e.returns?.[id] || e.returns?.raw || {};
+      const v = finite(r.total) ? r.total : r.observed;
+      if (!finite(v)) continue;
+      values.push(v);
+      if (!best || v > best.v) best = {e, v};
+    }
+    if (best) {
+      best.tie = values.length > 1 && values.every(v => v === best.v) ? values.length : 0;
+      best.shared = values.filter(v => v === best.v).length;
+    }
+    return best;
+  }
+  const day = t => finite(t) ? new Date(t * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) : '';
+  function renderHome() {
+    const models = new Set(EPS.map(e => e.model));
+    const spend = EPS.reduce((a, e) => a + (finite(e.cost) ? e.cost : 0), 0);
+    const running = EPS.filter(e => e.live?.running);
+    const stats = [[GAMES.length, 'games'], [EPS.length.toLocaleString('en-US'), 'episodes'], [models.size, 'models'],
+      [EPS.reduce((a, e) => a + (e.steps || 0), 0).toLocaleString('en-US'), 'observations'], ['$' + fmt(spend, 0), 'model spend']];
+    const current = new Set(EPS.filter(e => cohortInfo(e.cohort).status === 'current').map(e => e.cohort));
+    stats.push(LAB.live ? [running.length, 'playing now'] : [current.size, 'latest runs']);
+    $('home-stats').innerHTML = stats.map(([b, t]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(t)}</span></div>`).join('');
+    $('home-run').hidden = !LAB.live;
+    const first = GAMES[0];
+    $('home-browse').href = '#/runs/' + first.id + '/' + encodeURIComponent(first.default_cohort_id || '');
+    $('home-compare').onclick = ev => { ev.preventDefault(); setGame(first.id); setView('compare'); };
+
+    $('home-live').hidden = !running.length;
+    $('home-live').innerHTML = running.length ? `<h2 class="home-h">Playing now <span class="chip live">${running.length}</span></h2><div class="live-strip">${
+      running.slice(0, 12).map(e => `<a class="live-card" href="#/ep/${e.i}/0"><b>${esc(game(e.game)?.label || e.game)}</b><span>${esc(modelName(e))} <span class="chip">${esc(e.effort)}</span></span><span class="muted">${dur(e.duration_ms)} · ${e.steps} steps</span></a>`).join('')
+    }${running.length > 12 ? `<span class="muted">and ${running.length - 12} more</span>` : ''}</div>` : '';
+
+    $('home-games').innerHTML = GAMES.map(g => {
+      const mine = EPS.filter(e => e.game === g.id), current = mine.filter(e => e.cohort === g.default_cohort_id);
+      const best = bestOf(current, g), def = rewardDef(g.id, g.default_reward_id);
+      const when = day(cohortInfo(g.default_cohort_id).started_at || current[0]?.started_at);
+      const live = mine.filter(e => e.live?.running).length;
+      const pic = g.thumb ? `<img src="${esc(u(g.thumb))}" alt="${esc(g.label)} screenshot" loading="lazy">` : `<span class="ph">${esc(g.label)}</span>`;
+      return `<article class="game-card">
+        <a class="pic ${g.id !== 'veloren' ? 'pixel' : ''}" href="#/runs/${esc(g.id)}/${encodeURIComponent(g.default_cohort_id || '')}" aria-label="${esc(g.label)} runs">${pic}</a>
+        <div class="body">
+          <div class="top"><h3>${esc(g.label)}</h3>${g.test ? `<span class="chip ${/strategy/i.test(g.test) ? 'ok' : ''}">${esc(g.test)}</span>` : ''}${live ? `<span class="chip live">${live} live</span>` : ''}</div>
+          <p class="muted small">${mine.length} episodes · latest run ${esc(g.default_cohort_id || '–')}${when ? ' · ' + when : ''}</p>
+          ${!best ? '<p class="muted small">No scored episodes yet.</p>'
+            : best.tie ? `<p class="best">All ${best.tie} scored episodes in the latest run scored <b class="score">${fmt(best.v)}</b> <span class="muted small">${esc(def?.label || 'recorded reward')}</span></p>`
+            : `<p class="best">Best in latest run: <b>${esc(modelName(best.e))}</b> <span class="chip">${esc(best.e.effort)}</span> <b class="score">${fmt(best.v)}</b> <span class="muted small">${esc(def?.label || 'recorded reward')}${best.shared > 1 ? `, shared by ${best.shared} episodes` : ''}</span></p>`}
+          ${g.note ? `<p class="note">${esc(g.note)}</p>` : ''}
+          <p class="links"><a href="#/runs/${esc(g.id)}/${encodeURIComponent(g.default_cohort_id || '')}">All runs</a>${best && !best.tie ? ` · <a href="#/ep/${best.e.i}/0">Watch the best episode</a>` : ''}</p>
+        </div>
+      </article>`;
+    }).join('');
+
+    const cohorts = new Map();
+    for (const e of EPS) { if (!cohorts.has(e.cohort)) cohorts.set(e.cohort, []); cohorts.get(e.cohort).push(e); }
+    const rows = [...cohorts].filter(([c]) => cohortInfo(c).status === 'current')
+      .sort((a, b) => (cohortInfo(b[0]).started_at || b[1][0].started_at || 0) - (cohortInfo(a[0]).started_at || a[1][0].started_at || 0));
+    $('home-cohorts').innerHTML = `<thead><tr><th>Run</th><th>Game</th><th>Started</th><th class="num">Episodes</th><th class="num">Models</th><th>Best</th><th class="num">Spend</th></tr></thead><tbody>${
+      rows.map(([c, list]) => {
+        const g = game(list[0].game), best = bestOf(list, g), cost = list.reduce((a, e) => a + (finite(e.cost) ? e.cost : 0), 0);
+        const live = list.some(e => e.live?.running);
+        return `<tr><td><a href="#/runs/${esc(g.id)}/${encodeURIComponent(c)}">${esc(c)}</a>${live ? ' <span class="chip live">live</span>' : ''}</td><td>${esc(g.label)}</td>
+          <td>${day(cohortInfo(c).started_at || list[0].started_at)}</td><td class="num">${list.length}</td><td class="num">${new Set(list.map(e => e.model)).size}</td>
+          <td>${!best ? '–' : best.tie ? `all ${fmt(best.v)}` : `${esc(modelName(best.e))} <span class="chip">${esc(best.e.effort)}</span> ${fmt(best.v)}`}</td><td class="num">${cost ? usd(cost) : '–'}</td></tr>`;
+      }).join('')}</tbody>`;
   }
 
   // ---------- runs ----------
@@ -1017,6 +1092,7 @@
       renderBar();
       renderLivePanel();
       if (st.view === 'runs') renderRuns();
+      if (st.view === 'home') renderHome();
       if (st.view === 'episode' && changed(st.ep)) await refreshEpisode();
       if (st.view === 'compare' && st.cmp.some(changed)) { st.cmp.forEach(i => cache.delete(i)); await renderCompare(); }
       if (st.view === 'run' && !runState.busy) { try { runState.status = await api('api/status'); renderQueue(); } catch (e) { /* keep last */ } }

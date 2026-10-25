@@ -80,17 +80,21 @@ code, pre { font-family: var(--mono); font-size: 12px; }
 [hidden] { display: none !important; }
 
 /* Top bar */
-.bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 18px; padding: 0 20px; height: 52px; background: var(--bar); color: var(--bar-ink); }
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bar); color: var(--bar-ink); }
+.bar-top { display: flex; align-items: center; gap: 18px; padding: 0 20px; height: 50px; }
+.bar-games { display: flex; align-items: center; gap: 6px; padding: 0 20px; border-top: 1px solid rgba(255, 255, 255, .07); background: rgba(255, 255, 255, .03); }
+.row-label { flex: none; color: #7f8fa0; font-family: var(--cond); font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .brand { display: flex; align-items: center; gap: 9px; color: inherit; text-decoration: none; font-weight: 700; font-size: 17px; white-space: nowrap; }
 .brand svg { width: 26px; height: 26px; fill: none; stroke: #f0a63a; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
 .games, .views { display: flex; gap: 2px; }
-.games { margin-left: 8px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.games { min-width: 0; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3a4a5c transparent; }
+.bar .games button { padding: 9px 10px 8px; font-size: 14.5px; }
 .bar button { white-space: nowrap; }
 .bar button { border: 0; background: transparent; color: #a9b7c6; padding: 15px 10px 13px; border-radius: 0; border-bottom: 2px solid transparent; font-weight: 500; }
 .bar button:hover { color: #fff; }
 .bar button.on { color: #fff; border-bottom-color: #f0a63a; }
 .bar .count { color: #7f8fa0; font-size: 12px; margin-left: 4px; }
-.views { margin-left: auto; }
+.views { margin: 0 auto 0 22px; }
 .keys-btn { color: #a9b7c6; }
 
 main { max-width: 1600px; margin: 0 auto; padding: 22px 20px 48px; }
@@ -176,7 +180,7 @@ th.r, td.r { text-align: right; }
 .transport .play { min-width: 70px; background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 600; }
 .clock { font-size: 13px; color: var(--muted); min-width: 180px; text-align: right; }
 
-.inspector { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; max-height: calc(100vh - 76px); position: sticky; top: 64px; min-width: 0; }
+.inspector { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; max-height: calc(100vh - 108px); position: sticky; top: 100px; min-width: 0; }
 .tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; flex: none; }
 .tabs button { border: 0; border-radius: 0; background: transparent; padding: 10px 12px 8px; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; font-size: 14px; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
@@ -256,10 +260,11 @@ dialog::backdrop { background: rgba(10, 18, 28, .45); }
   .inspector { position: static; max-height: none; }
 }
 @media (max-width: 760px) {
-  .bar { position: static; height: auto; flex-wrap: wrap; gap: 0 10px; padding: 6px 16px 0; }
+  .bar { position: static; }
+  .bar-top { height: auto; flex-wrap: wrap; gap: 0 10px; padding: 6px 16px 0; }
+  .bar-games { padding: 0 16px; }
   .brand { width: 100%; padding: 6px 0 2px; }
-  .games { margin-left: 0; overflow-x: auto; }
-  .views { margin-left: 0; }
+  .views { margin: 0; }
   .bar button { padding: 10px 8px 9px; font-size: 14px; }
   .keys-btn { display: none; }
   main { padding: 16px 16px 40px; }
@@ -283,7 +288,7 @@ dialog::backdrop { background: rgba(10, 18, 28, .45); }
 .live-badge.stale::before { background: #ec6464; }
 .bar button.live-badge { padding: 15px 8px 13px; font-size: 13px; }
 .bar button.live-badge[aria-expanded="true"] { color: #fff; }
-.live-panel { position: fixed; top: 56px; right: 16px; z-index: 30; width: min(560px, calc(100vw - 32px)); max-height: 70vh; overflow: auto;
+.live-panel { position: fixed; top: 94px; right: 16px; z-index: 30; width: min(560px, calc(100vw - 32px)); max-height: 70vh; overflow: auto;
   background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.18); padding: 12px 14px; }
 .live-panel h3 { margin: 0 0 8px; font-size: 15px; }
 .live-panel ul { list-style: none; margin: 0; padding: 0; }

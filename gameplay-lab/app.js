@@ -187,6 +187,9 @@
       render();
     });
     document.querySelectorAll('.views button').forEach(b => b.classList.toggle('on', b.dataset.view === st.view));
+    // keep the selected game visible in the scrolling game row
+    const on = $('game-tabs').querySelector('.on'), row = $('game-tabs');
+    if (on && (on.offsetLeft < row.scrollLeft || on.offsetLeft + on.offsetWidth > row.scrollLeft + row.clientWidth)) row.scrollLeft = on.offsetLeft - 12;
   }
   function setView(v) {
     stopPlay(); stopCmp();

@@ -10,26 +10,31 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=d4a9817885e5">
+<link rel="stylesheet" href="style.css?v=114a8ac55322">
 <script>window.LAB_INDEX = function (d) { window.LAB = d; };</script>
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="#/home" aria-label="Gameplay Lab home">
-    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 21h6l3-11 4 15 3-8h10"/></svg>
-    <span>Gameplay Lab</span>
-  </a>
-  <nav id="game-tabs" class="games" aria-label="Game"></nav>
-  <nav class="views" aria-label="View">
-    <button data-view="home">Home</button>
-    <button data-view="runs">Runs</button>
-    <button data-view="episode">Episode</button>
-    <button data-view="compare">Compare</button>
-    <button data-view="run" id="run-tab" hidden>Run</button>
-  </nav>
-  <button id="live-badge" class="live-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="live-panel" title="Show the runs playing now"></button>
-  <div id="live-panel" class="live-panel" role="dialog" aria-label="Runs playing now" hidden></div>
-  <button id="keys-btn" class="ghost keys-btn" aria-haspopup="dialog">Keys</button>
+  <div class="bar-top">
+    <a class="brand" href="#/home" aria-label="Gameplay Lab home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 21h6l3-11 4 15 3-8h10"/></svg>
+      <span>Gameplay Lab</span>
+    </a>
+    <nav class="views" aria-label="View">
+      <button data-view="home">Home</button>
+      <button data-view="runs">Runs</button>
+      <button data-view="episode">Episode</button>
+      <button data-view="compare">Compare</button>
+      <button data-view="run" id="run-tab" hidden>Run</button>
+    </nav>
+    <button id="live-badge" class="live-badge" hidden aria-haspopup="true" aria-expanded="false" aria-controls="live-panel" title="Show the runs playing now"></button>
+    <div id="live-panel" class="live-panel" role="dialog" aria-label="Runs playing now" hidden></div>
+    <button id="keys-btn" class="ghost keys-btn" aria-haspopup="dialog">Keys</button>
+  </div>
+  <div class="bar-games">
+    <span class="row-label">Game</span>
+    <nav id="game-tabs" class="games" aria-label="Game"></nav>
+  </div>
 </header>
 
 <main>
@@ -225,6 +230,6 @@
 </dialog>
 
 <script src="data/index.js"></script>
-<script src="app.js?v=f16c419ba3cb"></script>
+<script src="app.js?v=91ce0456185a"></script>
 </body>
 </html>

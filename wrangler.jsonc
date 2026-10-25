@@ -1,0 +1,9 @@
+// Cloudflare Workers static assets: serve this repo as a site (mirror of the GitHub Pages site).
+{
+  "name": "air-crypto-github-io",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./",
+    "not_found_handling": "404-page"
+  }
+}

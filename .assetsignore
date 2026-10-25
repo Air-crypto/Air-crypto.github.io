@@ -1,0 +1,8 @@
+# Not part of the site; .git also holds pack files over the 25 MiB asset limit
+.git
+.github
+.gitignore
+.assetsignore
+wrangler.jsonc
+node_modules
+README.md

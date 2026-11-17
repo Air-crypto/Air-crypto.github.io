@@ -1,38 +1,38 @@
-# Arihan's little corner
+# Arihan's tree
 
-[air-crypto.github.io](https://air-crypto.github.io/) is a quiet, interactive personal website: an original stippled tree, a field of grasses, drifting particles, and branches into work, projects, life, and contact. The monochrome botanical direction is inspired by [natochi.cv](https://natochi.cv/); the scene is drawn procedurally from original code.
+[air-crypto.github.io](https://air-crypto.github.io/) is a continuous landscape: follow growing branches into work, projects, and life, then scroll past the grass into roots and soil. The visual direction follows [natochi.cv](https://natochi.cv/), with independently written procedural scenery and Arihan's own content and photos.
 
 ## Run locally
 
-This is a static site with no build step or package dependencies.
+This is a static site with no build step.
 
 ```sh
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-Open http://127.0.0.1:8765. A web server is needed for the portfolio panels to load their content.
+Open http://127.0.0.1:8765. Serve over HTTP so the content pages can be fetched.
 
 ## Editing
 
-- `index.html`: homepage, branch links, music controls, and panel shell.
-- `grove.css`: scene layout, responsive presentation, and panel palette.
-- `grove.js`: seeded canvas illustration, animation lifecycle, reduced motion, and music.
-- `grove-panels.js`: portfolio content loading, deep links, navigation, and dialogs.
-- `portfolio.html`, `projects.html`, `life.html`, `gallery.html`, and `hockey.html`: canonical content. These remain usable as standalone pages.
-- `styles.css` and `scripts.js`: shared reading styles and accessible photo/video viewers.
-- `desk.css`: shared panel base styles and the previous workbench layout.
-- `workbench.html` and `desk.js`: preserved previous homepage.
-- `thumbs/`: small gallery images; full-size originals load when opened.
-- `assets/kalam-light.woff2`: self-hosted handwritten font; license in `assets/Kalam-OFL.txt`.
+- `index.html`: landscape shell, accessible branch navigation, music controls.
+- `forest-scene.js`: seeded tree, growing branches, grasses, roots, soil, animation and text-overlap fading.
+- `forest.js`: nested routes, content loading, history, and halftone photo treatment.
+- `forest.css`: Libre Franklin typography, rough underlines, framing and responsive layout.
+- `music.js`: official **Unethical — Faouzia** YouTube player.
+- `portfolio.html`, `projects.html`, `life.html`, `gallery.html`, `hockey.html`: canonical content, also usable as standalone pages.
+- `assets/libre-franklin.woff2`: self-hosted Libre Franklin; license in `assets/Libre-Franklin-OFL.txt`.
+- `workbench.html`, `desk.css`, `desk.js`: preserved previous homepage.
 
-Panels reuse the standalone pages so descriptions stay consistent. After changing content, bump `pageVersion` in `grove-panels.js` and its versioned URL in `index.html`. The old workbench uses its own page version in `desk.js`.
+Articles live in the landscape itself. They do not open portfolio side panels or tabs. Photos use a two-color halftone treatment; hover, keyboard focus, or tap reveals color. Text stays selectable and links are native elements. Scenery fades only where it crosses text.
 
-## Music and accessibility
+When updating content, change the canonical HTML page and bump the fetch version in `forest.js`. Bump the asset query versions in `index.html` after JS/CSS changes.
 
-The player loads the official **Unethical — Faouzia** YouTube video only after a visitor clicks play. No audio is redistributed. A visible player and direct YouTube link are available; some browsers require a second tap in the video. Closing the music panel pauses playback.
+## Navigation and music
 
-Navigation works without JavaScript via the standalone links. Native dialogs support Escape, keyboard focus, and photo enlargement. Scene animation can be paused, respects reduced-motion preferences, and stops while the tab is hidden. Mobile artwork uses separate horizontal proportions to keep branch labels readable.
+Nested routes are shareable, for example `#projects/systems`, `#projects/ebike`, and `#life/flights`. The back arrow and Escape return to the parent branch. Browser history works. Standalone pages are available through the no-JavaScript fallback.
 
-## Deployment and verification
+The scene respects reduced-motion preferences, can be paused with the top-right keyboard-accessible control, and stops animating in hidden tabs. Branch and article layouts adapt to narrow screens.
 
-GitHub Pages serves static files from `main`. See `PROGRESS.md` for verification evidence. The previous homepage is available at [workbench.html](https://air-crypto.github.io/workbench.html).
+The official YouTube player loads only after clicking play. No audio is redistributed. Playback may require a second tap in the video; a direct YouTube link is included. Closing the player pauses playback.
+
+GitHub Pages serves the static site from `main`.

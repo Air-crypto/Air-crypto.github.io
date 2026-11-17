@@ -1,64 +1,51 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A little corner of the internet by Arihan Yadav. Machine learning, software, hardware, and everything in between.">
-    <link rel="canonical" href="https://air-crypto.github.io/">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Arihan Yadav — A Little Corner">
-    <meta property="og:description" content="Projects, research, and life at the intersection of machine learning, software, and hardware.">
-    <meta property="og:url" content="https://air-crypto.github.io/">
-    <meta property="og:image" content="https://air-crypto.github.io/assets/social-card.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#252426">
-    <title>Arihan Yadav — A Little Corner</title>
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=7">
-    <link rel="stylesheet" href="desk.css?v=14">
-    <link rel="stylesheet" href="grove.css?v=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Arihan Yadav. Machine learning, software, hardware, and life in between. Follow a branch and look around.">
+<title>Arihan Yadav</title>
+<link rel="canonical" href="https://air-crypto.github.io/">
+<meta property="og:title" content="Arihan Yadav">
+<meta property="og:description" content="Machine learning, software, hardware, and life in between.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://air-crypto.github.io/">
+<meta property="og:image" content="https://air-crypto.github.io/thumbs/selfie.jpg">
+<meta name="theme-color" content="#2a282c">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="forest.css?v=2">
 </head>
-<body class="grove-page">
-    <a class="skip-link" href="#branches">Skip to navigation</a>
-    <main id="grove" class="grove" aria-label="Arihan's little corner of the internet">
-        <div class="scene" aria-hidden="true">
-            <canvas id="sky"></canvas>
-            <div class="tree-wrap"><canvas id="tree"></canvas></div>
-            <canvas id="meadow"></canvas>
-        </div>
-        <div class="site-signature"><h1>Arihan Yadav</h1><p>a little corner of the internet.</p></div>
-        <div class="location-note">Madison, WI <span aria-hidden="true">↗</span></div>
-        <nav id="branches" class="branches" aria-label="Explore my world" tabindex="-1">
-            <a class="branch branch-work" href="portfolio.html#experience" data-open="experience"><span>my work</span><svg viewBox="0 0 100 20" aria-hidden="true"><path d="M2 6 Q42 16 96 10 M89 5 L97 10 L88 14"/></svg></a>
-            <a class="branch branch-projects" href="projects.html" data-open="projects"><svg viewBox="0 0 100 20" aria-hidden="true"><path d="M3 14 Q48 4 98 9 M11 9 L3 14 L13 17"/></svg><span>things I've built</span></a>
-            <a class="branch branch-about" href="portfolio.html#aboutMe" data-open="about"><span>a little about me</span><svg viewBox="0 0 100 20" aria-hidden="true"><path d="M2 13 Q50 19 97 6 M89 3 L97 6 L90 13"/></svg></a>
-            <a class="branch branch-life" href="life.html" data-open="life"><svg viewBox="0 0 100 20" aria-hidden="true"><path d="M2 8 Q55 18 97 6 M11 3 L2 8 L11 13"/></svg><span>life &amp; little things</span></a>
-            <a class="branch branch-contact" href="mailto:apyadav@wisc.edu" data-open="contact"><span>say hello</span><svg viewBox="0 0 100 20" aria-hidden="true"><path d="M2 4 Q52 19 96 12 M87 7 L97 12 L88 17"/></svg></a>
-        </nav>
-        <div class="ground-note"><span>stay a little. look around.</span><button id="motion-toggle" type="button" aria-pressed="false" aria-label="Pause scene animation">pause the breeze <span aria-hidden="true">Ⅱ</span></button></div>
-        <aside class="music" aria-label="Music player">
-            <p class="music-note">a song for your stay <span aria-hidden="true">↴</span></p>
-            <div id="music-panel" class="music-panel" hidden>
-                <div class="music-panel-heading"><span>UNETHICAL — Faouzia</span><button id="music-close" aria-label="Close player and pause music" type="button">×</button></div>
-                <div id="youtube-player"></div>
-                <p id="music-status" role="status">Loading the official music video…</p>
-                <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer">Listen on YouTube ↗</a>
-            </div>
-            <div class="music-bar">
-                <button id="music-toggle" type="button" aria-label="Play Unethical by Faouzia" aria-expanded="false" aria-controls="music-panel"><span id="play-icon" aria-hidden="true">▶</span><span class="song-title">UNETHICAL <span>· Faouzia</span></span><span class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
-                <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer" aria-label="Open Unethical by Faouzia on YouTube">↗</a>
-            </div>
-        </aside>
-        <noscript><p class="no-script">Follow a branch to open its page. Music is available on YouTube.</p></noscript>
-    </main>
-    <dialog id="portfolio-window" class="portfolio-window" aria-labelledby="window-title">
-        <div class="window-bar"><span class="window-leaf" aria-hidden="true">✳</span><span id="window-title">A little corner</span><button class="window-close" type="button" aria-label="Close portfolio window">✕</button></div>
-        <nav class="window-nav" aria-label="Portfolio window sections"><button type="button" data-open="about">About</button><button type="button" data-open="experience">Experience</button><button type="button" data-open="projects">Projects</button><button type="button" data-open="life">Life</button><button type="button" data-open="contact">Contact</button></nav>
-        <div class="window-scroll" tabindex="0"><div id="window-content" class="reader" aria-live="polite"></div><a id="window-source" class="window-source" href="portfolio.html">Open this page on its own ↗</a></div>
-    </dialog>
-    <template id="contact-content"><section class="contact-card"><p class="eyebrow">LET'S TALK</p><h2>Say hello.</h2><p>I'm always happy to talk about machine learning, software, hardware, or something you're building.</p><a class="contact-email" href="mailto:apyadav@wisc.edu">apyadav@wisc.edu <span aria-hidden="true">↗</span></a><div class="contact-links"><a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></section></template>
-    <script src="scripts.js?v=4" defer></script>
-    <script src="grove-panels.js?v=1" defer></script>
-    <script src="grove.js?v=1" defer></script>
+<body>
+<a class="skip-link" href="#forest-navigation">Skip to branches</a>
+<h1 class="visually-hidden">Arihan Yadav</h1>
+<main id="forest-viewport" aria-label="Explore Arihan's tree">
+  <canvas id="landscape" aria-hidden="true"></canvas>
+  <div id="world">
+    <nav id="forest-navigation" aria-label="Tree branches" tabindex="-1"></nav>
+    <article id="story" tabindex="-1" hidden></article>
+  </div>
+</main>
+<div class="paper-edge" aria-hidden="true"></div>
+<button id="back" class="ink-pill back" type="button" aria-label="Back to the previous branch" hidden>⟵</button>
+<button id="motion-toggle" class="motion-control" type="button" aria-label="Pause animation" aria-pressed="false">Ⅱ</button>
+<aside class="music" aria-label="Music player">
+  <p class="music-note">maybe you'll know me better<br>if you listen to what I like!<span aria-hidden="true">⤵</span></p>
+  <div id="music-panel" hidden>
+    <div class="music-panel-heading"><span>Unethical · Faouzia</span><button id="music-close" type="button" aria-label="Close player and pause music">×</button></div>
+    <div id="youtube-player"></div>
+    <p id="music-status" role="status">Loading the official music video…</p>
+    <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer">listen on YouTube ↗</a>
+  </div>
+  <div class="music-bar ink-pill">
+    <button id="music-toggle" type="button" aria-label="Play Unethical by Faouzia" aria-expanded="false" aria-controls="music-panel"><span id="play-icon" aria-hidden="true">▶</span><span class="song-title">unethical · faouzia</span></button>
+    <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer" aria-label="Open Unethical on YouTube">↗</a>
+  </div>
+</aside>
+
+<noscript><nav class="no-script" aria-label="Portfolio pages"><a href="portfolio.html">me &amp; my work</a><a href="projects.html">projects</a><a href="life.html">life</a><a href="mailto:apyadav@wisc.edu">say hello</a></nav></noscript>
+<script src="forest-scene.js?v=2" defer></script>
+<script src="forest.js?v=2" defer></script>
+<script src="music.js?v=2" defer></script>
 </body>
 </html>

@@ -1,22 +1,17 @@
-# Personal tree website
+# Branch landscape implementation
 
-## Objective
-Adapt the monochrome botanical atmosphere of natochi.cv into an original homepage for Arihan, preserving portfolio content and standalone pages. Use Unethical by Faouzia via the official YouTube player. Test in the macOS VM, push to GitHub, and test the deployed site.
+The original panel-based version was superseded by nested growing branches and articles that scroll through one continuous grass, root, and soil scene.
 
-## Setup
-Static HTML/CSS/JS, no build or package dependencies. Run: `python3 -m http.server 8765 --bind 127.0.0.1`.
+Implemented: Libre Franklin, charcoal/pale-ink palette, rough double-stroke underlines, two-color halftone photos with color reveal, growing branch paths and child links, shareable nested routes, browser history, back/Escape navigation, reduced motion, and text-overlap fading. Existing portfolio content and the earlier workbench remain available. Music uses the official Unethical by Faouzia video.
 
-## Implemented
-Original seeded canvas tree, ambient particles, grasses, branch navigation, accessible portfolio dialogs, reduced-motion/pause control, official music embed. Prior homepage preserved at workbench.html.
+## Local acceptance in the macOS VM
 
-## Verification
-Local Safari in the macOS VM: all primary panels opened; experience disclosure expanded; project and life panels scrolled; nested flight-photo navigation opened; contact details loaded; Escape closed dialogs. Official YouTube video reached playing state on desktop and at an iPhone-size viewport (second tap required on mobile). Pause/resume scene control worked. Responsive layouts inspected at 402×874 and 320×874; mobile tree width and label contrast corrected after inspection.
+- Safari: home → projects → hardware & systems → eBike article.
+- Scrolled the article through the grass into roots, strata, and rocks.
+- Opened about content and inspected the rotated halftone photo collage.
+- At 320 × 874: work branch → AMD article, long-content scrolling, back/Escape.
+- Corrected mobile tree and label overlap, then added feathered scenery fading behind actual text rectangles per user preference.
+- Inspected desktop typography, tree proportions, branches, music placement, and image treatment against the reference in Safari.
+- JavaScript syntax checked with JavaScriptCore. Static content and asset references checked against the repository.
 
-JavaScript syntax: both new JS files compiled with JavaScriptCore via osascript. Static HTML checks passed for all local asset/link paths against tracked files, and unique IDs on seven pages. No repository test/build commands exist.
-
-Safari remote WebDriver setup was rejected by automatic approval review. It was not enabled; browser acceptance used the authorized VMPal UI controls.
-
-Live deployment verification pending.
-
-## Next action
-Push verified files to main, wait for GitHub Pages, and repeat the primary checks on the deployed URL.
+No build step or repository test suite is required for these static files. Browser acceptance uses VMPal UI interaction. The music implementation retains the official-video integration previously verified on desktop and mobile.

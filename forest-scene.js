@@ -12,6 +12,7 @@ let view={type:'home',group:'',item:-1},current={x:0,y:0},target={x:0,y:0},initi
 const branches=new Map(['work','projects','life','me'].map(key=>[key,{key,open:false,growth:0,count:0}]));
 let layoutCallback=()=>{},connector=0;
 const labelAnchors=new Map();
+let scrollOrigin={left:0,top:0};
 let rng=2943;
 function random(){rng=(Math.imul(rng,1664525)+1013904223)>>>0;return rng/4294967296}
 const r=(a,b)=>a+(b-a)*random();
@@ -102,7 +103,7 @@ function drawGroundArt(){
 }
 // All coordinates belong to one tree. Only the camera and branch growth change.
 const anchorSpecs={work:[150,241,-1],projects:[450,323,1],life:[120,477,-1],me:[447,565,1]};
-function treeSize(){const sy=H*.82/990;return {sy,sx:W<700?Math.min(sy,W*.72/600):sy*1.55}}
+function treeSize(){const sy=H*1.10/990;return {sy,sx:W<700?Math.min(sy,W*1.05/600):sy*2.3}}
 function anchor(key){
  const [x,y,side]=anchorSpecs[key],{sx,sy}=treeSize();
  return {x:(x-300)*sx,y:H-4-(1050-y)*sy,side};
@@ -114,10 +115,10 @@ function curve(key,t){
   const endX=W<700?26-W*.12-10:W*.24-10;
   return {x:a.x+(endX-a.x)*t,y:a.y+(H*.59+8-a.y)*t+Math.sin(t*Math.PI)*7};
  }
- const length=W*.62,ex=a.x+a.side*length,ey=-H*.09;
- const u=1-t;
- return {x:u*u*u*a.x+3*u*u*t*(a.x+a.side*length*.27)+3*u*t*t*(ex-a.side*length*.28)+t*t*t*ex,
- y:u*u*u*a.y+3*u*u*t*(a.y+(ey-a.y)*.33)+3*u*t*t*(a.y+(ey-a.y)*.66)+t*t*t*ey};
+ const length=W*.62,ex=a.x+a.side*length,ey=a.y-H*.54;
+ const u=1-t,wave=Math.sin(Math.PI*t);
+ return {x:u*u*u*a.x+3*u*u*t*(a.x+a.side*length*.27)+3*u*t*t*(ex-a.side*length*.28)+t*t*t*ex+wave*Math.sin(t*13)*5,
+ y:u*u*u*a.y+3*u*u*t*(a.y+(ey-a.y)*.33)+3*u*t*t*(a.y+(ey-a.y)*.66)+t*t*t*ey+wave*(Math.sin(t*11)*7+Math.sin(t*23)*2)};
 }
 function nodeGeometry(key,i,count){
  const t=.12+(i+.5)/count*.82,p=project(curve(key,t)),side=i%2===0?-1:1;
@@ -132,26 +133,44 @@ function storyGeometry(){
 }
 function setTarget(){
  if(view.type==='home')target={x:W*(W<700?.48:.40),y:0};
- else {const side=anchorSpecs[view.group][2];target={x:W*(side>0?.12:.88),y:H*(view.type==='story'?-.26:.13)};}
+ else {const side=anchorSpecs[view.group][2];target={x:W*(side>0?.12:.88),y:H*(view.type==='story'?-.26:.34)};}
  if(!initialized&&W&&H){current={x:W*(W<700?.48:.40),y:0};initialized=true}
  if(paused)current={...target};
 }
 function drawPath(points,reach,size){
  const end=Math.max(1,Math.ceil((points.length-1)*reach));
- const visible=points.slice(0,end);
- if(visible.length>1)line(ctx,visible.map(p=>[p.x+current.x,p.y+current.y-scroll]),1.8,.9);
- for(let i=0;i<end;i++){
-  if(i%2)continue;
-  const p=points[i],t=i/(points.length-1);
-  const grow=Math.min(1,Math.max(0,(reach-t)*20)),radius=size*(1-t*.45)*(1+Math.sin(i*2.31)*.24)*grow;
-  if(radius>0)ctx.drawImage(brush,p.x+current.x-radius,p.y+current.y-scroll-radius*.76,radius*2,radius*1.55);
+ const hash=i=>{const n=Math.sin(i*12.9898+size*78.233)*43758.5453;return n-Math.floor(n)};
+ const screen=p=>[p.x+current.x,p.y+current.y-scroll];
+ // A tapering stem carries uneven forks and foliage, rather than a row of stamps.
+ for(let i=1;i<end;i++){
+  const t=i/(points.length-1),width=Math.max(.55,size*.15*Math.pow(1-t,.8));
+  line(ctx,[screen(points[i-1]),screen(points[i])],width,.94);
+ }
+ for(let i=2;i<end-1;i++){
+  if(i%3!==0&&hash(i)<.91)continue;
+  const p=points[i],before=points[i-1],after=points[Math.min(i+1,points.length-1)],t=i/(points.length-1);
+  const grow=Math.max(0,Math.min(1,(reach-t)*18));if(!grow)continue;
+  const dx=after.x-before.x,dy=after.y-before.y,length=Math.hypot(dx,dy)||1,tx=dx/length,ty=dy/length;
+  const side=hash(i+51)>.5?1:-1,nx=-ty*side,ny=tx*side;
+  const fork=size*(.3+hash(i+9)*.9)*(1-t*.35)*grow;
+  const tip={x:p.x+nx*fork+tx*fork*.45,y:p.y+ny*fork+ty*fork*.45};
+  const mid={x:p.x+nx*fork*.45+tx*fork*.1,y:p.y+ny*fork*.45+ty*fork*.1};
+  line(ctx,[screen(p),screen(mid),screen(tip)],Math.max(.55,size*.055*(1-t)),.9);
+  const radius=size*(.55+hash(i+29)*.8)*(1-t*.5)*grow;
+  ctx.save();ctx.translate(tip.x+current.x,tip.y+current.y-scroll);
+  ctx.rotate(Math.atan2(ty,tx)+side*(.3+hash(i+3)*.65));
+  ctx.drawImage(brush,-radius,-radius*.6,radius*2,radius*1.2);ctx.restore();
+  if(hash(i+7)>.35){
+   const small=radius*(.35+hash(i+11)*.3);
+   ctx.drawImage(brush,mid.x+current.x-small,mid.y+current.y-scroll-small*.7,small*2,small*1.4);
+  }
  }
 }
 function renderBoughs(){
  for(const branch of branches.values()){
   if(branch.growth<=0)continue;
   const points=Array.from({length:55},(_,i)=>curve(branch.key,i/54));
-  drawPath(points,branch.growth,W<700?15:24);
+  drawPath(points,branch.growth,W<700?18:32);
   for(let i=0;i<branch.count;i++){
    const n=nodeGeometry(branch.key,i,branch.count);
    if(n.opacity<=0)continue;
@@ -255,11 +274,21 @@ function setView(next){
  if(paused)for(const b of branches.values())b.growth=b.open?1:0;
  setTarget();layoutCallback();refresh();
 }
-viewport.addEventListener('scroll',()=>{scroll=viewport.scrollTop-H;panX=viewport.scrollLeft-W;if(paused)render()},{passive:true});
+viewport.addEventListener('scroll',()=>{syncScroll();if(paused)render()},{passive:true});
 document.addEventListener('visibilitychange',refresh);
 motion.addEventListener('click',()=>{paused=!paused;syncMotion()});
 function syncMotion(){motion.setAttribute('aria-pressed',String(paused));motion.setAttribute('aria-label',paused?'Resume animation':'Pause animation');motion.textContent=paused?'▷':'Ⅱ';refresh()}
 reduced.addEventListener('change',e=>{paused=e.matches;syncMotion()});
+function worldBounds(){
+ const {sx,sy}=treeSize(),groundY=H-4+current.y;
+ const box={minX:Math.min(0,current.x-450),maxX:Math.max(W,current.x+450),minY:Math.min(0,groundY-1050*sy),maxY:Math.max(H,groundY+1800)};
+ const include=(p,margin=32)=>{box.minX=Math.min(box.minX,p.x-margin);box.maxX=Math.max(box.maxX,p.x+margin);box.minY=Math.min(box.minY,p.y-margin);box.maxY=Math.max(box.maxY,p.y+margin)};
+ include({x:current.x-300*sx,y:groundY-1050*sy});include({x:current.x+300*sx,y:groundY});
+ for(const b of branches.values())if(b.growth>0)for(let i=0;i<=40;i++)include(project(curve(b.key,b.growth*i/40)),W<700?48:80);
+ if(view.type==='story')include(storyGeometry());
+ return box;
+}
+function syncScroll(){scroll=viewport.scrollTop-scrollOrigin.top;panX=viewport.scrollLeft-scrollOrigin.left}
 window.forestScene={
  setView,nodeGeometry,primaryGeometry,storyGeometry,
  branchPoint(key,t){return project(curve(key,t))},
@@ -267,7 +296,9 @@ window.forestScene={
  onLayout(callback){layoutCallback=callback},
  setTextAreas(areas){textAreas=areas;if(paused)render()},
  get size(){return {width:W,height:H,rootDepth:1800}},
- get scrollOrigin(){return {left:W,top:H}},
+ get scrollOrigin(){return {...scrollOrigin}},
+ setScrollOrigin(next){scrollOrigin={...next}},syncScroll,
+ get bounds(){return worldBounds()},
  get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b}))}},
  render
 };

@@ -7,7 +7,7 @@ function run(){
   let time=0,serial=0;const pending=new Map();
   const context=new Proxy({createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}}),createPattern:()=>({})},{get:(target,key)=>key in target?target[key]:()=>{},set:(target,key,value)=>(target[key]=value,true)});
   const canvas={width:0,height:0,style:{},getContext:()=>context};
-  const viewport={clientWidth:dims[0],clientHeight:dims[1],scrollTop:0,addEventListener(){}};
+  const viewport={clientWidth:dims[0],clientHeight:dims[1],scrollTop:0,scrollLeft:0,addEventListener(){}};
   const motion={addEventListener(){},setAttribute(){}};
   const document={hidden:false,getElementById:id=>id==='landscape'?canvas:id==='forest-viewport'?viewport:motion,createElement:()=>({width:0,height:0,getContext:()=>context}),addEventListener(){}};
   const window={dispatchEvent(){}},devicePixelRatio=1;
@@ -30,6 +30,7 @@ function run(){
   scene.setView({type:'story',group:'projects',count:11,item:6});
   assert(scene.state.branches.find(b=>b.key==='projects').growth===partial,'Opening an article restarted its limb');
   advance(55);attached('projects');
+  assert(scene.bounds.minY<0,'Opening content did not expand bounds above the viewport');
   assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Parent branch failed to finish growing');
   scene.setView({type:'menu',group:'life',count:7,item:-1});
   assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Another limb erased the existing project branch');
@@ -39,7 +40,7 @@ function run(){
   assert(scene.state.branches.every(b=>b.growth===0&&!b.open),'Reset failed to retract expanded branches');
   assert(Math.abs(scene.state.camera.y)<.1,'Reset failed to return the ground');
   assert(scene.size.rootDepth===1800,'Deep scrollable roots were lost');
-  assert(scene.scrollOrigin.left===dims[0]&&scene.scrollOrigin.top===dims[1],'World lacks scrollable space above or beside the default view');
+  assert(scene.bounds.maxY>=dims[1]+1700,'Root bounds cannot be reached by scrolling');
   assert(document.getElementById('landscape')===canvas,'Landscape canvas was replaced');
   results.push(dims.join('x')+': connected branches, continuous camera, no growth restart, retained limbs, reset, deep roots PASS');
  }

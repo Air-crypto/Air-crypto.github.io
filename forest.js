@@ -68,7 +68,7 @@ function updateTextMask(){
    let node;while((node=walker.nextNode())){
     if(!node.textContent.trim()||node.parentElement.closest('button.photo, .about-photos, details:not([open]) > :not(summary)'))continue;
     const range=document.createRange();range.selectNodeContents(node);
-    for(const box of range.getClientRects())if(box.width&&box.height)areas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.size.height,w:box.width,h:box.height});
+    for(const box of range.getClientRects())if(box.width&&box.height)areas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.scrollOrigin.top,w:box.width,h:box.height});
    }
   }
   textHitAreas=areas;window.forestScene.setTextAreas(areas);
@@ -86,40 +86,50 @@ function createNavigation(){
   leafLinks.set(group,links);
  }
 }
-let lastOrigin=null;
+let retainedBounds=null,lastSize=null;
 function layout(){
  const scene=window.forestScene,{width:w,height:h}=scene.size;if(!w||!h)return;
- const mobile=w<700,state=scene.state;
+ const mobile=w<700,state=scene.state,placements=[];
+ let bounds={...scene.bounds};
+ const include=(x,y,width,height)=>{bounds.minX=Math.min(bounds.minX,x);bounds.maxX=Math.max(bounds.maxX,x+width);bounds.minY=Math.min(bounds.minY,y);bounds.maxY=Math.max(bounds.maxY,y+height)};
  for(const [key,a] of primaryLinks){
-  const p=scene.primaryGeometry(key);at(a,p.x+p.side*10+w,p.y+h,p.side<0?'left':'right');
+  const p=scene.primaryGeometry(key),x=p.x+p.side*10,align=p.side<0?'left':'right';
   a.style.opacity=mode==='home'||key===state.view.group?'1':'.5';
+  placements.push({a,x,y:p.y,align});
+  include(x-(align==='left'?a.offsetWidth:0)-8,p.y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
  }
  for(const [key,links] of leafLinks){
   links.forEach((a,i)=>{
    const p=scene.nodeGeometry(key,i,links.length);
-   a.hidden=p.opacity<=0;
-   a.style.width=mobile?'145px':'';
+   a.hidden=p.opacity<=0;a.style.width=mobile?'145px':'';
    a.style.opacity=String(p.opacity*(mode==='story'&&a.dataset.route!==route?.5:1));
    let x=p.x+p.side*(mobile?17:30);
    if(mobile){const width=a.offsetWidth;x=p.side<0?Math.max(width+8,Math.min(w-8,x)):Math.min(w-width-8,Math.max(8,x));}
-   at(a,x+w,p.y-12+h,p.side<0?'left':'right');
-   scene.setLabelAnchor(key,i,{x:x-p.side*3,y:p.y-12});
+   const align=p.side<0?'left':'right',y=p.y-12;
+   placements.push({a,x,y,align});scene.setLabelAnchor(key,i,{x:x-p.side*3,y});
+   if(!a.hidden)include(x-(align==='left'?a.offsetWidth:0)-8,y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
   });
  }
- let bottom=h+window.forestScene.size.rootDepth;
+ let articlePoint=null;
  if(!story.hidden){
-  const p=scene.storyGeometry();story.style.left=(p.x+w)+'px';story.style.top=(p.y+h)+'px';
-  story.style.width=mobile?(w-52)+'px':(route==='me'?340:440)+'px';
-  bottom=Math.max(bottom,p.y+story.offsetHeight+150);
+  articlePoint=scene.storyGeometry();story.style.width=mobile?(w-52)+'px':(route==='me'?340:440)+'px';
+  include(articlePoint.x-20,articlePoint.y-20,story.offsetWidth+(route==='me'&&!mobile?300:40),story.offsetHeight+170);
  }
- // Keep enough world while scrolling home, so the ground returns continuously.
- world.style.width=(w*3)+'px';
- world.style.height=Math.ceil(Math.max(h+bottom,viewport.scrollTop+h))+'px';
- if(!lastOrigin||lastOrigin.w!==w||lastOrigin.h!==h){
-  const left=lastOrigin?viewport.scrollLeft+w-lastOrigin.w:w,top=lastOrigin?viewport.scrollTop+h-lastOrigin.h:h;
-  lastOrigin={w,h};viewport.scrollTo({left,top,behavior:'instant'});
- }
+ const oldOrigin=scene.scrollOrigin,effective={left:viewport.scrollLeft-oldOrigin.left,top:viewport.scrollTop-oldOrigin.top};
+ const atDefault=mode==='home'&&state.branches.every(b=>b.growth===0)&&Math.abs(state.camera.x-w*(mobile?.48:.40))+Math.abs(state.camera.y)<.2&&Math.abs(effective.left)+Math.abs(effective.top)<1;
+ if(!lastSize||lastSize.w!==w||lastSize.h!==h||atDefault)retainedBounds=null;
+ lastSize={w,h};
+ if(retainedBounds){bounds={minX:Math.min(bounds.minX,retainedBounds.minX),minY:Math.min(bounds.minY,retainedBounds.minY),maxX:Math.max(bounds.maxX,retainedBounds.maxX),maxY:Math.max(bounds.maxY,retainedBounds.maxY)}}
+ retainedBounds={...bounds};
+ const origin={left:Math.max(0,Math.ceil(-bounds.minX)),top:Math.max(0,Math.ceil(-bounds.minY))};
+ world.style.width=Math.ceil(Math.max(w,bounds.maxX+origin.left))+'px';
+ world.style.height=Math.ceil(Math.max(h,bounds.maxY+origin.top))+'px';
  world.style.minHeight=h+'px';
+ scene.setScrollOrigin(origin);
+ for(const p of placements)at(p.a,p.x+origin.left,p.y+origin.top,p.align);
+ if(articlePoint){story.style.left=(articlePoint.x+origin.left)+'px';story.style.top=(articlePoint.y+origin.top)+'px';}
+ if(origin.left!==oldOrigin.left||origin.top!==oldOrigin.top)viewport.scrollTo({left:origin.left+effective.left,top:origin.top+effective.top,behavior:'instant'});
+ scene.syncScroll();
  updateTextMask();
 }
 function go(key){
@@ -267,6 +277,6 @@ story.addEventListener('toggle',updateTextMask,true);
 document.querySelector('.skip-link').addEventListener('click',event=>{event.preventDefault();nav.focus({preventScroll:true})});
 createNavigation();
 window.forestScene.onLayout(layout);
-viewport.addEventListener('scroll',()=>{if(mode==='home')layout()},{passive:true});
+viewport.addEventListener('scroll',()=>{if(mode==='home')layout();else updateTextMask()},{passive:true});
 renderRoute(location.hash.slice(1));
 })();

@@ -55,22 +55,17 @@ const state = {
   tween: null, mouse: new THREE.Vector2(), mouseIn: 0, mouseWorld: new THREE.Vector3(), t: 0,
   pointers: new Map(), drag: null, pinch: null, wheelPush: 0, wheelOut: 0, cooldown: 0, musicOn: false,
 };
-try {
-  const q = new URLSearchParams(location.search), wq = q.get('world'), eq = q.get('env');
-  state.world = wq === 'game' || eq === 'rl' ? 'env' : wq === 'silicon' ? 'die' : (localStorage.getItem('world') === 'env' ? 'env' : 'die');
-} catch {}
+state.world = 'die';
 
 // ---------- DOM ----------
 const labels = $('#labels'), cards = $('#cards'), beams = $('#beams'), tip = $('#tip');
 function regionCount(g) {
-  if (w?.game) { const p = w.stats().per[g]; return `${p.found}/${p.n} found · ${esc(p.name)}`; }
   return `${pad2(inGroup(g).length)} ${g === 'io' ? 'links' : 'items'}`;
 }
 function buildLabels() {
-  labels.innerHTML = REGIONS.map(g => `<button type="button" class="rlabel${w?.game && w.stats().per[g].found === w.stats().per[g].n ? ' done' : ''}" data-region="${g}" style="--accent:${GROUPS[g].hue}">
-      <span class="mono">${GROUPS[g].index}</span><b class="serif">${GROUPS[g].label}</b><span class="mono rl-n">${regionCount(g)}</span><span class="rl-go mono">${w?.game ? 'Walk here →' : 'Enter →'}</span></button>`).join('')
-    + ITEMS.map(it => `<button type="button" class="ilabel mono${w?.game && w.isFound(it.id) ? ' found' : ''}" data-item="${esc(it.id)}" data-id="${esc(it.id)}" style="--accent:${GROUPS[it.group].hue}" tabindex="-1">${esc(it.short || it.title)}</button>`).join('')
-    + (w?.game ? '<span id="you" class="mono">You</span>' : '');
+  labels.innerHTML = REGIONS.map(g => `<button type="button" class="rlabel" data-region="${g}" style="--accent:${GROUPS[g].hue}">
+      <span class="mono">${GROUPS[g].index}</span><b class="serif">${GROUPS[g].label}</b><span class="mono rl-n">${regionCount(g)}</span><span class="rl-go mono">Enter →</span></button>`).join('')
+    + ITEMS.map(it => `<button type="button" class="ilabel mono" data-item="${esc(it.id)}" data-id="${esc(it.id)}" style="--accent:${GROUPS[it.group].hue}" tabindex="-1">${esc(it.short || it.title)}</button>`).join('');
 }
 function cardHTML(it) {
   const thumb = (it.media || []).find(m => m.type === 'img') || (it.media || []).find(m => m.poster);
@@ -78,9 +73,8 @@ function cardHTML(it) {
   const date = it.org || it.group === 'projects' ? (it.year || it.date || '') : it.group === 'life' ? it.date : '';
   const stat = it.stat ? `<span class="c-stat"><b>${esc(it.stat.value)}</b> ${esc(it.stat.label)}</span>` : it.group === 'life' && it.media ? `<span class="c-stat">${it.media.length} ${it.media.some(m => m.type === 'video') ? 'clips + pics' : 'pics'}</span>` : '';
   const img = thumb && it.group !== 'about' ? `<span class="c-img"><img src="${esc(thumb.poster || thumb.src)}" alt="" loading="lazy" decoding="async"></span>` : '';
-  const q = w?.game ? '<span class="c-q mono"></span>' : '';
-  if (it.group === 'io') return `<a class="card3d io" href="${esc(it.href)}" data-id="${esc(it.id)}" ${/^https?:/.test(it.href) ? 'target="_blank" rel="noopener noreferrer"' : ''}><span class="c-top mono">${esc(it.short)}</span><span class="c-t serif">${esc(it.title)}</span><span class="c-stat">${esc(it.label)} ↗</span>${q}</a>`;
-  return `<button type="button" class="card3d" data-id="${esc(it.id)}">${img}<span class="c-top mono"><span>${esc(top)}</span><span>${esc(date)}</span></span><span class="c-t serif">${esc(it.title)}</span>${stat}${q}</button>`;
+  if (it.group === 'io') return `<a class="card3d io" href="${esc(it.href)}" data-id="${esc(it.id)}" ${/^https?:/.test(it.href) ? 'target="_blank" rel="noopener noreferrer"' : ''}><span class="c-top mono">${esc(it.short)}</span><span class="c-t serif">${esc(it.title)}</span><span class="c-stat">${esc(it.label)} ↗</span></a>`;
+  return `<button type="button" class="card3d" data-id="${esc(it.id)}">${img}<span class="c-top mono"><span>${esc(top)}</span><span>${esc(date)}</span></span><span class="c-t serif">${esc(it.title)}</span>${stat}</button>`;
 }
 function buildA11y() {
   $('#a11y').innerHTML = REGIONS.map(g => `<h2>${GROUPS[g].label}</h2><ul>${inGroup(g).map(it => it.group === 'io' ? `<li><a href="${esc(it.href)}">${esc(it.title)}: ${esc(it.label)}</a></li>` : `<li><button type="button" data-id="${esc(it.id)}">${esc(it.title)}</button></li>`).join('')}</ul>`).join('');
@@ -89,11 +83,10 @@ function buildA11y() {
 // ---------- cards in the sky ----------
 const cardState = { list: [], region: null, k: 1 };
 function buildCards(g) {
-  const items = inGroup(g), st = w.regions[g].stand; cardState.arc = null;
+  const items = inGroup(g), st = w.regions[g].stand;
   cards.innerHTML = items.map(cardHTML).join('');
   cards.style.setProperty('--accent', GROUPS[g].hue);
   const els = $$('.card3d', cards);
-  if (w.game) return buildCardsGame(g, items, els, st);
   const mob = isMobile(), n = items.length;
   let rows = n <= (mob ? 2 : 5) ? 1 : 2, perTop = Math.ceil(n / rows);
   const ppr = (innerHeight / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
@@ -128,48 +121,13 @@ function buildCards(g) {
   beams.innerHTML = cardState.list.map(() => '<line/><circle r="3"/>').join('');
   requestAnimationFrame(() => cards.classList.add('in'));
 }
-function buildCardsGame(g, items, els, st) {
-  const mob = isMobile(), n = items.length, ppr = (innerHeight / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-  document.body.classList.add('short');
-  let cw = Math.max(...els.map(e => e.offsetWidth)), ch = Math.max(...els.map(e => e.offsetHeight));
-  const k = mob || innerHeight < 760 ? .76 : .86; cardState.k = k; cw *= k; ch *= k;
-  const gap = mob ? 12 : 18, stepAz = (cw + gap) / ppr;
-  const cardY = (mob ? 168 : innerHeight < 760 ? 172 : 190) + ch / 2, horizonY = cardY + ch / 2 + (mob ? 18 : 30);
-  const lookElev = (horizonY - innerHeight / 2) / ppr, el = lookElev + (innerHeight / 2 - cardY) / ppr;
-  const f = st.dir, r = new THREE.Vector3(-f.z, 0, f.x), R = 60;
-  cardState.list = items.map((it, i) => {
-    const az = (i - (n - 1) / 2) * stepAz;
-    // Lower outer cards so the row projects flat instead of curving up at the edges.
-    const e = Math.atan(Math.tan(el) * Math.cos(az));
-    const anchor = st.eye.clone().addScaledVector(f, R * Math.cos(e) * Math.cos(az)).addScaledVector(r, R * Math.cos(e) * Math.sin(az)).add(new THREE.Vector3(0, R * Math.sin(e), 0));
-    els[i].style.setProperty('--d', (i * .05 + .35) + 's');
-    return { id: it.id, el: els[i], anchor, i, az };
-  });
-  cardState.arc = { eye: st.eye.clone(), f: f.clone(), r, R, el };
-  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
-  state.gd.maxYaw = Math.max(0, ((n - 1) * stepAz + cw / ppr) / 2 - hfov / 2 + (mob ? .12 : .06));
-  state.gd.lookElev = lookElev;
-  cardState.region = g;
-  beams.innerHTML = cardState.list.map(() => '<line/><circle r="3"/>').join('');
-  refreshCardStatus();
-  requestAnimationFrame(() => cards.classList.add('in'));
-}
-function refreshCardStatus() {
-  if (!w?.game) return;
-  for (const cd of cardState.list) {
-    const q = cd.el.querySelector('.c-q'), found = w.isFound(cd.id); if (!q) continue;
-    cd.el.classList.toggle('found', found);
-    const d = found ? 0 : w.stepsTo(cd.id);
-    q.textContent = found ? '✓ Found · open anytime' : `◆ +1.00 reward · ${d} step${d === 1 ? '' : 's'} away`;
-  }
-}
 // Edge hints when cards sit outside the view.
 const more = ['l', 'r'].map(s => { const b = document.createElement('button'); b.type = 'button'; b.className = 'more-hint mono more-' + s; b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); state.gd.yaw = clamp(state.gd.yaw + (s === 'r' ? .35 : -.35), -state.gd.maxYaw - .25, state.gd.maxYaw + .25); }); document.body.appendChild(b); return b; });
 function moreHint(l, r, y) {
   const on = state.view === 'ground' && !state.panel;
   [[more[0], l, `‹ ${l} more`], [more[1], r, `${r} more ›`]].forEach(([b, n, s]) => { b.classList.toggle('on', on && n > 0); if (n) { b.textContent = s; if (y) b.style.top = y + 'px'; } });
 }
-function clearCards() { cardState.arc = null; more.forEach(b => b.classList.remove('on')); cards.classList.remove('in'); cardState.region = null; setTimeout(() => { if (!cardState.region) { cards.innerHTML = ''; beams.innerHTML = ''; cardState.list = []; } }, 500); }
+function clearCards() { more.forEach(b => b.classList.remove('on')); cards.classList.remove('in'); cardState.region = null; setTimeout(() => { if (!cardState.region) { cards.innerHTML = ''; beams.innerHTML = ''; cardState.list = []; } }, 500); }
 
 // ---------- camera ----------
 const tmpV = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
@@ -182,7 +140,7 @@ function gdPose() {
   const f = st.dir.clone().applyAxisAngle(UP, -(gd.yaw + gd.look)), el = gd.lookElev + gd.pitch;
   return { pos: st.eye.clone(), look: st.eye.clone().add(new THREE.Vector3(f.x * Math.cos(el), Math.sin(el), f.z * Math.cos(el)).multiplyScalar(60)) };
 }
-const pose = () => state.view === 'ground' && state.region ? gdPose() : state.view === 'travel' && w.game ? w.followPose() : ovPose();
+const pose = () => state.view === 'ground' && state.region ? gdPose() : ovPose();
 function startTween(lift = 0, dur = 1.9) {
   state.tween = reduced.matches ? null : { from: { pos: state.cam.pos.clone(), look: state.cam.look.clone() }, t0: clock(), dur, lift };
 }
@@ -192,43 +150,19 @@ function clampTarget() { const b = w.overview.bounds, T = state.ov.target; T.x =
 function setBodyView() {
   document.body.classList.toggle('view-ground', state.view === 'ground');
   document.body.classList.toggle('view-overview', state.view === 'overview');
-  document.body.classList.toggle('view-travel', state.view === 'travel');
   $$('.nav a').forEach(a => a.classList.toggle('on', state.view === 'ground' && a.dataset.go === state.region));
   if (state.view === 'ground') {
     const g = state.region;
-    $('#rh-tag').textContent = `${GROUPS[g].index} · ${GROUPS[g].label}${state.world === 'env' && w.isleName ? ' · ' + w.isleName(g) : ''}`;
+    $('#rh-tag').textContent = `${GROUPS[g].index} · ${GROUPS[g].label}`;
     $('#rh-title').innerHTML = COPY[g].title; $('#rh-blurb').textContent = COPY[g].blurb;
     $('#region-head').style.setProperty('--accent', GROUPS[g].hue);
   }
-  $('#hud-line').textContent = w?.game
-    ? (state.view === 'ground' ? (isMobile() ? 'Tap a card or the ground to walk · pinch out for the map' : 'Click a card or the ground to walk · WASD to step · scroll out for the map')
-      : state.view === 'travel' ? (isMobile() ? 'Walking · tap to redirect' : 'Walking · click to redirect · WASD to step · scroll out for the map')
-      : (isMobile() ? 'Tap an island to walk there · pinch to zoom' : 'Click an island to walk there · WASD to step · scroll to zoom'))
-    : state.view === 'ground'
+  $('#hud-line').textContent = state.view === 'ground'
     ? (isMobile() ? 'Swipe to look · tap a card · tap empty space to leave' : 'Drag to look around · click a card · click empty space to leave')
     : (isMobile() ? 'Pinch to zoom · drag to move · tap a region' : 'Scroll to zoom · drag to move · click a region');
 }
-function goTravelView() {
-  if (state.view === 'travel') return;
-  closePanel(true); clearCards(); state.view = 'travel'; state.region = null;
-  startTween(0, 1.3); setBodyView();
-}
-function startTravel(g, opts = {}) {
-  state.pendingOpen = opts.open || null;
-  w.travelTo(g); goTravelView();
-  history.replaceState(null, '', '#' + g);
-}
-// In the game, an item is reached on foot before it opens.
-function requestItem(id) {
-  const it = byId.get(id); if (!it) return;
-  if (w.isFound(id)) { if (it.group === 'io') { if (!(state.view === 'ground' && state.region === 'io')) enterRegion('io', { direct: true }); } else openPanel(id); return; }
-  closePanel(true);
-  w.walkToItem(id);
-  if (!(state.view === 'ground' && state.region === it.group && w.playerRegion() === it.group)) goTravelView();
-}
 function enterRegion(g, opts = {}) {
   if (!g || !w.regions[g]) return;
-  if (w.game && !opts.direct && w.playerRegion() !== g) { startTravel(g, opts); return; }
   const from = state.view;
   if (state.panel && byId.get(state.panel)?.group !== g) closePanel(true);
   state.view = 'ground'; state.region = g; state.hoverRegion = null;
@@ -245,7 +179,7 @@ function enterRegion(g, opts = {}) {
 function exitRegion() {
   if (state.view === 'overview') return;
   closePanel(true);
-  const was = state.region || (w.game && w.playerRegion()) || 'about';
+  const was = state.region || 'about';
   state.view = 'overview'; state.region = null;
   // Pull back most of the way so the whole map is in view again.
   state.ov.target.lerpVectors(w.regions[was].center.clone().setY(0), w.overview.target, .7); state.ov.dist = w.overview.dist * .9; state.ov.yaw = 0; state.ov.pitch = w.overview.pitch;
@@ -335,15 +269,6 @@ function endPointer(e) {
   const d = state.drag; if (!d || state.pointers.size) return;
   state.drag = null; canvas.classList.remove('dragging');
   if (d.moved || e.type === 'pointercancel') return;
-  if (w.game) {
-    if (state.panel) { closePanel(); return; }
-    const id = itemAt(e.clientX, e.clientY);
-    if (id) { requestItem(id); return; }
-    if (state.view === 'overview') { const p = groundAt(e.clientX, e.clientY), g = p && w.regionAt(p.x, p.z); if (g) enterRegion(g); return; }
-    const hit = w.pickGround(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
-    if (hit) { w.walkToPoint(hit.x, hit.z); if (state.view === 'ground' && w.regionAt(hit.x, hit.z) !== state.region) goTravelView(); }
-    return;
-  }
   if (state.view === 'overview') {
     const id = itemAt(e.clientX, e.clientY);
     if (id) { const g = byId.get(id).group; enterRegion(g, { open: g === 'io' ? null : id }); return; }
@@ -406,7 +331,7 @@ document.addEventListener('click', e => {
   if (go) { e.preventDefault(); go.dataset.go === 'top' ? goHome() : enterRegion(go.dataset.go); return; }
   if (e.target.closest('#rh-back')) { exitRegion(); return; }
   const rl = e.target.closest('.rlabel'); if (rl) { enterRegion(rl.dataset.region); return; }
-  const il = e.target.closest('.ilabel'); if (il) { const it = byId.get(il.dataset.item); if (w.game) requestItem(it.id); else enterRegion(it.group, { open: it.group === 'io' ? null : it.id }); return; }
+  const il = e.target.closest('.ilabel'); if (il) { const it = byId.get(il.dataset.item); enterRegion(it.group, { open: it.group === 'io' ? null : it.id }); return; }
   const lbt = e.target.closest('[data-lb]'); if (lbt) { openLightbox(lbt.dataset.lb, +lbt.dataset.lbI); return; }
   const el = e.target.closest('[data-id]');
   if (!el) {
@@ -414,7 +339,7 @@ document.addEventListener('click', e => {
     return;
   }
   if (e.metaKey || e.ctrlKey) return;
-  if (el.tagName === 'A' && el.dataset.id.startsWith('io/')) { if (w?.game && !w.isFound(el.dataset.id)) { e.preventDefault(); requestItem(el.dataset.id); } return; }
+  if (el.tagName === 'A' && el.dataset.id.startsWith('io/')) return;
   e.preventDefault(); openPanel(el.dataset.id);
 });
 
@@ -438,9 +363,8 @@ function panelHTML(it) {
 const siblings = it => inGroup(it.group);
 function openPanel(id, opts = {}) {
   const it = byId.get(id); if (!it) return;
-  if (w?.game && !w.isFound(id)) { requestItem(id); return; }
   if (it.group === 'io') return;
-  if (state.view !== 'ground' || state.region !== it.group) { enterRegion(it.group, { open: id, noHash: opts.noHash, direct: true }); return; }
+  if (state.view !== 'ground' || state.region !== it.group) { enterRegion(it.group, { open: id, noHash: opts.noHash }); return; }
   state.panel = id; setLit(id);
   panel.style.setProperty('--accent', GROUPS[it.group].hue);
   $('#panel-crumb').textContent = `${GROUPS[it.group].index} · ${GROUPS[it.group].label}`;
@@ -516,18 +440,8 @@ $('.lb-next', lb).addEventListener('click', () => { lbI = (lbI + 1) % lbList.len
 lb.addEventListener('click', e => { if (e.target === lb || e.target.tagName === 'FIGURE') closeLb(); });
 
 // ---------- keyboard ----------
-const MOVES = { w: [0, 1], arrowup: [0, 1], s: [0, -1], arrowdown: [0, -1], a: [-1, 0], arrowleft: [-1, 0], d: [1, 0], arrowright: [1, 0] };
-function moveDir([rx, fy]) {
-  const f = state.cam.look.clone().sub(state.cam.pos).setY(0).normalize();
-  if (w.stepDir(-f.z * rx + f.x * fy, f.x * rx + f.z * fy) && state.view === 'overview' && state.ov.dist > w.overview.dist * .8) goTravelView();
-}
 addEventListener('keydown', e => {
   const typing = e.target.closest('input,textarea');
-  if (w?.game && !typing && lb.hidden && ix.hidden && !e.metaKey && !e.ctrlKey && !e.altKey) {
-    const key = e.key.toLowerCase(), mv = MOVES[key];
-    if (mv && !(state.panel && key.startsWith('arrow'))) { e.preventDefault(); if (state.panel) closePanel(true); moveDir(mv); return; }
-    if (key === 'enter' && state.view === 'travel') { const g = w.playerRegion(); if (g) { enterRegion(g, { direct: true }); return; } }
-  }
   if (e.key === 'Escape') {
     if (!lb.hidden) return closeLb();
     if (!ix.hidden) return closeIndex();
@@ -557,88 +471,10 @@ const music = $('.music');
 new MutationObserver(() => { state.musicOn = music.classList.contains('is-playing'); }).observe(music, { attributes: true, attributeFilter: ['class'] });
 
 // ---------- worlds ----------
-const worldBtn = $('#world-toggle');
 async function getWorld(key) {
-  if (!worlds[key]) {
-    if (key === 'env') { const { createEnvWorld } = await import('./world-env.js?v=10'); worlds.env = createEnvWorld(ctx); hookGame(worlds.env); }
-    else worlds.die = createDieWorld(ctx);
-  }
+  if (!worlds[key]) worlds[key] = createDieWorld(ctx);
   return worlds[key];
 }
-function labelWorld() {
-  worldBtn.innerHTML = `<span class="env-k">World · </span>${state.world === 'env' ? 'Game' : 'Silicon'}`;
-  worldBtn.setAttribute('aria-pressed', String(state.world === 'env'));
-  document.body.classList.toggle('world-env', state.world === 'env');
-}
-async function setWorld(key) {
-  if (key === state.world && w) return;
-  const fade = $('#fade'); fade.classList.add('on');
-  await new Promise(r => setTimeout(r, reduced.matches ? 0 : 380));
-  state.world = key; w = await getWorld(key);
-  try { localStorage.setItem('world', key); } catch {}
-  labelWorld(); buildLabels();
-  if (state.view === 'ground') { buildCards(state.region); state.tween = null; const p = gdPose(); state.cam.pos.copy(p.pos); state.cam.look.copy(p.look); setBodyView(); }
-  else { Object.assign(state.ov, { target: w.overview.target.clone(), dist: w.overview.dist, yaw: 0, pitch: w.overview.pitch }); const p = ovPose(); state.cam.pos.copy(p.pos); state.cam.look.copy(p.look); }
-  if (state.lit) { const l = state.lit; state.lit = null; setLit(l); }
-  requestAnimationFrame(() => fade.classList.remove('on'));
-}
-worldBtn.addEventListener('click', () => setWorld(state.world === 'env' ? 'die' : 'env'));
-function toast(html) {
-  const el = $('#reward'); el.innerHTML = html; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-}
-function hookGame(g) {
-  g.api.onArrive = t => {
-    if (w !== g) return;
-    if (t.type === 'island') { enterRegion(t.key, { direct: true, open: state.pendingOpen }); state.pendingOpen = null; }
-    else if (t.type === 'item') {
-      const it = byId.get(t.id);
-      if (it.group === 'io') { if (!(state.view === 'ground' && state.region === 'io')) enterRegion('io', { direct: true }); }
-      else if (state.view === 'ground' && state.region === it.group) openPanel(t.id);
-      else enterRegion(it.group, { direct: true, open: t.id });
-    }
-  };
-  g.api.onDiscover = (id, r) => {
-    if (w !== g) return;
-    const it = byId.get(id);
-    toast(`<b>+${r.reward.toFixed(2)}</b> Found · ${esc(it.short || it.title)}` + (r.island ? `<br><b>+${r.bonus.toFixed(2)}</b> ${esc(g.isleName(r.island))} complete` : ''));
-    buildLabels(); refreshCardStatus(); updateGameHud(true);
-  };
-  g.api.onComplete = (st, bonus) => { if (w === g) setTimeout(() => showComplete(st, bonus), 1600); };
-}
-function updateGameHud(force) {
-  if (!w?.game) return;
-  const st = w.stats();
-  $('#gh-ep').textContent = `Episode ${pad3(st.episode)}`;
-  $('#gh-step').textContent = `Step ${String(st.steps).padStart(4, '0')}`;
-  $('#gh-ret').textContent = `Return ${st.ret >= 0 ? '+' : '−'}${Math.abs(st.ret).toFixed(2)}`;
-  $('#gh-found').textContent = `Found ${st.found}/${st.total}`;
-  $('#gh-par').textContent = `Par ${st.par}`;
-  $('#gh-best').textContent = st.best ? `Best ${st.best.ret.toFixed(1)}` : '';
-  if (force || state.ghFound !== st.found) {
-    state.ghFound = st.found;
-    $('#gh-isles').innerHTML = REGIONS.map(k => { const p = st.per[k]; return `<span class="gi${p.found === p.n ? ' done' : ''}" style="--accent:${GROUPS[k].hue}"><b>${esc(p.name)}</b><i><s style="width:${p.found / p.n * 100}%"></s></i><em>${p.found}/${p.n}</em></span>`; }).join('');
-  }
-  $('#gh-hint').textContent = `Hint · ${st.hint ? 'on' : 'off'}`; $('#gh-hint').setAttribute('aria-pressed', String(st.hint));
-}
-function showComplete(st, bonus) {
-  $('#cp-stats').innerHTML = [['Steps', st.steps], ['Par', st.par], ['Efficiency', Math.round(st.par / Math.max(1, st.steps) * 100) + '%'], ['Finish bonus', '+' + bonus.toFixed(2)], ['Return', st.ret.toFixed(2)], ['Best', st.best ? st.best.ret.toFixed(2) : '—']]
-    .map(([k, v]) => `<div><dt class="mono">${k}</dt><dd class="serif">${v}</dd></div>`).join('');
-  const c = $('#complete'); c.hidden = false; requestAnimationFrame(() => c.classList.add('open')); $('#cp-new').focus();
-}
-function hideComplete() { const c = $('#complete'); c.classList.remove('open'); setTimeout(() => { c.hidden = true; }, 350); }
-function newEpisode() {
-  hideComplete(); closePanel(true); w.reset(); buildLabels(); updateGameHud(true);
-  if (state.view !== 'overview') enterRegion('about', { direct: true }); else refreshCardStatus();
-  toast(`Episode ${pad3(w.stats().episode)} · back to Spawn`);
-}
-$('#gh-hint').addEventListener('click', () => { w.setHint(!w.stats().hint); updateGameHud(); });
-let resetArm = 0;
-$('#gh-reset').addEventListener('click', e => {
-  if (clock() > resetArm) { resetArm = clock() + 2.5; e.currentTarget.textContent = 'Sure? Click again'; setTimeout(() => { if (clock() > resetArm) $('#gh-reset').textContent = 'New episode'; }, 2600); return; }
-  resetArm = 0; $('#gh-reset').textContent = 'New episode'; newEpisode();
-});
-$('#cp-new').addEventListener('click', newEpisode);
-$('#cp-close').addEventListener('click', hideComplete);
 
 // ---------- frame ----------
 let last = performance.now();
@@ -672,13 +508,6 @@ function frame(now) {
     renderer.render(w.scene, camera);
 
     // Overview labels
-    if (w.game) {
-      if (state.view === 'travel' && !state.tween && !w.isWalking()) { state.idle = (state.idle || 0) + dt; const g = w.playerRegion(); if (g && state.idle > .7) { state.idle = 0; enterRegion(g, { direct: true }); } } else state.idle = 0;
-      if (state.view === 'ground' && w.isWalking() && w.playerRegion() !== state.region) goTravelView();
-      if ((t * 7 | 0) !== state.ghT) { state.ghT = t * 7 | 0; updateGameHud(); if (state.view === 'ground') refreshCardStatus(); }
-      const you = $('#you');
-      if (you) { const p = project(w.playerPos().add(new THREE.Vector3(0, 9, 0))); you.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-100%)`; you.style.visibility = p.ok && state.view !== 'ground' ? '' : 'hidden'; }
-    }
     if (state.view !== 'ground' || state.tween) {
       const showItems = state.view === 'overview' && state.ov.dist < w.labelLOD;
       for (const el of labels.children) {
@@ -697,11 +526,6 @@ function frame(now) {
     if (cardState.list.length) {
       const ls = beams.children; let offL = 0, offR = 0, rowY = 0;
       cardState.list.forEach((cd, i) => {
-        if (cardState.arc && cd.az !== undefined) {
-          // Keep the row flat relative to where the camera looks now.
-          const A = cardState.arc, e = Math.atan(Math.tan(A.el) * Math.cos(cd.az - state.gd.yaw - state.gd.look));
-          cd.anchor.copy(A.eye).addScaledVector(A.f, A.R * Math.cos(e) * Math.cos(cd.az)).addScaledVector(A.r, A.R * Math.cos(e) * Math.sin(cd.az)); cd.anchor.y += A.R * Math.sin(e);
-        }
         tmpV.copy(cd.anchor); if (!rm) tmpV.y += Math.sin(t * 1.1 + i * .9) * .35;
         const p = project(tmpV), vis = p.ok && p.x > -300 && p.x < innerWidth + 300, hw = cd.el.offsetWidth * cardState.k / 2;
         if (p.ok) { if (p.x + hw * .4 < 0) offL++; else if (p.x - hw * .4 > innerWidth) offR++; else rowY = Math.max(rowY, p.y + cd.el.offsetHeight * cardState.k / 2 + 26); }
@@ -719,14 +543,14 @@ function frame(now) {
     }
     if ((t * 8 | 0) !== state.coT) {
       state.coT = t * 8 | 0; const L = state.cam.look;
-      $('#coords').textContent = state.view === 'travel' ? `TRAVEL · STEP ${String(w.stats().steps).padStart(4, '0')}` : state.view === 'ground' ? `${GROUPS[state.region].label.toUpperCase()} · LOOK ${((state.gd.yaw + state.gd.look) * 57.3).toFixed(0)}°` : `X ${L.x >= 0 ? '+' : '−'}${Math.abs(L.x).toFixed(0).padStart(3, '0')} · Z ${L.z >= 0 ? '+' : '−'}${Math.abs(L.z).toFixed(0).padStart(3, '0')} · ZOOM ${(w.overview.dist / state.ov.dist).toFixed(1)}×`;
+      $('#coords').textContent = state.view === 'ground' ? `${GROUPS[state.region].label.toUpperCase()} · LOOK ${((state.gd.yaw + state.gd.look) * 57.3).toFixed(0)}°` : `X ${L.x >= 0 ? '+' : '−'}${Math.abs(L.x).toFixed(0).padStart(3, '0')} · Z ${L.z >= 0 ? '+' : '−'}${Math.abs(L.z).toFixed(0).padStart(3, '0')} · ZOOM ${(w.overview.dist / state.ov.dist).toFixed(1)}×`;
     }
   }
   requestAnimationFrame(frame);
 }
 
 // Test hook
-window.__site = { state, go: (g, o) => enterRegion(g, o), screenOf: id => w && project(w.markerPos(id)), regionScreen: g => w && project(w.regions[g].center), cards: () => cardState.list.map(c => ({ id: c.id, ...c.el.getBoundingClientRect().toJSON() })), world: () => w, setWorld };
+window.__site = { state, go: (g, o) => enterRegion(g, o), screenOf: id => w && project(w.markerPos(id)), regionScreen: g => w && project(w.regions[g].center), cards: () => cardState.list.map(c => ({ id: c.id, ...c.el.getBoundingClientRect().toJSON() })), world: () => w };
 
 // ---------- boot ----------
 async function boot() {
@@ -739,7 +563,6 @@ async function boot() {
     catch (err) { console.error(err); gl = false; document.body.classList.add('no-webgl'); }
   }
   progress(80);
-  labelWorld();
   if (w) { buildLabels(); Object.assign(state.ov, { target: w.overview.target.clone(), dist: w.overview.dist, yaw: 0, pitch: w.overview.pitch }); }
   resize(); setBodyView();
   if (w) { const p = ovPose(); state.cam.pos.copy(p.pos).multiplyScalar(1.7); state.cam.look.copy(p.look); }

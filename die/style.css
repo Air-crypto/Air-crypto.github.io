@@ -114,9 +114,6 @@ body:not(.is-loading) #loader{opacity:0;visibility:hidden}
 .nav a.on::after{transform:scaleX(1)}
 .hud-r{display:flex;align-items:center;gap:18px}
 .hud-r .mono,.wordmark .mono{white-space:nowrap}
-.env-btn{color:var(--dim);padding:8px 0;border-bottom:1px dashed var(--line);transition:color .2s,border-color .2s}
-.env-btn:hover{color:var(--ink)}
-.env-btn[aria-pressed="true"]{color:var(--copper);border-color:var(--copper)}
 .frame-btn{position:relative;padding:10px 16px 9px;color:var(--ink);
   background:linear-gradient(var(--ink),var(--ink)) 0 0/8px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 0/1px 8px no-repeat,
   linear-gradient(var(--ink),var(--ink)) 100% 0/8px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 100% 0/1px 8px no-repeat,
@@ -147,11 +144,6 @@ body.panel-open #region-head{opacity:.25}
 
 .readout{position:fixed;left:var(--pad);bottom:22px;z-index:20;display:flex;gap:18px;color:var(--dim);font-size:10px}
 .readout #hud-line{color:var(--soft)}
-#rl-stat{position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:20;margin:0;padding:7px 14px 6px;font-size:10px;color:var(--ink);background:rgba(5,7,13,.55);border:1px solid rgba(255,210,122,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .4s}
-body.world-env #rl-stat{opacity:1}
-#reward{position:fixed;left:50%;top:118px;transform:translateX(-50%);z-index:20;color:#ffd27a;font-size:11px;opacity:0;pointer-events:none}
-#reward.pop{animation:pop 1.4s var(--ease)}
-@keyframes pop{0%{opacity:0;transform:translate(-50%,6px)}15%{opacity:1;transform:translate(-50%,0)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}
 
 /* Detail panel */
 #panel{position:fixed;top:0;right:0;bottom:0;z-index:80;width:min(480px,100vw);display:flex;flex-direction:column;background:rgba(7,10,18,.92);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);border-left:1px solid var(--line);transform:translateX(102%);transition:transform .6s var(--ease)}
@@ -233,14 +225,13 @@ body.no-webgl #intro{bottom:auto;top:120px}
 
 @media (max-width:900px){
   .nav{display:none}
-  #rl-stat{top:72px;font-size:9px;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 }
 @media (max-width:600px){
   body{font-size:14.5px}
   .hud{padding:16px 18px}
   .wordmark .serif{font-size:21px}
   .wordmark .mono{letter-spacing:.08em;font-size:9px}
-  .env-k,.hud kbd{display:none}
+  .hud kbd{display:none}
   .hud-r{gap:12px}.hud-r .frame-btn{padding:9px 12px 8px}
   #intro{bottom:92px}
   #intro h1{font-size:44px}
@@ -277,57 +268,10 @@ body.short #rh-title{font-size:30px;margin-bottom:6px}
 body.short #rh-blurb{display:none}
 body.short .tag{margin-bottom:8px}
 
-/* Game world */
-.game-only{display:none}
-body.world-env #intro .game-only{display:block;color:#ffd27a;margin-top:8px}
-body.view-travel #intro{opacity:0;transform:translateY(16px)}
-body.view-travel #labels{opacity:1}
-#you{position:absolute;left:0;top:0;pointer-events:none;color:#ffd27a;font-size:10px;padding:2px 6px;border:1px solid rgba(255,210,122,.5);background:rgba(5,7,13,.7);will-change:transform}
-.rlabel.done b::after{content:" ✓";font-family:var(--mono);font-size:.4em;color:var(--accent);vertical-align:middle}
-.ilabel.show.found{opacity:.55}
-#game-hud{position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:30;display:none;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
-body.world-env #game-hud{display:flex}
-.gh-stats{display:flex;gap:16px;padding:8px 14px 7px;font-size:10px;color:var(--ink);background:rgba(5,7,13,.62);border:1px solid rgba(255,210,122,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);white-space:nowrap}
-.gh-stats #gh-ret{color:#ffd27a}.gh-stats #gh-par,.gh-stats #gh-best{color:var(--dim)}
-.gh-isles{display:flex;gap:10px;font-size:9px;letter-spacing:.08em}
-.gi{display:grid;grid-template-columns:auto auto;align-items:center;gap:2px 6px;padding:4px 8px;background:rgba(5,7,13,.5);border:1px solid var(--faint)}
-.gi b{font-weight:400;color:var(--soft);grid-column:1/-1}
-.gi i{display:block;width:54px;height:3px;background:var(--faint)}
-.gi s{display:block;height:100%;background:var(--accent);text-decoration:none;transition:width .5s var(--ease)}
-.gi em{font-style:normal;color:var(--dim)}
-.gi.done{border-color:var(--accent)}.gi.done b{color:var(--ink)}
-.gh-btns{display:flex;gap:12px;pointer-events:auto}
-.gh-btns button{font-size:9.5px;color:var(--dim);padding:4px 2px;border-bottom:1px dashed var(--line)}
-.gh-btns button:hover{color:var(--ink)}
-#gh-hint[aria-pressed="true"]{color:#ffd27a;border-color:rgba(255,210,122,.5)}
-body.world-env.view-ground #game-hud .gh-isles,body.world-env.view-ground #game-hud .gh-btns{display:none}
-body.world-env #reward{top:auto;bottom:96px;text-align:center;line-height:1.7;font-size:11px;color:var(--ink);padding:8px 14px;background:rgba(5,7,13,.7);border:1px solid rgba(255,210,122,.45)}
-#reward b{color:#ffd27a;font-weight:500}
-.c-q{display:block;font-size:9.5px;letter-spacing:.08em;color:#ffd27a;border-top:1px solid var(--faint);padding-top:6px;margin-top:2px}
-.card3d.found .c-q{color:var(--mint)}
-#complete{position:fixed;inset:0;z-index:130;display:grid;place-items:center;background:rgba(5,7,13,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;transition:opacity .35s}
-#complete.open{opacity:1}#complete[hidden]{display:none}
-.cp-inner{width:min(520px,calc(100vw - 40px));padding:30px 30px 24px;background:rgba(10,14,24,.95);border:1px solid rgba(255,210,122,.4)}
-.cp-inner .tag{color:#ffd27a}
-.cp-inner h2{font-size:44px;line-height:1;margin:0 0 20px}
-#cp-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;margin:0 0 24px}
-#cp-stats dt{color:var(--dim);margin-bottom:4px}#cp-stats dd{margin:0;font-size:28px;line-height:1}
-.cp-btns{display:flex;gap:18px;align-items:center}
-@media (max-width:900px){.gh-isles{display:none}}
-@media (max-width:600px){#game-hud{top:62px}.gh-stats{gap:9px;font-size:8.5px;padding:6px 10px 5px}#gh-par,#gh-best{display:none}.gh-btns{display:none}body.world-env #reward{bottom:110px}}
-
-body.world-env.view-overview #game-hud .gh-isles{display:none}
-#game-hud{flex-direction:row;flex-wrap:wrap;justify-content:center}
-.gh-stats{order:1}.gh-btns{order:2;align-self:center}.gh-isles{order:3;flex-basis:100%;justify-content:center}
-
-/* Game HUD sits at the bottom so it never covers island labels; toasts at the top. */
-#game-hud{top:auto;bottom:58px;left:auto;right:var(--pad);transform:none;align-items:flex-end;flex-direction:column-reverse;flex-wrap:nowrap}
-#game-hud .gh-row{display:flex;gap:12px;align-items:center}
-body.world-env #reward{bottom:auto;top:84px}
-body.world-env .readout{bottom:16px}
-@media (max-width:600px){#game-hud{bottom:auto;top:62px;right:auto;left:50%;transform:translateX(-50%);align-items:center}body.world-env #reward{top:auto;bottom:110px}body.world-env .readout{bottom:62px}}
-#game-hud .gh-btns button{background:rgba(5,7,13,.72);padding:4px 8px}
 .more-hint{position:fixed;top:50%;z-index:24;transform:translateY(-50%);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:rgba(5,7,13,.78);border:1px solid var(--line);padding:7px 10px;opacity:0;pointer-events:none;transition:opacity .4s}
 .more-hint.on{opacity:1;pointer-events:auto}
 .more-hint:hover{border-color:var(--soft)}
 .more-l{left:10px}.more-r{right:10px}
+/* Name shows only inside a region; the intro already carries it on the home view. */
+.wordmark{transition:opacity .5s var(--ease),visibility .5s}
+body.view-overview .wordmark{opacity:0;visibility:hidden}

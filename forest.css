@@ -146,3 +146,5 @@ body{font-size:14px}#forest-viewport{inset:9px}#landscape{left:9px;top:9px}.pape
 .story-entry p,.story-entry li,.story-entry h2,.story-entry h3{ text-shadow:0 0 4px #2a282c,0 0 9px #2a282c,0 0 15px #2a282c }
 
 .back{display:grid;place-items:center;padding:0;font-size:0;line-height:1}.back[hidden]{display:none}.back svg{display:block;width:28px;height:20px}
+
+.music-note{margin:0 0 13px 37px;text-align:left}.music-note>span{left:-27px;right:auto}

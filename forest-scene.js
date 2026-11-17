@@ -38,22 +38,38 @@ const trunkPhase=r(-.5,.5),trunkPoints=Array.from({length:110},(_,i)=>{
 });
 for(let i=1;i<trunkPoints.length;i++)line(tc,[trunkPoints[i-1],trunkPoints[i]],Math.max(2,23*Math.pow(1-i/110,.9)),.95);
 for(let i=0;i<8;i++)line(tc,[[300+r(-5,5),995],[300+r(-12,12),1030],[300+r(-31,31),1048]],r(1.2,4),.75);
-const crowns=[
-[286,91,27,43,-.25],[310,150,48,40,.4],[257,177,36,37,.2],[341,192,41,32,-.2],
-[303,230,31,36,.1],[346,285,43,42,.3],[250,299,46,32,-.35],[213,329,26,32,-.2],
-[284,346,45,37,-.2],[338,365,55,39,.1],[367,407,35,38,.6],[312,422,57,35,.1],
-[242,425,50,34,-.3],[202,458,32,38,.4],[253,495,39,34,.2],[307,489,53,37,-.2],
-[354,520,52,38,.2],[286,554,53,32,-.3],[225,569,43,42,.3],[195,600,33,39,-.1],
-[247,627,48,38,.1],[308,620,48,44,-.2],[352,654,35,38,.3],[293,679,47,34,.1],
-[258,713,38,35,-.3],[228,752,26,25,.1],[303,742,23,31,.1]
-];
-crowns.forEach(([x,y,rx,ry,a],i)=>{
- x+=r(-13,13);y+=r(-10,10);rx*=r(.72,1.14);ry*=r(.75,1.18);a+=r(-.3,.3);
- const at=[300+Math.sin(y*.012)*5,y+30];
- line(tc,[at,[x+(300-x)*.35,y+12],[x,y]],r(1.8,4));
- roughBlob(tc,x,y,rx,ry,a);
- for(let j=0;j<3;j++)roughBlob(tc,x+r(-rx*.7,rx*.7),y+r(-ry*.7,ry*.7),rx*r(.2,.44),ry*r(.2,.45),r(-1,1));
-});
+// Foliage follows a branching skeleton instead of stacked horizontal blobs.
+const leafSites=[];
+function crownBranch(x,y,length,angle,thickness,depth){
+ const points=[[x,y]],bend=r(-.4,.4),steps=22;
+ angle=Math.max(-2.8,Math.min(-.34,angle));
+ for(let i=1;i<=steps;i++){
+  const t=i/steps,a=angle+Math.sin(t*Math.PI)*bend;
+  x+=Math.cos(a)*length/steps;y+=Math.sin(a)*length/steps;
+  x=Math.max(65,Math.min(535,x));y=Math.max(45,y);points.push([x,y]);
+  line(tc,[points[i-1],points[i]],Math.max(.5,thickness*(1-t*.6)),.9);
+  if(depth<=2&&i>8&&i%5===0)leafSites.push({x:x+r(-9,9),y:y+r(-9,9),angle:a,size:r(9,20)});
+ }
+ if(depth>0){
+  crownBranch(x,y,length*r(.5,.7),angle+r(-.5,-.13),thickness*.58,depth-1);
+  crownBranch(x,y,length*r(.46,.67),angle+r(.15,.55),thickness*.53,depth-1);
+ }else leafSites.push({x,y,angle,size:r(11,23)});
+}
+for(let i=0;i<12;i++){
+ const y=760-i*48+r(-31,31),side=i%2?1:-1;
+ const angle=side>0?r(-1.18,-.55):r(-2.60,-1.97);
+ crownBranch(300+Math.sin((1035-y)/945*4+trunkPhase)*7,y,r(92,150)*(1-i*.025),angle,r(3.2,6.1)*(1-i*.025),2);
+}
+crownBranch(298,230,100,-Math.PI/2,3,2);
+// Several smaller, differently angled clusters give the crown depth and open sky.
+for(let i=0;i<27;i++)leafSites.push({x:300+r(-82,85),y:r(155,600),angle:r(-2.8,-.3),size:r(8,17)});
+leafSites.sort((a,b)=>a.y-b.y);
+for(const leaf of leafSites){
+ tc.globalAlpha=r(.55,.95);
+ roughBlob(tc,leaf.x,leaf.y,leaf.size*r(.65,1.1),leaf.size*r(.75,1.3),leaf.angle+r(-.6,.6));
+ for(let i=0;i<3;i++)roughBlob(tc,leaf.x+r(-18,18),leaf.y+r(-16,16),r(3,8),r(4,10),r(-2,2));
+}
+tc.globalAlpha=1;
 // Navigation twigs are drawn live so they can thicken into new limbs.
 tc.globalCompositeOperation='source-atop';
 for(let i=0;i<69000;i++){tc.globalAlpha=r(.08,.7);tc.fillStyle=BG;tc.fillRect(r(130,420),r(40,1030),r(.4,1.7),r(.4,1.5))}
@@ -113,11 +129,11 @@ function drawGroundArt(){
  g.globalAlpha=1;
 }
 // All coordinates belong to one tree. Only the camera and branch growth change.
-const anchorSpecs={work:[150,241,-1],projects:[450,323,1],life:[120,477,-1],me:[447,565,1]};
+const anchorSpecs={work:[110,241,-1],projects:[490,323,1],life:[95,477,-1],me:[490,565,1]};
 const baseSpecs={work:[297,265],projects:[302,345],life:[299,487],me:[304,590]};
 function treeSize(){const sy=H*.95/990;return {sy,sx:W<700?Math.min(sy,W*1.15/600):sy*2.8}}
 function rawPoint(x,y){const {sx,sy}=treeSize();return {x:(x-300)*sx,y:H-4-(1050-y)*sy}}
-function anchor(key){const [x,y,side]=anchorSpecs[key];return {...rawPoint(x,y),side}}
+function anchor(key){const [x,y,side]=anchorSpecs[key],p=rawPoint(x,y);if(W<700)p.x=Math.max(-W*.23,Math.min(W*.23,p.x));return {...p,side}}
 function baseAnchor(key){return rawPoint(...baseSpecs[key])}
 function project(p){return {...p,x:p.x+current.x,y:p.y+current.y}}
 function ensureBranch(key,count){

@@ -7,9 +7,9 @@ One persistent, scrollable world with a substantial tree and trunk. A clicked wo
 - Runtime randomized branch angles, curvature, taper, foliage and thickness. Open geometry is stable; fresh openings vary.
 - Collision search places sibling labels, new limbs, and article footprints around existing content. Connector routes seek clear paths; scenery fades softly behind text when crossing cannot be avoided.
 - Geometry-derived scrolling expands in every direction and preserves previous extents until reset. Responsive resizing replans open geometry.
-- A broader, smoothly tapered trunk, curved roots with continuous fork tangents, irregular canopy, and graded ground litter replace rigid scenery. The full default tree fits the viewport.
+- A broader, smoothly tapered trunk, curved roots with continuous fork tangents, a branching canopy with small irregular leaf clusters and visible sky gaps, and graded ground litter replace rigid scenery. The full default tree fits the viewport.
 - Three unlabeled root knots reveal a circuit, hockey stick and puck, and paper plane. Native buttons support hover, touch and keyboard; discovery persists for the visit, and reduced motion reveals immediately.
-- The music-note arrow is on its right side, and the separate diagonal arrow in the play bar has been removed. The back arrow is centered, short, and gently curved.
+- The music-note arrow is on the left of “what I’m listening to on repeat right now”, retaining its direction, and the separate diagonal arrow in the play bar has been removed. The back arrow is centered, short, and gently curved.
 - Larger circular halftone photos, San Francisco/New York, and the official Unethical by Faouzia player are preserved.
 
 ## Validation

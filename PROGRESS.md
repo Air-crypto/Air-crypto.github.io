@@ -1,17 +1,20 @@
-# Branch landscape implementation
+# Persistent tree landscape
 
-The original panel-based version was superseded by nested growing branches and articles that scroll through one continuous grass, root, and soil scene.
+## Objective
+One continuous scene. Limbs grow sideways from the existing tree while the camera pans. Opening content adds to the same scene. Empty-background clicks return to the default tree. Preserve natural text without boxes, lower scenery opacity behind text, extend the roots, and use larger halftone dots.
 
-Implemented: Libre Franklin, charcoal/pale-ink palette, rough double-stroke underlines, two-color halftone photos with color reveal, growing branch paths and child links, shareable nested routes, browser history, back/Escape navigation, reduced motion, and text-overlap fading. Existing portfolio content and the earlier workbench remain available. Music uses the official Unethical by Faouzia video.
+## Implemented
+- Persistent branch state and persistent navigation elements; opening a leaf does not recreate or regrow its parent limb.
+- Flat project navigation, with compatibility for former category URLs.
+- Shared world coordinates for the tree, twigs, labels, terrain, and articles.
+- Background, back-arrow, and Escape reset; scrollable underground space on the default tree too.
+- Root artwork extends through an 1800px underground region.
+- 4px circular halftone dots with color reveal on hover/focus/tap.
+- Location remains San Francisco/New York; official Unethical by Faouzia player preserved.
 
-## Local acceptance in the macOS VM
+## Verification
+Local Safari in the macOS VM: persistent desktop tree → projects → eBike article; scrolling into soil; background return to default tree; deeper roots viewed well underground. Inspected the revised dot treatment. At 320px: all 11 project links fit, article navigation and background reset work.
 
-- Safari: home → projects → hardware & systems → eBike article.
-- Scrolled the article through the grass into roots, strata, and rocks.
-- Opened about content and inspected the rotated halftone photo collage.
-- At 320 × 874: work branch → AMD article, long-content scrolling, back/Escape.
-- Corrected mobile tree and label overlap, then added feathered scenery fading behind actual text rectangles per user preference.
-- Inspected desktop typography, tree proportions, branches, music placement, and image treatment against the reference in Safari.
-- JavaScript syntax checked with JavaScriptCore. Static content and asset references checked against the repository.
+`osascript -l JavaScript tests/forest-scene.test.js`: PASS at 1250×540 and 302×856. Checks camera continuity, original twig attachment, progressive growth, no growth reset when opening an article, retention of another open limb, default reset, root extent, and canvas identity. Drawing is stubbed in this state regression; Safari supplies visual acceptance.
 
-No build step or repository test suite is required for these static files. Browser acceptance uses VMPal UI interaction. The music implementation retains the official-video integration previously verified on desktop and mobile.
+Static site, no build step. Local preview: `python3 -m http.server 8765 --bind 127.0.0.1`. Publish to main through GitHub Pages and verify the deployed files and interactions.

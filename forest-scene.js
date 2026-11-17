@@ -8,7 +8,10 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const motion=document.getElementById('motion-toggle');
 const INK='#b8bbc3',BG='#2a282c';
 let W=0,H=0,DPR=1,scroll=0,clock=0,last=0,frame=0,paused=reduced.matches;
-let view={type:'home',side:1,count:0}, current={x:0,y:0,scale:1},target={x:0,y:0,scale:1},initialized=false,growth=1;
+let view={type:'home',group:'',item:-1},current={x:0,y:0},target={x:0,y:0},initialized=false;
+const branches=new Map(['work','projects','life','me'].map(key=>[key,{key,open:false,growth:0,count:0}]));
+let layoutCallback=()=>{},connector=0;
+const labelAnchors=new Map();
 let rng=2943;
 function random(){rng=(Math.imul(rng,1664525)+1013904223)>>>0;return rng/4294967296}
 const r=(a,b)=>a+(b-a)*random();
@@ -53,15 +56,17 @@ tc.globalAlpha=1;tc.globalCompositeOperation='source-over';
 const brush=surface(140,120),bc=brush.getContext('2d');roughBlob(bc,70,60,51,40,-.1);
 bc.globalCompositeOperation='source-atop';for(let i=0;i<4800;i++){bc.globalAlpha=r(.15,.7);bc.fillStyle=BG;bc.fillRect(r(0,140),r(0,120),r(.4,1.2),r(.4,1.5))}bc.globalAlpha=1;
 const ground=surface(1,1);
-const rootArt=surface(1000,900),rc=rootArt.getContext('2d');
+const rootArt=surface(1800,2600),rc=rootArt.getContext('2d');
 rng=44271;
 function root(x,y,len,angle,thick,depth){
+ angle=Math.max(.25,Math.min(Math.PI-.25,angle));
+ if(depth<4)angle+=(Math.PI/2-angle)*.15;
  const ex=x+Math.cos(angle)*len,ey=y+Math.sin(angle)*len;
  const mid=[x+(ex-x)*.5+r(-12,12),y+(ey-y)*.5+r(-12,12)];
  line(rc,[[x,y],mid,[ex,ey]],thick,.9);
  if(depth>0){root(ex,ey,len*r(.56,.76),angle+r(-.4,.4),thick*.63,depth-1);root(mid[0],mid[1],len*r(.43,.7),angle+r(-.9,.9),thick*.54,depth-1)}
 }
-for(let i=0;i<11;i++)root(500+r(-12,12),0,r(65,160),r(.15,2.95),r(1.8,4.7),5);
+for(let i=0;i<11;i++)root(900+r(-12,12),0,r(380,650),r(.35,2.79),r(2.8,5.5),7);
 const rocks=Array.from({length:5},(_,i)=>{const c=surface(100,80),g=c.getContext('2d');roughBlob(g,50,40,35+r(-8,8),22+r(-5,6),r(-.4,.4));g.globalCompositeOperation='source-atop';for(let j=0;j<2400;j++){g.globalAlpha=r(.2,.8);g.fillStyle=BG;g.fillRect(r(0,100),r(0,80),r(.3,1),r(.3,1))}g.globalAlpha=1;line(g,[[45,28],[41,37],[44,51]],.8,.5);return c});
 const grain=surface(256,256),gc=grain.getContext('2d');
 for(let i=0;i<6000;i++){gc.fillStyle=random()>.5?'rgba(255,255,255,.022)':'rgba(0,0,0,.04)';gc.fillRect(random()*256,random()*256,1,1)}
@@ -95,48 +100,85 @@ function drawGroundArt(){
  for(let i=0;i<W*2.8;i++){g.fillStyle=INK;g.globalAlpha=r(.3,.8);g.fillRect(r(0,W),bottom+r(-2,20),r(.5,1.5),r(.7,1.5))}
  g.globalAlpha=1;
 }
-function nodeGeometry(i,count){
- const mobile=W<700,side=view.side||1,t=count===1?.53:(i+.45)/(count+.25);
- const x=side>0?W*(.30+.43*t)+Math.sin(t*15)*10:W*(.70-.41*t)+Math.sin(t*15)*10;
- const y=H*(.94-.88*t)+Math.sin(t*12)*6;
- return {x,y,side:(i%2===0?-1:1),index:i,mobile};
+// All coordinates belong to one tree. Only the camera and branch growth change.
+const anchorSpecs={work:[150,241,-1],projects:[450,323,1],life:[120,477,-1],me:[447,565,1]};
+function treeSize(){const sy=H*.82/990;return {sy,sx:W<700?Math.min(sy,W*.72/600):sy*1.55}}
+function anchor(key){
+ const [x,y,side]=anchorSpecs[key],{sx,sy}=treeSize();
+ return {x:(x-300)*sx,y:H-4-(1050-y)*sy,side};
+}
+function project(p){return {x:p.x+current.x,y:p.y+current.y,side:p.side}}
+function curve(key,t){
+ const a=anchor(key);
+ if(key==='me'){
+  const endX=W<700?26-W*.12-10:W*.24-10;
+  return {x:a.x+(endX-a.x)*t,y:a.y+(H*.59+8-a.y)*t+Math.sin(t*Math.PI)*7};
+ }
+ const length=W*.62,ex=a.x+a.side*length,ey=-H*.09;
+ const u=1-t;
+ return {x:u*u*u*a.x+3*u*u*t*(a.x+a.side*length*.27)+3*u*t*t*(ex-a.side*length*.28)+t*t*t*ex,
+ y:u*u*u*a.y+3*u*u*t*(a.y+(ey-a.y)*.33)+3*u*t*t*(a.y+(ey-a.y)*.66)+t*t*t*ey};
+}
+function nodeGeometry(key,i,count){
+ const t=.12+(i+.5)/count*.82,p=project(curve(key,t)),side=i%2===0?-1:1;
+ return {...p,side,t,opacity:Math.max(0,Math.min(1,(branches.get(key).growth-t)*10))};
+}
+function primaryGeometry(key){return project(anchor(key))}
+function storyGeometry(){
+ const mobile=W<700,side=anchorSpecs[view.group||'me'][2];
+ const cameraX=W*(side>0?(mobile?.12:.12):.88);
+ const screenX=mobile?26:side>0?(view.group==='me'?.36:.415)*W:W*.09;
+ return {x:screenX-cameraX+current.x,y:H*.59+current.y};
 }
 function setTarget(){
- const mobile=W<700;
- const s=H*.82/990;
- if(view.type==='home')target={x:W*(mobile?.48:.40),y:H-4,scale:s};
- else if(view.type==='menu')target={x:W*(view.side>0?.25:.72),y:H*2.4,scale:s*1.3};
- else target={x:W*(mobile?-.38:.08),y:H-4,scale:s*1.3};
- if(!initialized||paused){current={...target};initialized=true;}
+ if(view.type==='home')target={x:W*(W<700?.48:.40),y:0};
+ else {const side=anchorSpecs[view.group][2];target={x:W*(side>0?.12:.88),y:H*(view.type==='story'?-.26:.13)};}
+ if(!initialized&&W&&H){current={x:W*(W<700?.48:.40),y:0};initialized=true}
+ if(paused)current={...target};
 }
-function renderBough(){
- if(view.type==='home')return;
- const article=view.type==='story';
- const mobile=W<700;
- let start,end;
- if(article){start={x:mobile?-20:current.x+8,y:mobile?50:H*.25};end={x:W*(mobile?.70:.405),y:mobile?136:H*.28};}
- else {start={x:W*(view.side>0?.30:.70),y:H*.94};end={x:W*(view.side>0?.73:.29),y:H*.06};}
- const dx=end.x-start.x,dy=end.y-start.y,steps=article?15:26;
- const reach=paused?1:Math.min(1,growth);
- line(ctx,[[start.x,start.y-scroll],[start.x+dx*reach*.5-15*reach,start.y+dy*reach*.5-scroll],[start.x+dx*reach,start.y+dy*reach-scroll]],2,.9);
- for(let i=0;i<steps;i++){
-  const t=(i+.5)/steps;if(t>reach)continue;const x=start.x+dx*t+Math.sin(t*15)*10,y=start.y+dy*t+Math.sin(t*12)*6-scroll;
-  const size=(article?28:35)*(1-.35*t)*(mobile?.72:1)*Math.min(1,(reach-t)*12);
-  ctx.drawImage(brush,x-size,y-size*.76,size*2,size*1.55);
+function drawPath(points,reach,size){
+ const end=Math.max(1,Math.ceil((points.length-1)*reach));
+ const visible=points.slice(0,end);
+ if(visible.length>1)line(ctx,visible.map(p=>[p.x+current.x,p.y+current.y-scroll]),1.8,.9);
+ for(let i=0;i<end;i++){
+  if(i%2)continue;
+  const p=points[i],t=i/(points.length-1);
+  const grow=Math.min(1,Math.max(0,(reach-t)*20)),radius=size*(1-t*.45)*(1+Math.sin(i*2.31)*.24)*grow;
+  if(radius>0)ctx.drawImage(brush,p.x+current.x-radius,p.y+current.y-scroll-radius*.76,radius*2,radius*1.55);
  }
- if(!article)for(let i=0;i<view.count;i++){
-  if((i+.45)/(view.count+.25)>reach)continue;const n=nodeGeometry(i,view.count),side=n.side,ex=n.x+side*(mobile?14:26);
-  line(ctx,[[n.x,n.y-scroll],[ex,n.y-14-scroll]],1.2);
+}
+function renderBoughs(){
+ for(const branch of branches.values()){
+  if(branch.growth<=0)continue;
+  const points=Array.from({length:55},(_,i)=>curve(branch.key,i/54));
+  drawPath(points,branch.growth,W<700?15:24);
+  for(let i=0;i<branch.count;i++){
+   const n=nodeGeometry(branch.key,i,branch.count);
+   if(n.opacity<=0)continue;
+   const label=labelAnchors.get(branch.key+'/'+i);
+   const end=label?project(label):{x:n.x+n.side*(W<700?16:28),y:n.y-12};
+   line(ctx,[[n.x,n.y-scroll],[end.x,end.y-scroll]],1,n.opacity);
+  }
+ }
+ if(view.type==='story'&&view.group&&view.group!=='me'&&connector>0){
+  const branch=branches.get(view.group);
+  const from=view.item>=0?curve(view.group,.12+(view.item+.5)/branch.count*.82):curve(view.group,.72);
+  const to=storyGeometry(),end={x:to.x-current.x-10,y:to.y-current.y+8};
+  const points=Array.from({length:35},(_,i)=>{
+   const t=i/34,u=1-t;
+   return {x:u*u*from.x+2*u*t*(from.x+(end.x-from.x)*.75)+t*t*end.x,y:u*u*from.y+2*u*t*(end.y-H*.13)+t*t*end.y};
+  });
+  drawPath(points,connector,W<700?8:12);
  }
 }
 function drawSoil(groundY){
  if(groundY>H+30)return;
- ctx.drawImage(rootArt,(W<700&&view.type==='story'?W*.15:current.x)-300,groundY-3,600,540);
+ ctx.drawImage(rootArt,current.x-450,groundY-3,900,1800);
  const top=Math.max(0,scroll-H),bottom=scroll+H+100;
  // Deterministic layers make scrolling continuous instead of regenerating the earth.
  for(let level=0;level<Math.ceil((scroll+H)/220)+1;level++){
   rng=8721+level*331;
-  const worldY=H+level*220+100,y=worldY-scroll;
+  const worldY=H+current.y+level*220+100,y=worldY-scroll;
   if(y < -100 || y>H+100)continue;
   for(let x=0;x<W;x+=r(4,12)){
    const wave=Math.sin(x*.012+level)*11+Math.sin(x*.033)*3;
@@ -148,7 +190,7 @@ function drawSoil(groundY){
  for(let band=first;band<=lastBand;band++){
   rng=4599+band*177;
   for(let j=0;j<Math.ceil(W/30);j++){
-   const x=r(0,W),y=H+band*150+r(0,150)-scroll;
+   const x=(r(0,W)+current.x-W*.40+W)%W,y=H+current.y+band*150+r(0,150)-scroll;
    if(y<groundY+12||y<-60||y>H+60)continue;
    const big=j%19===0,size=big?r(30,68):r(2,10);
    ctx.drawImage(rocks[(j+band)%rocks.length],x,y,size,size*.8);
@@ -163,40 +205,68 @@ function render(){
   const x=random()*W,y=(random()*H*1.8-clock*r(.1,.5)-scroll*.15)%(H+10);
   if(y>0&&y<H){ctx.fillStyle=INK;ctx.globalAlpha=r(.1,.7);ctx.fillRect(x,y,r(.35,.85),r(.35,.85))}
  }ctx.globalAlpha=1;
- const groundY=H-4-scroll;
+ const groundY=H-4+current.y-scroll;
  drawSoil(groundY);
- const tw=W<700?Math.min(600*current.scale,W*.72):600*current.scale*1.55,th=1050*current.scale;
- const sway=paused?0:Math.sin(clock*.8)*1.1;
- ctx.save();ctx.translate(current.x,current.y-scroll);ctx.transform(1,0,sway*.0008,1,0,0);
- ctx.drawImage(treeArt,-tw*.5,-th,tw,th);ctx.restore();
- renderBough();
- ctx.drawImage(ground,0,0,ground.width,ground.height,0,groundY-136,W,170);
+ const {sx,sy}=treeSize(),tw=600*sx,th=1050*sy;
+ ctx.drawImage(treeArt,current.x-tw*.5,H-4+current.y-scroll-th,tw,th);
+ renderBoughs();
+ const groundShift=(current.x-W*(W<700?.48:.40))%W;
+ for(const x of [groundShift-W,groundShift,groundShift+W])ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,170);
  ctx.fillStyle=pattern;ctx.fillRect(0,0,W,H);
  // Thin the ink only where it passes behind text; the landscape stays continuous.
  for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>H)continue;ctx.drawImage(textFade,a.x-26,y-16,a.w+52,a.h+32)}
 }
+function isMoving(){
+ return Math.abs(current.x-target.x)+Math.abs(current.y-target.y)>.05||
+ [...branches.values()].some(b=>Math.abs(b.growth-(b.open?1:0))>.001)||
+ (view.type==='story'&&connector<1);
+}
 function tick(now){
- frame=0;const moving=growth<1||Math.abs(current.x-target.x)+Math.abs(current.y-target.y)+Math.abs(current.scale-target.scale)>0.03;
- if(!document.hidden&&(now-last>32||moving)){
-  const f=paused?1:.11;
-  for(const k of ['x','y','scale'])current[k]+=(target[k]-current[k])*f;
-  const dt=Math.min((now-last)/1000,.07);clock+=dt;growth=paused?1:Math.min(1,growth+dt*.9);last=now;render();
+ frame=0;
+ if(!document.hidden&&(now-last>32||isMoving())){
+  const dt=Math.min((now-last)/1000,.07),moving=isMoving();clock+=dt;last=now;
+  const f=paused?1:1-Math.exp(-dt*5);
+  for(const key of ['x','y'])current[key]+=(target[key]-current[key])*f;
+  for(const b of branches.values()){
+   const goal=b.open?1:0;
+   b.growth=paused?goal:goal>b.growth?Math.min(goal,b.growth+dt*.75):Math.max(goal,b.growth-dt*1.5);
+  }
+  if(view.type==='story')connector=paused?1:Math.min(1,connector+dt*.85);
+  if(moving)layoutCallback();
+  render();
  }
- if(!document.hidden&&(!paused||moving))frame=requestAnimationFrame(tick);
+ if(!document.hidden&&(!paused||isMoving()))frame=requestAnimationFrame(tick);
 }
 function refresh(){cancelAnimationFrame(frame);frame=0;render();if(!document.hidden)frame=requestAnimationFrame(tick)}
 function resize(){
  W=viewport.clientWidth;H=viewport.clientHeight;DPR=Math.min(devicePixelRatio||1,2);
  canvas.width=Math.ceil(W*DPR);canvas.height=Math.ceil(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';
- ctx.setTransform(DPR,0,0,DPR,0,0);pattern=ctx.createPattern(grain,'repeat');drawGroundArt();setTarget();refresh();
+ ctx.setTransform(DPR,0,0,DPR,0,0);pattern=ctx.createPattern(grain,'repeat');drawGroundArt();setTarget();layoutCallback();refresh();
  window.dispatchEvent(new CustomEvent('forest-resize'));
 }
-function setView(next){view=next;growth=paused?1:0;setTarget();refresh()}
+function setView(next){
+ const was=view;view=next;
+ if(next.type==='home')for(const b of branches.values())b.open=false;
+ else {const b=branches.get(next.group);b.open=true;b.count=next.count||0;}
+ // Opening a leaf never restarts its parent branch.
+ if(next.type==='story'&&(was.group!==next.group||was.item!==next.item||was.type!=='story'))connector=0;
+ if(paused)for(const b of branches.values())b.growth=b.open?1:0;
+ setTarget();layoutCallback();refresh();
+}
 viewport.addEventListener('scroll',()=>{scroll=viewport.scrollTop;if(paused)render()},{passive:true});
 document.addEventListener('visibilitychange',refresh);
 motion.addEventListener('click',()=>{paused=!paused;syncMotion()});
 function syncMotion(){motion.setAttribute('aria-pressed',String(paused));motion.setAttribute('aria-label',paused?'Resume animation':'Pause animation');motion.textContent=paused?'▷':'Ⅱ';refresh()}
 reduced.addEventListener('change',e=>{paused=e.matches;syncMotion()});
-window.forestScene={setView,nodeGeometry,setTextAreas(areas){textAreas=areas;if(paused)render()},get size(){return {width:W,height:H}},render};
+window.forestScene={
+ setView,nodeGeometry,primaryGeometry,storyGeometry,
+ branchPoint(key,t){return project(curve(key,t))},
+ setLabelAnchor(key,i,p){labelAnchors.set(key+'/'+i,{x:p.x-current.x,y:p.y-current.y})},
+ onLayout(callback){layoutCallback=callback},
+ setTextAreas(areas){textAreas=areas;if(paused)render()},
+ get size(){return {width:W,height:H,rootDepth:1800}},
+ get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b}))}},
+ render
+};
 new ResizeObserver(resize).observe(viewport);
 })();

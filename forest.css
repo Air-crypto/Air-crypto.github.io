@@ -50,7 +50,7 @@ a:focus-visible,button:focus-visible{outline:none;color:#e6e8ed;text-decoration:
 #story .gallery-container{display:flex;flex-direction:column;gap:24px;margin:22px 0}
 .photo{position:relative;display:block;border:0;padding:0;background:transparent;cursor:pointer;line-height:0;width:100%;overflow:hidden}
 .photo img,.photo canvas{display:block;width:100%;height:auto;border-radius:0}
-.photo canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity 180ms;image-rendering:pixelated}
+.photo canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity 180ms;image-rendering:auto}
 .photo.dither-ready img{opacity:0}
 .photo:hover img,.photo:focus-visible img{opacity:1}
 .photo:hover canvas,.photo:focus-visible canvas{opacity:0}
@@ -121,3 +121,11 @@ body{font-size:14px}#forest-viewport{inset:9px}#landscape{left:9px;top:9px}.pape
 @media(max-width:700px){.music-note{display:none}}
 
 .branch-link:focus-visible{text-decoration:none}.photo:focus-visible{filter:brightness(1.15)}
+
+/* Persistent world: articles and labels move with the same camera. */
+#story,#story.about-story{position:absolute;margin:0;max-width:none;padding:0 0 100px;transition:opacity .2s}
+.branch-leaf{animation:none}.branch-link[hidden],.story-entry[hidden]{display:none}
+.about-photos{top:0}
+@media(max-width:700px){#story,#story.about-story{margin:0;padding:0 0 120px;max-width:none}.about-photos{top:0}}
+
+.story-entry>section{margin:0 0 60px}.story-entry>section:last-child{margin-bottom:0}

@@ -17,12 +17,17 @@ flowchart TB
 ```
 
 - **Silicon** (default): the die has a block for About, Work, Projects and Life, plus I/O pads for Contact, and sits on a wafer of dies that runs to the horizon. Standing in a block, a particle core floats over the horizon and changes shape per region.
-- **Game**: five low-poly islands joined by causeways (Spawn, The Ridge, The Workshop, The Grove, The Lighthouse) at dusk. An agent runs value iteration on a gridworld over the terrain and walks quest to quest. It heads to whatever region you hover or stand in, and a reward burst goes off when it arrives. The HUD shows episode, mean return and current quest.
+- **Game**: an exploration task. You are a small explorer who starts on Spawn. Five islands (Spawn, The Ridge, The Workshop, The Grove, The Lighthouse) are joined by causeways, and each holds the items for one section as crystals.
+  - **Steps:** every tile walked is one step (click to walk a shortest path, or WASD / arrows to move one tile).
+  - **Reward:** +1 per item found, +2 per island completed, −0.01 per step, and a finish bonus of 10 × par / steps (capped at 1.5×). Par is a nearest-neighbour tour over every item from Spawn.
+  - **Hint:** value iteration over the walkable grid toward every unfound item; the glowing trail is its greedy path from you. It can be turned off.
+  - **HUD:** episode, step, return, found, par, best, and per-island progress. "New episode" resets. Found items open anytime without walking.
+  - **World:** shadowed low-poly terrain, a water shader with lagoons, foam and sun glint, cottages, a watchtower, a workshop with smoke, a lantern grove with fireflies, a lighthouse with a dock and boat, birds, clouds, and distant islets.
 - The switch at the top right toggles worlds and is remembered. `?world=game` or `?world=silicon` links to one.
 
 ## Controls
 
-- **Overview:** scroll or pinch to zoom, drag to pan, right-drag or shift-drag to orbit. Click a region or its label, or zoom all the way in, to enter it.
+- **Overview:** scroll or pinch to zoom, drag to pan, right-drag or shift-drag to orbit. Click a region or its label, or zoom all the way in, to enter it. In the game, clicking an island walks you there.
 - **Standing in a region:** drag to look around. Click a card for its panel; ← → step through the group. Click anywhere off the panel to close it. Click empty space, scroll out, pinch out, Esc or "← Overview" to leave.
 - **Index** (`/`) searches everything.
 

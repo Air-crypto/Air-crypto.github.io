@@ -17,7 +17,7 @@
 <link rel="preload" href="die/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="die/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="die/three.module.min.js">
-<link rel="stylesheet" href="die/style.css?v=7">
+<link rel="stylesheet" href="die/style.css?v=9">
 </head>
 <body class="is-loading">
 <a class="skip" href="#a11y">Skip to a plain list of everything</a>
@@ -41,13 +41,6 @@
 
 <header class="hud">
   <a class="wordmark" href="#top" data-go="top"><span class="serif">Arihan <em>Yadav</em></span><span class="mono">ML · systems · hardware</span></a>
-  <nav class="nav mono" aria-label="Sections">
-    <a href="#about" data-go="about">About</a>
-    <a href="#work" data-go="work">Work</a>
-    <a href="#projects" data-go="projects">Projects</a>
-    <a href="#life" data-go="life">Life</a>
-    <a href="#io" data-go="io">Contact</a>
-  </nav>
   <div class="hud-r"><button class="env-btn mono" id="world-toggle" type="button" aria-pressed="false" title="Switch between the silicon die and the game world">World · Silicon</button><button class="frame-btn mono" id="index-open" type="button" aria-haspopup="dialog" aria-controls="index">Index <kbd>/</kbd></button></div>
 </header>
 
@@ -56,6 +49,7 @@
   <h1 class="serif">Arihan <em>Yadav</em></h1>
   <p class="lede">I train language models and build what runs them: RL pipelines, GPU kernels, and the hardware underneath.</p>
   <p class="mono cap">AI Engineer @ AMD · UW–Madison CE + CS ’26 · SF / NYC</p>
+  <p class="mono cap game-only">Quest · find all 33 pieces of me in as few steps as you can</p>
 </section>
 <section id="region-head" aria-live="polite">
   <button type="button" id="rh-back" class="frame-btn mono">← Overview</button>
@@ -64,7 +58,19 @@
   <p id="rh-blurb"></p>
 </section>
 <div class="readout mono" aria-hidden="true"><span id="coords"></span><span id="hud-line"></span></div>
-<p id="rl-stat" class="mono" aria-live="off"></p>
+<div id="game-hud" aria-label="Episode stats">
+  <div class="gh-stats mono"><span id="gh-ep"></span><span id="gh-step"></span><span id="gh-ret"></span><span id="gh-found"></span><span id="gh-par"></span><span id="gh-best"></span></div>
+  <div class="gh-isles mono" id="gh-isles"></div>
+  <div class="gh-btns"><button type="button" id="gh-hint" class="mono" aria-pressed="true">Hint · on</button><button type="button" id="gh-reset" class="mono">New episode</button></div>
+</div>
+<div id="complete" role="dialog" aria-modal="true" aria-labelledby="cp-title" hidden>
+  <div class="cp-inner">
+    <p class="tag mono">Episode complete</p>
+    <h2 id="cp-title" class="serif">You found <em>everything</em>.</h2>
+    <dl id="cp-stats"></dl>
+    <div class="cp-btns"><button type="button" id="cp-new" class="frame-btn mono">New episode</button><button type="button" id="cp-close" class="icon-btn mono">Keep exploring</button></div>
+  </div>
+</div>
 <main id="a11y" class="vh"></main>
 
 <aside id="panel" role="dialog" aria-modal="false" aria-labelledby="panel-title" hidden>
@@ -104,7 +110,7 @@
 </aside>
 
 <noscript><div class="noscript"><p>This site draws its scene with JavaScript. Everything is also on plain pages:</p><p><a href="portfolio.html">About &amp; work</a> · <a href="projects.html">Projects</a> · <a href="life.html">Life</a> · <a href="gallery.html">Photos</a> · <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a></p></div><style>body.is-loading #loader{display:none}</style></noscript>
-<script type="module" src="die/app.js?v=8"></script>
+<script type="module" src="die/app.js?v=10"></script>
 <script src="music.js?v=3" defer></script>
 </body>
 </html>

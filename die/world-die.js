@@ -1,6 +1,6 @@
 // World 1: the silicon die, sitting on a wafer of dies that runs to the horizon.
 import * as THREE from './three.module.min.js';
-import { clamp, lerp, makeRand, PAL, spriteMaterial, pointsGeo } from './gfx.js?v=5';
+import { clamp, lerp, makeRand, PAL, spriteMaterial, pointsGeo } from './gfx.js?v=9';
 
 const DIE = 100;
 const BLOCKS = {
@@ -363,6 +363,5 @@ export function createDieWorld({ renderer, pix, GROUPS, inGroup, byId, reduced }
     ids: () => [...nodes.keys()],
     overview: { target: mob ? new THREE.Vector3(0, 0, 60) : new THREE.Vector3(-62, 0, 14), dist: mob ? 440 : 340, minDist: 70, maxDist: 700, pitch: .98, bounds: 150 },
     labelLOD: 200,
-    hud: () => '',
   };
 }

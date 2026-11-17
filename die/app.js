@@ -13,6 +13,7 @@ const byId = new Map(ITEMS.map(it => [it.id, it]));
 const inGroup = g => ITEMS.filter(it => it.group === g);
 const pad3 = n => String(n).padStart(3, '0');
 const isMobile = () => innerWidth < 900;
+const clock = () => performance.now() / 1000;
 
 // Section order drives the scroll tour.
 const SECTIONS = [
@@ -278,7 +279,11 @@ function drawSilk() {
     g.strokeStyle = 'rgba(200,214,240,.28)'; g.lineWidth = 1.2; g.setLineDash(nd.group === 'io' ? [] : [6, 5]);
     g.strokeRect(X(p.x - cell.w / 2), X(p.z - cell.d / 2), cell.w * k, cell.d * k);
     g.setLineDash([]); g.fillStyle = 'rgba(200,214,240,.55)';
-    const code = (nd.group === 'io' ? it.short : (it.short || it.title)).toUpperCase().slice(0, 22);
+    const prefix = { about: 'A', work: 'W', projects: 'P', life: 'L', io: '' }[nd.group];
+    const num = nd.group === 'io' ? '' : prefix + String(inGroup(nd.group).indexOf(it) + 1).padStart(2, '0') + ' ';
+    let code = num + (it.short || it.title).toUpperCase().replace(/^AMD · /, 'AMD ');
+    const room = cell.w * k - 12;
+    while (code.length > 3 && g.measureText(code).width > room) code = code.slice(0, -2) + '…';
     g.fillText(code, X(p.x - cell.w / 2) + 6, X(p.z + cell.d / 2) - 8);
     n++;
   }
@@ -396,7 +401,7 @@ function buildScene() {
   gg.setAttribute('aZ', new THREE.Float32BufferAttribute(az, 1));
   gridMat = new THREE.ShaderMaterial({
     vertexShader: vertGrid, fragmentShader: fragGrid, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uTime: { value: 0 }, uPix: { value: pix * 1.5 }, uRip: { value: 0 }, uMouse: { value: new THREE.Vector3(0, 0, 0) }, uFocus: { value: new THREE.Vector3(0, 0, 0) }, uFocusA: { value: 0 }, uCol: { value: new THREE.Color('#9fb1d6') }, uHot: { value: new THREE.Color('#73d9ff') } },
+    uniforms: { uTime: { value: 0 }, uPix: { value: pix * 2.4 }, uRip: { value: 0 }, uMouse: { value: new THREE.Vector3(0, 0, 0) }, uFocus: { value: new THREE.Vector3(0, 0, 0) }, uFocusA: { value: 0 }, uCol: { value: new THREE.Color('#9fb1d6') }, uHot: { value: new THREE.Color('#73d9ff') } },
   });
   grid = new THREE.Points(gg, gridMat); scene.add(grid);
 
@@ -422,7 +427,7 @@ function buildScene() {
   markerGeo.setAttribute('position', new THREE.BufferAttribute(mp, 3));
   markerGeo.setAttribute('color', new THREE.BufferAttribute(mc, 3));
   markerGeo.setAttribute('aS', new THREE.BufferAttribute(ms, 1));
-  markers = new THREE.Points(markerGeo, spriteMaterial(pix * 2.4)); scene.add(markers);
+  markers = new THREE.Points(markerGeo, spriteMaterial(pix * 4.2)); scene.add(markers);
   // Vias under markers
   const vp = []; for (const nd of nodes.values()) vp.push(nd.pos.x, 0, nd.pos.z, nd.pos.x, 1.2, nd.pos.z);
   const vias = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(vp, 3)), new THREE.LineBasicMaterial({ color: 0x9fb1d6, transparent: true, opacity: .5 }));
@@ -433,7 +438,7 @@ function buildScene() {
   packetGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PK * 3), 3));
   packetGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(PK * 3), 3));
   packetGeo.setAttribute('aS', new THREE.BufferAttribute(new Float32Array(PK), 1));
-  packets = new THREE.Points(packetGeo, spriteMaterial(pix * 1.8)); packets.frustumCulled = false; scene.add(packets);
+  packets = new THREE.Points(packetGeo, spriteMaterial(pix * 3.2)); packets.frustumCulled = false; scene.add(packets);
 
   // Floating core
   coreGeo = new THREE.BufferGeometry();
@@ -442,7 +447,7 @@ function buildScene() {
   coreGeo.setAttribute('position', new THREE.BufferAttribute(Float32Array.from(scatter), 3));
   coreGeo.setAttribute('color', new THREE.BufferAttribute(Float32Array.from(s0.col), 3));
   coreGeo.setAttribute('aS', new THREE.BufferAttribute(Float32Array.from(s0.size), 1));
-  coreMat = spriteMaterial(pix * 1.15);
+  coreMat = spriteMaterial(pix * 2.6);
   core = new THREE.Points(coreGeo, coreMat); core.frustumCulled = false; scene.add(core);
   morph.from = { pos: scatter, col: Float32Array.from(s0.col), size: Float32Array.from(s0.size) };
 }
@@ -474,19 +479,21 @@ function updateMorph(now) {
 
 // ---------- camera stations ----------
 function blockFocus(g) { const b = BLOCKS[g === 'io' ? 'core' : g]; return new THREE.Vector3(b.x, 16, b.z); }
+// The core floats above and behind the block so it never covers the markers.
+function coreSpot(F) { return F.clone().add(new THREE.Vector3(isMobile() ? 0 : 10, 4, -20)); }
 function station(i) {
   const sec = SECTIONS[i], mob = isMobile();
   if (sec.id === 'io') return { pos: new THREE.Vector3(0, mob ? 300 : 210, mob ? 250 : 175), look: new THREE.Vector3(mob ? 0 : -24, 0, 18), focus: new THREE.Vector3(0, 22, 0), scale: 1.35 };
   const F = sec.group ? blockFocus(sec.group) : new THREE.Vector3(0, 16, 0);
-  if (mob) return { pos: F.clone().add(new THREE.Vector3(0, 58, 104)), look: F.clone().add(new THREE.Vector3(0, -6, -8)), focus: F, scale: 1 };
+  if (mob) return { pos: F.clone().add(new THREE.Vector3(0, 58, 104)), look: F.clone().add(new THREE.Vector3(0, -6, -8)), focus: sec.group ? coreSpot(F) : F, scale: sec.group ? .6 : 1.1 };
   const side = 1, wide = sec.id === 'projects' || sec.id === 'life' || sec.id === 'work';
-  return { pos: F.clone().add(new THREE.Vector3(-side * 18, wide ? 50 : 40, wide ? 92 : 78)), look: F.clone().add(new THREE.Vector3(-side * (wide ? 30 : 24), -2, wide ? 12 : 4)), focus: F, scale: 1 };
+  return { pos: F.clone().add(new THREE.Vector3(-side * 18, wide ? 50 : 40, wide ? 92 : 78)), look: F.clone().add(new THREE.Vector3(-side * (wide ? 30 : 24), -2, wide ? 12 : 4)), focus: sec.group ? coreSpot(F) : F, scale: sec.group ? 1 : 1.3 };
 }
 function panelStation(id) {
   const nd = nodes.get(id); if (!nd) return null;
   const F = nd.pos.clone(), mob = isMobile();
   const look = F.clone().add(new THREE.Vector3(mob ? 0 : 15, 0, mob ? -8 : 2));
-  return { pos: look.clone().add(new THREE.Vector3(-4, mob ? 46 : 36, mob ? 60 : 50)), look, focus: F.clone().add(new THREE.Vector3(0, 9, -6)), scale: .42 };
+  return { pos: look.clone().add(new THREE.Vector3(-4, mob ? 52 : 46, mob ? 70 : 66)), look, focus: F.clone().add(new THREE.Vector3(0, 10, -10)), scale: .45 };
 }
 
 // ---------- scroll tour ----------
@@ -506,8 +513,9 @@ function setSection(i) {
   navLinks.forEach(a => a.classList.toggle('on', a.dataset.go === sec.id));
   railLis().forEach((li, k) => li.classList.toggle('on', k === i));
   $('#layer').textContent = sec.layer;
-  if (gl && !state.panel) setShape(sec.shape, state.t);
+  if (gl && !state.panel) setShape(sec.shape, clock());
   document.documentElement.style.setProperty('--accent', sec.group ? GROUPS[sec.group].hue : '#73d9ff');
+  document.body.classList.toggle('at-top', i === 0);
 }
 
 // Lede word reveal, scrubbed by scroll.
@@ -666,7 +674,7 @@ function openPanel(id, opts = {}) {
   $('#panel-count').textContent = `${pad3(i + 1)} / ${pad3(sib.length)}`;
   panel.hidden = false; requestAnimationFrame(() => panel.classList.add('open'));
   document.body.classList.add('panel-open');
-  if (gl) setShape(SECTIONS.find(s => s.group === it.group)?.shape || 'chip', state.t);
+  if (gl) setShape(SECTIONS.find(s => s.group === it.group)?.shape || 'chip', clock());
   if (!opts.noHash) history.replaceState(null, '', '#' + id);
   if (opts.scroll !== false) {
     const sec = document.getElementById(it.group === 'about' ? 'about' : it.group);
@@ -680,7 +688,7 @@ function closePanel(quiet) {
   panel.classList.remove('open'); document.body.classList.remove('panel-open');
   setTimeout(() => { if (!state.panel) panel.hidden = true; }, 600);
   setLit(null);
-  if (gl) setShape(SECTIONS[state.section].shape, state.t);
+  if (gl) setShape(SECTIONS[state.section].shape, clock());
   if (!quiet) { history.replaceState(null, '', '#' + (SECTIONS[state.section].id === 'top' ? '' : SECTIONS[state.section].id)); $(`[data-id="${CSS.escape(was)}"]`)?.focus({ preventScroll: true }); }
 }
 $('#panel-close').addEventListener('click', () => closePanel());
@@ -815,7 +823,7 @@ function frame(now) {
     // Fast scrolling stirs the core a little.
     const stir = clamp(Math.abs(scrollVel) / 3000, 0, .6);
     core.rotation.z = stir * .3 * Math.sign(scrollVel);
-    updateMorph(t);
+    updateMorph(clock());
 
     // Grid uniforms
     ray.setFromCamera(state.mouse, camera); ray.ray.intersectPlane(plane, state.mouseWorld);
@@ -871,7 +879,7 @@ async function boot() {
   progress(100);
   await new Promise(r => setTimeout(r, 650));
   document.body.classList.remove('is-loading');
-  morph.start = state.t + .2; morph.dur = 2; setTimeout(() => { morph.dur = 1.5; }, 3000);
+  morph.start = clock() + .2; morph.dur = 2; setTimeout(() => { morph.dur = 1.5; }, 3000);
   if (location.hash) setTimeout(() => route(location.hash, true), rmDelay());
 }
 function rmDelay() { return reduced.matches ? 0 : 900; }

@@ -3,54 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Arihan Yadav. Machine learning, software, hardware, and life in between. Follow a branch and look around.">
-<title>Arihan Yadav</title>
+<title>Arihan Yadav · ML, systems, hardware</title>
+<meta name="description" content="Arihan Yadav. I train language models and build what runs them: RL pipelines, GPU kernels, and the hardware underneath. AI Engineer at AMD, UW–Madison CE + CS.">
 <link rel="canonical" href="https://air-crypto.github.io/">
 <meta property="og:title" content="Arihan Yadav">
-<meta property="og:description" content="Machine learning, software, hardware, and life in between.">
+<meta property="og:description" content="ML, systems, and hardware. One die, every piece of my work on it.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://air-crypto.github.io/">
 <meta property="og:image" content="https://air-crypto.github.io/thumbs/selfie.jpg">
-<meta name="theme-color" content="#2a282c">
+<meta name="theme-color" content="#05070d">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="assets/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="forest.css?v=17">
+<link rel="preload" href="die/fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="die/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="die/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="die/three.module.min.js">
+<link rel="stylesheet" href="die/style.css?v=1">
 </head>
-<body data-mode="home">
-<a class="skip-link" href="#forest-navigation">Skip to branches</a>
-<h1 class="visually-hidden">Arihan Yadav</h1>
-<main id="forest-viewport" aria-label="Explore Arihan's tree">
-  <canvas id="landscape" aria-hidden="true"></canvas>
-  <div id="world-space"><div id="world">
-    <nav id="forest-navigation" aria-label="Tree branches" tabindex="-1"></nav>
-    <article id="story" tabindex="-1" hidden></article>
-  </div></div>
-</main>
-<a id="signature" href="./" data-route="">arihan yadav</a>
-<p id="home-hint" aria-hidden="true">[pick a branch to follow]</p>
-<button id="return-hint" type="button" hidden>[click anywhere to return to original view]</button>
-<div class="paper-edge" aria-hidden="true"></div>
-<button id="back" class="ink-pill back" type="button" aria-label="Back to the previous branch" hidden><svg aria-hidden="true" viewBox="0 0 30 20"><path d="M23 10.4 C18 9.2 12 10.9 7 10 M12.5 4.7 Q10 7.8 6.6 10 Q9.7 12.1 12.2 15.3" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-<button id="motion-toggle" class="motion-control" type="button" aria-label="Pause animation" aria-pressed="false">Ⅱ</button>
-<aside class="music" aria-label="Music player">
-  <p class="music-note">what I'm listening to<br>on repeat right now<span aria-hidden="true">⤵</span></p>
-  <div id="music-panel" hidden>
-    <div class="music-panel-heading"><span>Unethical · Faouzia</span><button id="music-close" type="button" aria-label="Close player and pause music">×</button></div>
-    <div id="youtube-player"></div>
-    <p id="music-status" role="status">Loading the official music video…</p>
-    <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer">listen on YouTube ↗</a>
+<body class="is-loading">
+<a class="skip" href="#tour">Skip to content</a>
+
+<div id="loader" aria-hidden="true">
+  <div class="loader-mark"><span class="serif">Arihan <em>Yadav</em></span><span class="mono">powering on the die</span></div>
+  <div class="loader-bar"><i></i></div>
+  <div class="loader-row mono"><span>Experience</span><span>is loading</span><span id="loader-pct">000%</span><span>of 100%</span></div>
+</div>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="scrim" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div id="labels" aria-hidden="true"></div>
+<div id="tip" class="mono" role="status" aria-live="polite"></div>
+
+<header class="hud">
+  <a class="wordmark" href="#top" data-go="top"><span class="serif">Arihan <em>Yadav</em></span><span class="mono">ML · systems · hardware</span></a>
+  <nav class="nav mono" aria-label="Sections">
+    <a href="#about" data-go="about">About</a>
+    <a href="#work" data-go="work">Work</a>
+    <a href="#projects" data-go="projects">Projects</a>
+    <a href="#life" data-go="life">Life</a>
+    <a href="#io" data-go="io">Contact</a>
+  </nav>
+  <button class="frame-btn mono" id="index-open" type="button" aria-haspopup="dialog" aria-controls="index">Index <kbd>/</kbd></button>
+</header>
+
+<ol class="rail" aria-hidden="true"></ol>
+<div class="readout mono" aria-hidden="true"><span id="coords">X +000.0 · Z +000.0</span><span id="layer">L0 · CORE</span><span class="hint-drag">Drag to look · click a node</span></div>
+
+<main id="tour" tabindex="-1"></main>
+
+<aside id="panel" role="dialog" aria-modal="false" aria-labelledby="panel-title" hidden>
+  <div class="panel-head mono"><span id="panel-crumb"></span><button class="icon-btn" id="panel-close" type="button" aria-label="Close">Close ×</button></div>
+  <div class="panel-body" id="panel-body"></div>
+  <div class="panel-foot mono"><button type="button" id="panel-prev" class="frame-btn">← Prev</button><span id="panel-count"></span><button type="button" id="panel-next" class="frame-btn">Next →</button></div>
+</aside>
+
+<div id="index" role="dialog" aria-modal="true" aria-label="Index of everything" hidden>
+  <div class="index-inner">
+    <div class="index-head">
+      <p class="tag mono">Index</p>
+      <label class="search mono"><span>Find</span><input id="index-q" type="search" placeholder="AMD, FPGA, aurora…" autocomplete="off"></label>
+      <button class="icon-btn mono" id="index-close" type="button">Close ×</button>
+    </div>
+    <div id="index-list"></div>
   </div>
-  <div class="music-bar ink-pill">
-    <button id="music-toggle" type="button" aria-label="Play Unethical by Faouzia" aria-expanded="false" aria-controls="music-panel"><span id="play-icon" aria-hidden="true">▶</span><span class="song-title">unethical · faouzia</span></button>
+</div>
+
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Media viewer" hidden>
+  <button class="icon-btn mono lb-close" type="button" aria-label="Close viewer">Close ×</button>
+  <button class="lb-nav lb-prev mono" type="button" aria-label="Previous">←</button>
+  <figure><div class="lb-media"></div><figcaption class="mono"></figcaption></figure>
+  <button class="lb-nav lb-next mono" type="button" aria-label="Next">→</button>
+</div>
+
+<aside class="music" aria-label="Music player">
+  <div id="music-panel" hidden>
+    <div class="music-panel-heading mono"><span>Unethical · Faouzia</span><button id="music-close" type="button" aria-label="Close player and pause music">×</button></div>
+    <div id="youtube-player"></div>
+    <p id="music-status" class="mono" role="status">Loading the official music video…</p>
+    <a class="mono" href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer">listen on YouTube ↗</a>
+  </div>
+  <div class="music-bar">
+    <button id="music-toggle" type="button" aria-label="Play Unethical by Faouzia" aria-expanded="false" aria-controls="music-panel"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="play-icon" aria-hidden="true">▶</span><span class="song-title mono">on repeat · unethical</span></button>
   </div>
 </aside>
 
-<noscript><nav class="no-script" aria-label="Portfolio pages"><a href="portfolio.html">me &amp; my work</a><a href="projects.html">projects</a><a href="life.html">life</a><a href="mailto:apyadav@wisc.edu">say hello</a></nav></noscript>
-<script src="forest-layout.js?v=1" defer></script>
-<script src="forest-roots.js?v=1" defer></script>
-<script src="forest-scene.js?v=15" defer></script>
-<script src="forest.js?v=15" defer></script>
-<script src="forest-zoom.js?v=1" defer></script>
-<script src="music.js?v=2" defer></script>
+<noscript><div class="noscript"><p>This site draws its scene with JavaScript. Everything is also on plain pages:</p><p><a href="portfolio.html">About &amp; work</a> · <a href="projects.html">Projects</a> · <a href="life.html">Life</a> · <a href="gallery.html">Photos</a> · <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a></p></div><style>body.is-loading #loader{display:none}</style></noscript>
+<script type="module" src="die/app.js?v=1"></script>
+<script src="music.js?v=3" defer></script>
 </body>
 </html>

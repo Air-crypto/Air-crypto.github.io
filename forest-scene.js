@@ -339,6 +339,8 @@ function setZoom(value,x=W/2,y=H/2){
 }
 window.forestScene={
  setView,nodeGeometry,primaryGeometry,storyGeometry,placeStory,setZoom,wake:refresh,
+ storyProgress(key){return paused?1:storyGrowth.has(key)?storyGrowth.get(key):0},
+ get paused(){return paused},
  get zoom(){return zoom},
  get scrollOffset(){return {left:panX,top:scroll}},
  get homeScroll(){return {left:scrollOrigin.left*zoom,top:scrollOrigin.top*zoom}},

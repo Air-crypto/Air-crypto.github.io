@@ -186,3 +186,10 @@ body:not([data-mode=home]) .music-note{display:none}
 .music-note{margin-bottom:15px}
 @media(max-width:700px){#signature{top:15px;left:20px}#home-hint{top:36px;left:20px}#return-hint{top:52px}}
 @media(max-width:700px){#return-hint{top:36px}}
+
+/* Streamed article text: tokens hold their space and fade in. */
+.story-entry.streaming .s-tok{opacity:0}
+.s-tok{transition:opacity .28s ease-out}
+.story-entry .s-tok.s-on{opacity:1}
+.story-entry.streaming button.photo.s-tok,.story-entry.streaming video.s-tok,.story-entry.streaming iframe.s-tok{transition:opacity .5s ease-out}
+@media(prefers-reduced-motion:reduce){.s-tok{transition:none}}

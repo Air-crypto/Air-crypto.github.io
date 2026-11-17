@@ -226,15 +226,65 @@ async function buildStory(entry){
  if(entry.kind==='about')result.append(aboutPhotos());
  return result;
 }
+// Streaming: wrap words once, then reveal them in reading order after the limb grows.
+const streamMedia='button.photo, video, iframe';
+let streamRun=0;
+function prepareStream(node){
+ if(node.dataset.streamReady)return;
+ const tokens=[],walker=document.createTreeWalker(node,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode(n){
+  if(n.nodeType===1){if(n.matches(streamMedia)){tokens.push(n);return NodeFilter.FILTER_REJECT}return n.matches('script,style')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_SKIP}
+  return n.textContent.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
+ const texts=[];let n;while((n=walker.nextNode()))texts.push(n);
+ for(const text of texts){
+  // Flex, grid and table drop spaces between items, so keep such text as one token.
+  const shown=getComputedStyle(text.parentElement).display;
+  if(/flex|grid|table/.test(shown)){const span=document.createElement('span');span.className='s-tok';text.replaceWith(span);span.append(text);continue}
+  const frag=document.createDocumentFragment();
+  for(const part of text.textContent.split(/(\s+)/)){
+   if(!part)continue;
+   if(/^\s+$/.test(part)){frag.append(part);continue}
+   const span=document.createElement('span');span.className='s-tok';span.textContent=part;frag.append(span);
+  }
+  text.replaceWith(frag);
+ }
+ for(const m of tokens)m.classList.add('s-tok');
+ // Underlines, bullets and disclosure arrows belong to the parent; reveal it with its first word.
+ node.querySelectorAll('a:not(.photo), li, summary').forEach(e=>e.classList.add('s-tok'));
+ node.dataset.streamReady='1';
+}
+function streamStory(key,node){
+ const run=++streamRun,scene=window.forestScene;
+ prepareStream(node);
+ const tokens=[...node.querySelectorAll('.s-tok')];
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduce||scene.paused||!tokens.length){tokens.forEach(t=>t.classList.add('s-on'));node.classList.remove('streaming');return}
+ tokens.forEach(t=>t.classList.remove('s-on'));node.classList.add('streaming');
+ const waitStart=performance.now();
+ const per=Math.max(6,Math.min(26,2600/tokens.length));
+ let start=0,shown=0;
+ function step(now){
+  if(run!==streamRun||node.hidden)return;
+  if(!start){
+   // Hold until the limb reaches the article (or give up after 3 s).
+   if(scene.storyProgress(key)<.95&&now-waitStart<3000)return requestAnimationFrame(step);
+   start=now;
+  }
+  const want=Math.min(tokens.length,Math.floor((now-start)/per)+1);
+  while(shown<want)tokens[shown++].classList.add('s-on');
+  if(shown<tokens.length)requestAnimationFrame(step);else node.classList.remove('streaming');
+ }
+ requestAnimationFrame(step);
+}
+function finishStream(node){streamRun++;node.querySelectorAll('.s-tok').forEach(t=>t.classList.add('s-on'));node.classList.remove('streaming')}
 async function showStory(key){
  let node=articleViews.get(key);
- if(node){node.hidden=false;return;}
+ if(node){node.hidden=false;streamStory(key,node);return;}
  node=document.createElement('div');node.className='story-entry'+(key==='me'?' about-story':'');node.dataset.story=key;node.tabIndex=-1;
  node.innerHTML='<p>following the branch…</p>';node.setAttribute('aria-busy','true');
  articleViews.set(key,node);story.append(node);new ResizeObserver(layout).observe(node);
  try{
   node.replaceChildren(await buildStory(entries[key]));
-  transformLinks(node);initPhotos(node);
+  transformLinks(node);initPhotos(node);streamStory(key,node);
   const e=entries[key];
   if(e.parent&&menus[e.parent]){
    const trail=document.createElement('p'),up=document.createElement('a');trail.className='story-trail';
@@ -259,7 +309,7 @@ async function renderRoute(raw){
  document.body.dataset.mode=mode;if(key)document.body.classList.add('explored');
  const group=mode==='home'?'':menus[key]?key:entries[key].parent||'me';
  activeMenu=menus[group]||null;
- for(const [id,node] of articleViews)node.hidden=mode!=='story'||id!==key;
+ for(const [id,node] of articleViews){const hide=mode!=='story'||id!==key;if(hide&&!node.hidden)finishStream(node);node.hidden=hide}
  story.hidden=mode!=='story';story.className='';
  document.getElementById('return-hint').hidden=!key;
  if(mode==='home')window.forestScene.setZoom(1);

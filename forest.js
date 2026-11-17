@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const viewport=document.getElementById('forest-viewport'),world=document.getElementById('world');
+const viewport=document.getElementById('forest-viewport'),world=document.getElementById('world'),space=document.getElementById('world-space');
 const nav=document.getElementById('forest-navigation'),story=document.getElementById('story'),back=document.getElementById('back');
 const cache=new Map();let route='',request=0,returnTo='',mode='home',activeMenu=null;
 const menus={
@@ -61,21 +61,21 @@ let maskFrame=0,textHitAreas=[];
 function updateTextMask(){
  cancelAnimationFrame(maskFrame);
  maskFrame=requestAnimationFrame(()=>{
-  const origin=viewport.getBoundingClientRect(),areas=[];
-  for(const root of [nav,story,document.querySelector('.music-note')]){
+  const origin=viewport.getBoundingClientRect(),areas=[],scale=window.forestScene.zoom;
+  for(const root of [nav,story,document.querySelector('.music-note'),document.getElementById('return-hint')]){
    if(root.hidden)continue;
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
    let node;while((node=walker.nextNode())){
     if(!node.textContent.trim()||node.parentElement.closest('button.photo, .about-photos, details:not([open]) > :not(summary)'))continue;
     const range=document.createRange();range.selectNodeContents(node);
-    for(const box of range.getClientRects())if(box.width&&box.height)areas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.scrollOrigin.top,w:box.width,h:box.height});
+    for(const box of range.getClientRects())if(box.width&&box.height)areas.push({x:(box.left-origin.left)/scale,y:(box.top-origin.top+viewport.scrollTop)/scale-window.forestScene.scrollOrigin.top,w:box.width/scale,h:box.height/scale});
    }
   }
   textHitAreas=areas;
   const softAreas=[...areas];
   if(!story.hidden)for(const block of story.querySelectorAll('.story-entry:not([hidden]) p, .story-entry:not([hidden]) h2, .story-entry:not([hidden]) h3, .story-entry:not([hidden]) li')){
    const box=block.getBoundingClientRect();
-   if(box.width&&box.height)softAreas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.scrollOrigin.top,w:box.width,h:box.height});
+   if(box.width&&box.height)softAreas.push({x:(box.left-origin.left)/scale,y:(box.top-origin.top+viewport.scrollTop)/scale-window.forestScene.scrollOrigin.top,w:box.width/scale,h:box.height/scale});
   }
   window.forestScene.setTextAreas(softAreas);
  });
@@ -95,7 +95,7 @@ function createNavigation(){
 let retainedBounds=null,lastSize=null;
 function layout(){
  const scene=window.forestScene,{width:w,height:h}=scene.size;if(!w||!h)return;
- const mobile=w<700,state=scene.state,placements=[];
+ const mobile=w<700,state=scene.state,placements=[],scale=scene.zoom;
  let bounds={...scene.bounds};
  const include=(x,y,width,height)=>{bounds.minX=Math.min(bounds.minX,x);bounds.maxX=Math.max(bounds.maxX,x+width);bounds.minY=Math.min(bounds.minY,y);bounds.maxY=Math.max(bounds.maxY,y+height)};
  for(const [key,a] of primaryLinks){
@@ -127,26 +127,30 @@ function layout(){
   const p=scene.placeStory(key,group,item,footprint,Math.max(node.offsetHeight, key==='me'?500:180)+60);
   if(p){articlePlacements.push({node,p});include(p.x-25,p.y-25,footprint+50,node.offsetHeight+110)}
  }
- const oldOrigin=scene.scrollOrigin,effective={left:viewport.scrollLeft-oldOrigin.left,top:viewport.scrollTop-oldOrigin.top};
+ const effective=scene.scrollOffset;
  const atDefault=mode==='home'&&state.branches.every(b=>b.growth===0)&&Math.abs(state.camera.x-w*(mobile?.48:.40))+Math.abs(state.camera.y)<.2&&Math.abs(effective.left)+Math.abs(effective.top)<1;
  if(!lastSize||lastSize.w!==w||lastSize.h!==h||atDefault)retainedBounds=null;
  lastSize={w,h};
  if(retainedBounds){bounds={minX:Math.min(bounds.minX,retainedBounds.minX),minY:Math.min(bounds.minY,retainedBounds.minY),maxX:Math.max(bounds.maxX,retainedBounds.maxX),maxY:Math.max(bounds.maxY,retainedBounds.maxY)}}
  retainedBounds={...bounds};
- const origin={left:Math.max(0,Math.ceil(-bounds.minX)),top:Math.max(0,Math.ceil(-bounds.minY))};
- world.style.width=Math.ceil(Math.max(w,bounds.maxX+origin.left))+'px';
- world.style.height=Math.ceil(Math.max(h,bounds.maxY+origin.top))+'px';
+ const origin={left:Math.max(0,Math.ceil(-bounds.minX),Math.ceil(-effective.left)),top:Math.max(0,Math.ceil(-bounds.minY),Math.ceil(-effective.top))};
+ const worldWidth=Math.ceil(Math.max(w/scale,bounds.maxX+origin.left,origin.left+effective.left+w/scale));
+ const worldHeight=Math.ceil(Math.max(h/scale,bounds.maxY+origin.top,origin.top+effective.top+h/scale));
+ world.style.width=worldWidth+'px';world.style.height=worldHeight+'px';
+ world.style.transform='scale('+scale+')';
+ space.style.width=Math.ceil(worldWidth*scale)+'px';space.style.height=Math.ceil(worldHeight*scale)+'px';
  world.style.minHeight=h+'px';
  scene.setScrollOrigin(origin);
  window.forestRoots?.layout({width:w,camera:state.camera,ground:h-4+state.camera.y,origin});
  for(const p of placements)at(p.a,p.x+origin.left,p.y+origin.top,p.align);
  for(const {node,p} of articlePlacements){node.style.left=(p.x+origin.left)+'px';node.style.top=(p.y+origin.top)+'px';}
- if(origin.left!==oldOrigin.left||origin.top!==oldOrigin.top)viewport.scrollTo({left:origin.left+effective.left,top:origin.top+effective.top,behavior:'instant'});
+ const nextScroll={left:(origin.left+effective.left)*scale,top:(origin.top+effective.top)*scale};
+ if(Math.abs(viewport.scrollLeft-nextScroll.left)+Math.abs(viewport.scrollTop-nextScroll.top)>.1)viewport.scrollTo({...nextScroll,behavior:'instant'});
  scene.syncScroll();
  updateTextMask();
 }
 function go(key){
- if(key===route){if(!key)viewport.scrollTo({...window.forestScene.scrollOrigin,behavior:'smooth'});return;}
+ if(key===route){if(!key){window.forestScene.setZoom(1);window.forestScene.setView({type:'home',group:'',item:-1});viewport.scrollTo({...window.forestScene.homeScroll,behavior:'smooth'})}return;}
  returnTo=route;
  const hash=key?'#'+key:location.pathname+location.search;
  history.pushState({forest:true},'',hash);
@@ -243,12 +247,13 @@ async function renderRoute(raw){
  const id=++request;route=key;
  document.title=key?(menus[key]?.label||entries[key]?.title)+' · Arihan Yadav':'Arihan Yadav';
  story.querySelectorAll('video').forEach(v=>v.pause());
- viewport.scrollTo({...window.forestScene.scrollOrigin,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  mode=!key?'home':menus[key]?'menu':'story';
  const group=mode==='home'?'':menus[key]?key:entries[key].parent||'me';
  activeMenu=menus[group]||null;
- if(mode==='home')for(const node of articleViews.values())node.hidden=true;
- story.hidden=mode==='home';story.className='';
+ for(const [id,node] of articleViews)node.hidden=mode!=='story'||id!==key;
+ story.hidden=mode!=='story';story.className='';
+ document.getElementById('return-hint').hidden=!key;
+ if(mode==='home')window.forestScene.setZoom(1);
  back.hidden=!key;back.setAttribute('aria-label','Return to the default tree');
  for(const a of nav.querySelectorAll('.branch-link')){
   const selected=a.dataset.route===key;
@@ -256,6 +261,7 @@ async function renderRoute(raw){
   if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
  }
  window.forestScene.setView({type:mode,key,group,count:activeMenu?.items.length||0,item:activeMenu?.items.findIndex(x=>x[1]===key)??-1});
+ viewport.scrollTo({...window.forestScene.homeScroll,behavior:'instant'});window.forestScene.syncScroll();
  if(mode==='story')await showStory(key);
  if(id!==request)return;
  layout();
@@ -270,19 +276,20 @@ document.addEventListener('click',event=>{
   event.preventDefault();keyboardNavigation=event.detail===0;
   go(aliases[a.dataset.route]||a.dataset.route);return;
  }
- const origin=window.forestScene.scrollOrigin;
- if((!route&&Math.abs(viewport.scrollTop-origin.top)+Math.abs(viewport.scrollLeft-origin.left)<1)||event.target.closest('a,button,summary,input,select,textarea,video,iframe,.music')||window.getSelection()?.toString())return;
- const bounds=viewport.getBoundingClientRect(),x=event.clientX-bounds.left,y=event.clientY-bounds.top+viewport.scrollTop-origin.top;
+ const scene=window.forestScene,origin=scene.scrollOrigin,scale=scene.zoom;
+ if((!route&&scale===1&&Math.abs(viewport.scrollTop-origin.top)+Math.abs(viewport.scrollLeft-origin.left)<1)||event.target.closest('a,button,summary,input,select,textarea,video,iframe,.music')||window.getSelection()?.toString())return;
+ const bounds=viewport.getBoundingClientRect(),x=(event.clientX-bounds.left)/scale,y=(event.clientY-bounds.top+viewport.scrollTop)/scale-origin.top;
  if(textHitAreas.some(a=>x>=a.x&&x<=a.x+a.w&&y>=a.y&&y<=a.y+a.h))return;
  if(event.target.closest('#forest-viewport')||event.target===document.body){keyboardNavigation=false;go('')}
 });
+document.getElementById('return-hint').addEventListener('click',()=>go(''));
 back.addEventListener('click',event=>{keyboardNavigation=event.detail===0;go('')});
 document.addEventListener('keydown',event=>{
- if(event.key==='Escape'&&route&&!event.target.closest('.music')){event.preventDefault();keyboardNavigation=true;go('')}
+ if(event.key==='Escape'&&(route||window.forestScene.zoom!==1)&&!event.target.closest('.music')){event.preventDefault();keyboardNavigation=true;go('')}
 });
 window.addEventListener('popstate',()=>renderRoute(location.hash.slice(1)));
 window.addEventListener('hashchange',()=>{if(location.hash.slice(1)!==route)renderRoute(location.hash.slice(1))});
-window.addEventListener('forest-resize',()=>{layout();viewport.scrollTo({...window.forestScene.scrollOrigin,behavior:'instant'});window.forestScene.syncScroll()});
+window.addEventListener('forest-resize',()=>{layout();viewport.scrollTo({...window.forestScene.homeScroll,behavior:'instant'});window.forestScene.syncScroll()});
 new ResizeObserver(layout).observe(story);
 new ResizeObserver(updateTextMask).observe(nav);
 document.fonts.ready.then(()=>{layout();updateTextMask()});

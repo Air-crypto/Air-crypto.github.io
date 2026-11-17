@@ -148,3 +148,11 @@ body{font-size:14px}#forest-viewport{inset:9px}#landscape{left:9px;top:9px}.pape
 .back{display:grid;place-items:center;padding:0;font-size:0;line-height:1}.back[hidden]{display:none}.back svg{display:block;width:28px;height:20px}
 
 .music-note{margin:0 0 13px 37px;text-align:left}.music-note>span{left:-27px;right:auto}
+
+/* Scale the shared world; fixed controls remain readable at every zoom. */
+#world-space{position:relative;overflow:hidden;min-width:100%;min-height:100%}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#return-hint{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:45;border:0;background:none;padding:4px 8px;color:var(--ink);opacity:.7;font-size:12px;font-weight:500;white-space:nowrap}
+#return-hint[hidden]{display:none}
+#return-hint:hover,#return-hint:focus-visible{opacity:1}
+@media(max-width:700px){#return-hint{top:17px;font-size:10px}}

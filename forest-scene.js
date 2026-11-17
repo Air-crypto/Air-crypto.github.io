@@ -14,7 +14,7 @@ let layoutCallback=()=>{},connector=0,resetting=false;
 const planner=window.createForestLayout(),storyGrowth=new Map();
 const scenerySeed=Math.floor(Math.random()*4294967295);
 const labelAnchors=new Map();
-let scrollOrigin={left:0,top:0};
+let scrollOrigin={left:0,top:0},zoom=1;
 let rng=2943;
 function random(){rng=(Math.imul(rng,1664525)+1013904223)>>>0;return rng/4294967296}
 const r=(a,b)=>a+(b-a)*random();
@@ -94,7 +94,7 @@ function root(x,y,len,angle,thick,depth,initial=angle){
   if(random()>.13)root(mid[0],mid[1],len*r(.35,.65),angle+r(-.85,.85),thick*r(.32,.52),depth-1,initial+(angle-initial)*.5+turn);
  }
 }
-for(let i=0;i<9;i++)root(900+r(-13,13),0,r(270,470),r(.35,2.79),r(5,13),7);
+for(let i=0;i<9;i++)root(900+r(-13,13),0,r(270,470),r(.35,2.79),r(9,22),7);
 const rocks=Array.from({length:5},(_,i)=>{const c=surface(100,80),g=c.getContext('2d');roughBlob(g,50,40,35+r(-8,8),22+r(-5,6),r(-.4,.4));g.globalCompositeOperation='source-atop';for(let j=0;j<2400;j++){g.globalAlpha=r(.2,.8);g.fillStyle=BG;g.fillRect(r(0,100),r(0,80),r(.3,1),r(.3,1))}g.globalAlpha=1;line(g,[[45,28],[41,37],[44,51]],.8,.5);return c});
 const grain=surface(256,256),gc=grain.getContext('2d');
 for(let i=0;i<6000;i++){gc.fillStyle=random()>.5?'rgba(255,255,255,.022)':'rgba(0,0,0,.04)';gc.fillRect(random()*256,random()*256,1,1)}
@@ -156,10 +156,10 @@ function setTarget(){
  if(view.type==='home')target={x:W*(W<700?.48:.40),y:0};
  else if(view.type==='story'&&planner.stories.has(view.key)){
   const p=planner.stories.get(view.key).rect;
-  target={x:(W<700?26:Math.max(60,(W-Math.min(p.w,640))*.5))-p.x,y:H*.20-p.y};
+  target={x:(W<700?26:Math.max(60,(W/zoom-Math.min(p.w,640))*.5))-p.x,y:H/zoom*.20-p.y};
  }else{
   const p=planner.branches.get(view.group)?.point(.45)||anchor(view.group);
-  target={x:W*.5-p.x,y:H*.48-p.y};
+  target={x:W/zoom*.5-p.x,y:H/zoom*.48-p.y};
  }
  if(!initialized&&W&&H){current={x:W*(W<700?.48:.40),y:0};initialized=true}
  if(paused)current={...target};
@@ -208,49 +208,51 @@ function renderBoughs(){
  for(const [key,p] of planner.stories)drawPath(p.points,storyGrowth.get(key)||0,p.foliage,p.thickness,p.seed);
 }
 function drawSoil(groundY){
- if(groundY>H+30)return;
+ const visibleHeight=H/zoom,visibleWidth=W/zoom;
+ if(groundY>visibleHeight+30)return;
  ctx.drawImage(rootArt,current.x-450,groundY-3,900,1800);
- for(let band=Math.max(0,Math.floor((scroll-H-current.y)/120)-1);band<Math.ceil((scroll+H-current.y)/120);band++){
+ for(let band=Math.max(0,Math.floor((scroll-H-current.y)/120)-1);band<Math.ceil((scroll+visibleHeight-current.y)/120);band++){
   rng=(scenerySeed^8721)+band*331;
-  for(let i=0;i<W*.7;i++){
-   const x=r(-W,W*2),depth=band*120+r(0,120),y=H+current.y+depth-scroll;
-   if(y<groundY||y>H+20||y<-20)continue;
+  for(let i=0;i<visibleWidth*.7;i++){
+   const x=r(panX-W,panX+visibleWidth+W),depth=band*120+r(0,120),y=H+current.y+depth-scroll;
+   if(y<groundY||y>visibleHeight+20||y<-20)continue;
    const fade=depth<100?.5*(1-depth/140):.16;
    ctx.globalAlpha=r(.04,fade);ctx.fillStyle=INK;ctx.fillRect(x,y,r(.4,1.4),r(.4,1.4));
   }
  }ctx.globalAlpha=1;
- const first=Math.max(0,Math.floor((scroll-H)/150)-1),lastBand=Math.ceil((scroll+H)/150);
+ const first=Math.max(0,Math.floor((scroll-H-current.y)/150)-1),lastBand=Math.ceil((scroll+visibleHeight-H-current.y)/150);
  for(let band=first;band<=lastBand;band++){
   rng=4599+band*177;
   for(let j=0;j<Math.ceil(W/30);j++){
    const x=(r(0,W)+current.x-W*.40+W)%W,y=H+current.y+band*150+r(0,150)-scroll;
-   if(y<groundY+12||y<-60||y>H+60)continue;
+   if(y<groundY+12||y<-60||y>visibleHeight+60)continue;
    const big=j%29===0,size=big?r(12,32):r(1.2,6);
-   for(const offset of [-W,0,W])ctx.drawImage(rocks[(j+band)%rocks.length],x+offset,y,size,size*.8);
+   for(let offset=Math.floor(panX/W)*W-W;offset<panX+visibleWidth+W;offset+=W)ctx.drawImage(rocks[(j+band)%rocks.length],x+offset,y,size,size*.8);
   }
  }
 }
 function render(){
  if(!W||!H)return;
- ctx.clearRect(0,0,W,H);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
+ const visibleWidth=W/zoom,visibleHeight=H/zoom;
+ ctx.clearRect(0,0,visibleWidth,visibleHeight);ctx.fillStyle=BG;ctx.fillRect(0,0,visibleWidth,visibleHeight);
  ctx.save();ctx.translate(-panX,0);
  rng=92272;
  for(let i=0;i<115;i++){
-  const x=random()*W,y=(random()*H*1.8-clock*r(.1,.5)-scroll*.15)%(H+10);
-  if(y>0&&y<H){ctx.fillStyle=INK;ctx.globalAlpha=r(.1,.7);ctx.fillRect(x,y,r(.35,.85),r(.35,.85))}
+  const x=panX+random()*visibleWidth,y=(random()*visibleHeight*1.8-clock*r(.1,.5)-scroll*.15)%(visibleHeight+10);
+  if(y>0&&y<visibleHeight){ctx.fillStyle=INK;ctx.globalAlpha=r(.1,.7);ctx.fillRect(x,y,r(.35,.85),r(.35,.85))}
  }ctx.globalAlpha=1;
  const groundY=H-4+current.y-scroll;
  drawSoil(groundY);
- window.forestRoots?.draw(ctx,{width:W,height:H,camera:current,ground:H-4+current.y,scroll,clock,paused});
+ window.forestRoots?.draw(ctx,{width:W,height:visibleHeight,camera:current,ground:H-4+current.y,scroll,clock,paused});
  const {sx,sy}=treeSize(),tw=600*sx,th=1050*sy;
  ctx.drawImage(treeArt,current.x-tw*.5,H-4+current.y-scroll-th,tw,th);
  renderBoughs();
  const groundShift=(current.x-W*(W<700?.48:.40))%W;
- for(const x of [groundShift-W,groundShift,groundShift+W])ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,235);
+ for(let x=groundShift+Math.floor((panX-groundShift)/W)*W-W;x<panX+visibleWidth+W;x+=W)ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,235);
  ctx.restore();
- ctx.fillStyle=pattern;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle=pattern;ctx.fillRect(0,0,visibleWidth,visibleHeight);
  // Thin the ink only where it passes behind text; the landscape stays continuous.
- for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>H)continue;ctx.drawImage(textFade,a.x-26,y-16,a.w+52,a.h+32)}
+ for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>visibleHeight)continue;ctx.drawImage(textFade,a.x-26,y-16,a.w+52,a.h+32)}
 }
 function isMoving(){
  return Math.abs(current.x-target.x)+Math.abs(current.y-target.y)>.05||
@@ -266,6 +268,7 @@ function tick(now){
   for(const b of branches.values()){
    const goal=b.open?1:0;
    b.growth=paused?goal:goal>b.growth?Math.min(goal,b.growth+dt*.75):Math.max(goal,b.growth-dt*1.5);
+   if(!b.open&&b.growth===0)planner.branches.delete(b.key);
   }
   for(const [key,growth] of storyGrowth)storyGrowth.set(key,paused?1:Math.min(1,growth+dt*.8));
   if(resetting&&[...branches.values()].every(b=>b.growth===0)){planner.reset();resetting=false}
@@ -281,7 +284,7 @@ function resize(){
  W=viewport.clientWidth;H=viewport.clientHeight;
  if(changed&&initialized){planner.reset();storyGrowth.clear();for(const b of branches.values())if(b.open)ensureBranch(b.key,b.count)}DPR=Math.min(devicePixelRatio||1,2);
  canvas.width=Math.ceil(W*DPR);canvas.height=Math.ceil(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';
- ctx.setTransform(DPR,0,0,DPR,0,0);pattern=ctx.createPattern(grain,'repeat');drawGroundArt();setTarget();layoutCallback();refresh();
+ ctx.setTransform(DPR*zoom,0,0,DPR*zoom,0,0);pattern=ctx.createPattern(grain,'repeat');drawGroundArt();setTarget();layoutCallback();refresh();
  window.dispatchEvent(new CustomEvent('forest-resize'));
 }
 function setView(next){
@@ -291,6 +294,8 @@ function setView(next){
   planner.resetStories();storyGrowth.clear();resetting=true;
  }else{
   if(resetting){planner.reset();for(const b of branches.values()){b.growth=0;b.open=false}resetting=false}
+  for(const b of branches.values())b.open=b.key===next.group;
+  for(const key of planner.stories.keys())if(next.type!=='story'||key!==next.key){planner.stories.delete(key);storyGrowth.delete(key)}
   const b=branches.get(next.group);b.open=true;b.count=next.count||0;ensureBranch(b.key,b.count);
  }
  if(paused)for(const b of branches.values())b.growth=b.open?1:0;
@@ -303,16 +308,30 @@ function syncMotion(){motion.setAttribute('aria-pressed',String(paused));motion.
 reduced.addEventListener('change',e=>{paused=e.matches;syncMotion()});
 function worldBounds(){
  const {sx,sy}=treeSize(),groundY=H-4+current.y;
- const box={minX:Math.min(0,current.x-450),maxX:Math.max(W,current.x+450),minY:Math.min(0,groundY-1050*sy),maxY:Math.max(H,groundY+1800)};
+ const box={minX:Math.min(0,current.x-450),maxX:Math.max(W/zoom,current.x+450),minY:Math.min(0,groundY-1050*sy),maxY:Math.max(H/zoom,groundY+1800)};
  const include=(p,margin=32)=>{box.minX=Math.min(box.minX,p.x-margin);box.maxX=Math.max(box.maxX,p.x+margin);box.minY=Math.min(box.minY,p.y-margin);box.maxY=Math.max(box.maxY,p.y+margin)};
  include({x:current.x-300*sx,y:groundY-1050*sy});include({x:current.x+300*sx,y:groundY});
  for(const b of branches.values())if(b.growth>0)for(let i=0;i<=40;i++)include(project(curve(b.key,b.growth*i/40)),W<700?48:80);
  for(const p of planner.stories.values()){include(project({x:p.rect.x,y:p.rect.y}));include(project({x:p.rect.x+p.rect.w,y:p.rect.y+p.rect.h}));for(const q of p.points)include(project(q),45)}
  return box;
 }
-function syncScroll(){scroll=viewport.scrollTop-scrollOrigin.top;panX=viewport.scrollLeft-scrollOrigin.left}
+function syncScroll(){scroll=viewport.scrollTop/zoom-scrollOrigin.top;panX=viewport.scrollLeft/zoom-scrollOrigin.left}
+function setZoom(value,x=W/2,y=H/2){
+ if(!Number.isFinite(value))return;
+ const next=Math.max(.35,Math.min(1.6,value));if(next===zoom)return;
+ syncScroll();
+ const anchor={x:panX+x/zoom,y:scroll+y/zoom};
+ zoom=next;panX=anchor.x-x/zoom;scroll=anchor.y-y/zoom;
+ // Pinching changes the view, never the branch geometry.
+ target={...current};
+ ctx.setTransform(DPR*zoom,0,0,DPR*zoom,0,0);
+ layoutCallback();refresh();
+}
 window.forestScene={
- setView,nodeGeometry,primaryGeometry,storyGeometry,placeStory,wake:refresh,
+ setView,nodeGeometry,primaryGeometry,storyGeometry,placeStory,setZoom,wake:refresh,
+ get zoom(){return zoom},
+ get scrollOffset(){return {left:panX,top:scroll}},
+ get homeScroll(){return {left:scrollOrigin.left*zoom,top:scrollOrigin.top*zoom}},
  branchBase(key){return project(baseAnchor(key))},
  branchPoint(key,t){return project(curve(key,t))},
  setLabelAnchor(key,i,p){labelAnchors.set(key+'/'+i,{x:p.x-current.x,y:p.y-current.y})},
@@ -322,7 +341,7 @@ window.forestScene={
  get scrollOrigin(){return {...scrollOrigin}},
  setScrollOrigin(next){scrollOrigin={...next}},syncScroll,
  get bounds(){return worldBounds()},
- get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b})),stories:[...planner.stories.values()].map(p=>({key:p.key,rect:{...p.rect}}))}},
+ get state(){return {zoom,view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b})),stories:[...planner.stories.values()].map(p=>({key:p.key,rect:{...p.rect}}))}},
  render
 };
 new ResizeObserver(resize).observe(viewport);

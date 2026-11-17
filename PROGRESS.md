@@ -1,23 +1,25 @@
 # Living grayscale landscape
 
-## Scope
-One persistent, scrollable world with a substantial tree and trunk. A clicked word and twig transform into a thick growing limb, the word disappears, and new items emerge from it. Upper and lower labels direct new growth upward or downward. All opened branches and articles remain until an empty-background, back-arrow, or Escape reset.
+## Current scope
+One persistent scrollable grayscale scene. Opening a main branch now retracts other main branches; opening an article closes the prior article while keeping the current parent limb. This supersedes the earlier keep-all-branches-open behavior.
 
-## Implementation
-- Runtime randomized branch angles, curvature, taper, foliage and thickness. Open geometry is stable; fresh openings vary.
-- Collision search places sibling labels, new limbs, and article footprints around existing content. Connector routes seek clear paths; scenery fades softly behind text when crossing cannot be avoided.
-- Geometry-derived scrolling expands in every direction and preserves previous extents until reset. Responsive resizing replans open geometry.
-- A broader, smoothly tapered trunk, curved roots with continuous fork tangents, a branching canopy with small irregular leaf clusters and visible sky gaps, and graded ground litter replace rigid scenery. The full default tree fits the viewport.
-- Three unlabeled root knots reveal a circuit, hockey stick and puck, and paper plane. Native buttons support hover, touch and keyboard; discovery persists for the visit, and reduced motion reveals immediately.
-- The music-note arrow is on the left of “what I’m listening to on repeat right now”, retaining its direction, and the separate diagonal arrow in the play bar has been removed. The back arrow is centered, short, and gently curved.
-- Larger circular halftone photos, San Francisco/New York, and the official Unethical by Faouzia player are preserved.
+## Changes
+- Thicker primary roots taper into fine curved forks.
+- Trackpad pinch scales scenery, text, photos, links and root targets together, centered around the pointer, without regenerating geometry. Range: 35–160%.
+- Safari gesture events and Chromium/Firefox ctrl-wheel pinch events are supported; ordinary scrolling is untouched. Fixed music/back controls retain their size.
+- A subtle top message, “[click anywhere to return to original view]”, appears after opening a branch. It is also a keyboard-accessible reset button.
+- Empty-background click, back arrow, hint, and Escape restore the tree and 100% zoom.
+- Existing procedural tree, larger halftone dots, personal content, root discoveries and music are preserved.
 
 ## Validation
 Static site; no build step. Preview: python3 -m http.server 8765 --bind 127.0.0.1.
 
-- osascript -l JavaScript tests/forest-scene.test.js: desktop/mobile state checks for attached limbs, camera continuity, retained growth, prior article retention, reachable branch bounds, reset, deep roots, and canvas identity.
-- osascript -l JavaScript tests/forest-layout.test.js: 12 varied desktop/mobile worlds test direction, label/article separation, retained geometry, media resize, and fresh layouts.
-- osascript -l JavaScript tests/forest-roots.test.js: discovery, replay, keyboard, touch handling, pause/reduced motion, and reachable mobile targets.
-- Safari in macOS VM: all three root discoveries, background reset, downward life branch followed by upward work branch with the first retained, and two separate AMD articles opened on a 320px viewport. Full default tree and music controls visually inspected.
+- osascript -l JavaScript tests/forest-scene.test.js: desktop/mobile attached branch growth, exclusive switching/retraction, article removal, stable zoom geometry, anchored zoom, limits, reset and deep roots.
+- osascript -l JavaScript tests/forest-zoom.test.js: Safari gesture lifecycle, ctrl-wheel, ordinary scroll, correct pointer coordinates and duplicate-event suppression.
+- Existing forest-layout.test.js and forest-roots.test.js pass.
+- tests/forest-browser.html passed in Safari at desktop and 320px widths: exclusive branches/articles, hint visibility, actual DOM scaling/alignment, stationary pinch anchor, scrolling and reset.
+- macOS VM native clicks and Ctrl-scroll: zoomed navigation, old-limb closure, hint, and thicker roots visually inspected.
+- Browser checks synthesize Safari pinch events; the VM tool cannot issue a physical trackpad pinch. Native Ctrl-scroll covers the other input path.
 
-Drawing is stubbed in state tests; Safari provides visual acceptance. Publish to main through GitHub Pages, verify deployed bytes, then repeat live interactions.
+## Delivery
+Publish the reviewed files to main, wait for GitHub Pages, compare deployed bytes, and repeat the live browser checks. Preview server and test tab are temporary; preserve the repository and unrelated tabs.

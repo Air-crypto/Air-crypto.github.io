@@ -36,9 +36,23 @@ function run(){
   for(let i=0;i<=20;i++){const p=scene.branchPoint('projects',i/20),b=scene.bounds;assert(p.x>=b.minX&&p.x<=b.maxX&&p.y>=b.minY&&p.y<=b.maxY,'An earlier branch fell outside the scroll bounds')}
   assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Parent branch failed to finish growing');
   scene.setView({type:'menu',group:'life',count:7,item:-1});
-  assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Another limb erased the existing project branch');
+  assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Closing a limb should retract continuously');
+  assert(!scene.state.branches.find(b=>b.key==='projects').open,'Previous branch remained open');
   advance(55);attached('life');attached('projects');
-  assert(scene.state.stories.length===1,'Opening another branch hid earlier content');
+  assert(scene.state.stories.length===0,'Previous article remained open');
+  assert(scene.state.branches.find(b=>b.key==='projects').growth===0,'Previous branch failed to retract');
+  const p0=scene.branchPoint('life',.7),beforeCamera=scene.state.camera;
+  const center={x:dims[0]*.4,y:dims[1]*.35},oldOffset=scene.scrollOffset;
+  scene.setZoom(.5,center.x,center.y);
+  const afterOffset=scene.scrollOffset,p1=scene.branchPoint('life',.7);
+  assert(scene.zoom===.5,'Zoom out failed');
+  assert(Math.abs(oldOffset.left+center.x-afterOffset.left-center.x/.5)<.001,'Horizontal pinch anchor moved');
+  assert(Math.abs(oldOffset.top+center.y-afterOffset.top-center.y/.5)<.001,'Vertical pinch anchor moved');
+  assert(Math.hypot(p0.x-p1.x,p0.y-p1.y)<.00001,'Pinching rebuilt the branch');
+  assert(scene.state.camera.x===beforeCamera.x&&scene.state.camera.y===beforeCamera.y,'Pinching moved the camera');
+  scene.setZoom(.01);assert(scene.zoom===.35,'Minimum zoom failed');
+  scene.setZoom(9);assert(scene.zoom===1.6,'Maximum zoom failed');
+  scene.setZoom(1);
   scene.setView({type:'home',group:'',count:0,item:-1});
   advance(90);
   assert(scene.state.branches.every(b=>b.growth===0&&!b.open),'Reset failed to retract expanded branches');
@@ -46,7 +60,7 @@ function run(){
   assert(scene.size.rootDepth===1800,'Deep scrollable roots were lost');
   assert(scene.bounds.maxY>=dims[1]+1700,'Root bounds cannot be reached by scrolling');
   assert(document.getElementById('landscape')===canvas,'Landscape canvas was replaced');
-  results.push(dims.join('x')+': connected branches, continuous camera, no growth restart, retained limbs, reset, deep roots PASS');
+  results.push(dims.join('x')+': connected branches, continuous camera, no growth restart, exclusive limbs, stable pinch geometry, reset, deep roots PASS');
  }
  return results.join('\n');
 }

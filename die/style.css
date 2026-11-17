@@ -269,3 +269,10 @@ body.no-webgl #intro{bottom:auto;top:120px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
 }
+
+/* Short screens: compact heading so the cards have room. */
+body.short #region-head{top:84px}
+body.short #rh-back{margin-bottom:10px;padding:8px 13px 7px}
+body.short #rh-title{font-size:30px;margin-bottom:6px}
+body.short #rh-blurb{display:none}
+body.short .tag{margin-bottom:8px}

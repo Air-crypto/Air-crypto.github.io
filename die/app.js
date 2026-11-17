@@ -81,16 +81,26 @@ function buildA11y() {
 }
 
 // ---------- cards in the sky ----------
-const cardState = { list: [], region: null };
+const cardState = { list: [], region: null, k: 1 };
 function buildCards(g) {
   const items = inGroup(g), st = w.regions[g].stand;
   cards.innerHTML = items.map(cardHTML).join('');
   cards.style.setProperty('--accent', GROUPS[g].hue);
   const els = $$('.card3d', cards);
   const mob = isMobile(), n = items.length;
-  const rows = n <= (mob ? 2 : 5) ? 1 : 2, perTop = Math.ceil(n / rows);
+  let rows = n <= (mob ? 2 : 5) ? 1 : 2, perTop = Math.ceil(n / rows);
   const ppr = (innerHeight / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-  const cw = Math.max(...els.map(e => e.offsetWidth)), ch = Math.max(...els.map(e => e.offsetHeight));
+  const short = innerHeight < 760;
+  document.body.classList.toggle('short', short);
+  let cw = Math.max(...els.map(e => e.offsetWidth)), ch = Math.max(...els.map(e => e.offsetHeight));
+  // Scale cards down so the rows fit between the heading and the bottom bar, and most of a row fits across.
+  const reserve = mob ? 230 : short ? 205 : 285, bottom = mob ? 120 : 84;
+  let fitH = (innerHeight - reserve - bottom) / (rows * ch + (rows - 1) * 22);
+  // Too short for two rows: use one wide row and let the visitor look around.
+  if (rows === 2 && fitH < .8) { rows = 1; perTop = n; fitH = (innerHeight - reserve - bottom) / ch; }
+  const fitW = (innerWidth * .94) / (perTop * (cw + 22));
+  const k = clamp(Math.min(fitH, Math.max(fitW, .82)), .66, 1);
+  cardState.k = k; cw *= k; ch *= k;
   const gap = mob ? 14 : 22, stepAz = (cw + gap) / ppr, stepEl = (ch + gap) / ppr, base = (ch / 2 + (mob ? 26 : 40)) / ppr;
   const f = st.dir, r = new THREE.Vector3(-f.z, 0, f.x), R = 60;
   cardState.list = items.map((it, i) => {
@@ -104,9 +114,9 @@ function buildCards(g) {
   const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
   state.gd.maxYaw = Math.max(0, spanAz / 2 - hfov / 2 + (mob ? .12 : .06));
   // Keep the top row below the region heading, and the horizon on screen.
-  const topEdge = base + (rows - 1) * stepEl + (ch / 2) / ppr, reserve = mob ? 250 : 285;
+  const topEdge = base + (rows - 1) * stepEl + (ch / 2) / ppr;
   state.gd.lookElev = Math.max(base + (rows - 1) * stepEl / 2 + (mob ? .02 : .04), topEdge - (innerHeight / 2 - reserve) / ppr);
-  state.gd.lookElev = Math.min(state.gd.lookElev, (innerHeight / 2 - 70) / ppr);
+  state.gd.lookElev = Math.min(state.gd.lookElev, (innerHeight / 2 - bottom + 10) / ppr + base - (ch / 2 + (mob ? 26 : 40)) / ppr);
   cardState.region = g;
   beams.innerHTML = cardState.list.map(() => '<line/><circle r="3"/>').join('');
   requestAnimationFrame(() => cards.classList.add('in'));
@@ -536,11 +546,11 @@ function frame(now) {
       cardState.list.forEach((cd, i) => {
         tmpV.copy(cd.anchor); if (!rm) tmpV.y += Math.sin(t * 1.1 + i * .9) * .35;
         const p = project(tmpV), vis = p.ok && p.x > -300 && p.x < innerWidth + 300;
-        cd.el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%)`;
+        cd.el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(${cardState.k})`;
         cd.el.style.visibility = vis ? '' : 'hidden';
         const line = ls[i * 2], dot = ls[i * 2 + 1], m = w.markerPos(cd.id), q = m && project(m);
         if (line && q && q.ok && vis) {
-          line.setAttribute('x1', p.x); line.setAttribute('y1', p.y + cd.el.offsetHeight / 2); line.setAttribute('x2', q.x); line.setAttribute('y2', q.y);
+          line.setAttribute('x1', p.x); line.setAttribute('y1', p.y + cd.el.offsetHeight * cardState.k / 2); line.setAttribute('x2', q.x); line.setAttribute('y2', q.y);
           dot.setAttribute('cx', q.x); dot.setAttribute('cy', q.y);
           line.classList.toggle('lit', state.lit === cd.id); dot.classList.toggle('lit', state.lit === cd.id);
           line.style.display = dot.style.display = '';

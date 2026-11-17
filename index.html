@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#2a282c">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="assets/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="forest.css?v=8">
+<link rel="stylesheet" href="forest.css?v=10">
 </head>
 <body>
 <a class="skip-link" href="#forest-navigation">Skip to branches</a>
@@ -27,7 +27,7 @@
   </div>
 </main>
 <div class="paper-edge" aria-hidden="true"></div>
-<button id="back" class="ink-pill back" type="button" aria-label="Back to the previous branch" hidden>⟵</button>
+<button id="back" class="ink-pill back" type="button" aria-label="Back to the previous branch" hidden><svg aria-hidden="true" viewBox="0 0 30 20"><path d="M23 10.4 C18 9.2 12 10.9 7 10 M12.5 4.7 Q10 7.8 6.6 10 Q9.7 12.1 12.2 15.3" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <button id="motion-toggle" class="motion-control" type="button" aria-label="Pause animation" aria-pressed="false">Ⅱ</button>
 <aside class="music" aria-label="Music player">
   <p class="music-note">maybe you'll know me better<br>if you listen to what I like!<span aria-hidden="true">⤵</span></p>
@@ -39,13 +39,14 @@
   </div>
   <div class="music-bar ink-pill">
     <button id="music-toggle" type="button" aria-label="Play Unethical by Faouzia" aria-expanded="false" aria-controls="music-panel"><span id="play-icon" aria-hidden="true">▶</span><span class="song-title">unethical · faouzia</span></button>
-    <a href="https://www.youtube.com/watch?v=I1zqCX3Dvxo" target="_blank" rel="noopener noreferrer" aria-label="Open Unethical on YouTube">↗</a>
   </div>
 </aside>
 
 <noscript><nav class="no-script" aria-label="Portfolio pages"><a href="portfolio.html">me &amp; my work</a><a href="projects.html">projects</a><a href="life.html">life</a><a href="mailto:apyadav@wisc.edu">say hello</a></nav></noscript>
-<script src="forest-scene.js?v=8" defer></script>
-<script src="forest.js?v=8" defer></script>
+<script src="forest-layout.js?v=1" defer></script>
+<script src="forest-roots.js?v=1" defer></script>
+<script src="forest-scene.js?v=10" defer></script>
+<script src="forest.js?v=10" defer></script>
 <script src="music.js?v=2" defer></script>
 </body>
 </html>

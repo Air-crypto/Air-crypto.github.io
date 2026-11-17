@@ -1,6 +1,7 @@
 ObjC.import('Foundation');
 function run(){
  const source=$.NSString.stringWithContentsOfFileEncodingError($.NSFileManager.defaultManager.currentDirectoryPath.js+'/forest-scene.js',4,null).js;
+ const layoutSource=$.NSString.stringWithContentsOfFileEncodingError($.NSFileManager.defaultManager.currentDirectoryPath.js+'/forest-layout.js',4,null).js;
  const results=[];
  function assert(ok,message){if(!ok)throw new Error(message)}
  for(const dims of [[1250,540],[302,856]]){
@@ -16,10 +17,11 @@ function run(){
   const cancelAnimationFrame=id=>pending.delete(id);
   const ResizeObserver=function(cb){this.observe=()=>cb()};
   const CustomEvent=function(){};
+  new Function('window',layoutSource)(window);
   new Function('document','window','devicePixelRatio','matchMedia','requestAnimationFrame','cancelAnimationFrame','ResizeObserver','CustomEvent',source)(document,window,devicePixelRatio,matchMedia,requestAnimationFrame,cancelAnimationFrame,ResizeObserver,CustomEvent);
   const scene=window.forestScene;
   function advance(frames){for(let i=0;i<frames;i++){time+=34;const callbacks=[...pending.values()];pending.clear();callbacks.forEach(cb=>cb(time))}}
-  function attached(key){const a=scene.primaryGeometry(key),b=scene.branchPoint(key,0);assert(Math.hypot(a.x-b.x,a.y-b.y)<.00001,'Branch detached from its original twig')}
+  function attached(key){const a=scene.branchBase(key),b=scene.branchPoint(key,0);assert(Math.hypot(a.x-b.x,a.y-b.y)<.00001,'Branch detached from its original twig')}
   advance(2);
   const camera=scene.state.camera;
   scene.setView({type:'menu',group:'projects',count:11,item:-1});
@@ -27,14 +29,16 @@ function run(){
   advance(15);attached('projects');
   const partial=scene.state.branches.find(b=>b.key==='projects').growth;
   assert(partial>0&&partial<1,'Branch did not progressively grow');
-  scene.setView({type:'story',group:'projects',count:11,item:6});
+  scene.setView({type:'story',key:'projects/test',group:'projects',count:11,item:6});
   assert(scene.state.branches.find(b=>b.key==='projects').growth===partial,'Opening an article restarted its limb');
+  scene.placeStory('projects/test','projects',6,440,900);
   advance(55);attached('projects');
-  assert(scene.bounds.minY<0,'Opening content did not expand bounds above the viewport');
+  for(let i=0;i<=20;i++){const p=scene.branchPoint('projects',i/20),b=scene.bounds;assert(p.x>=b.minX&&p.x<=b.maxX&&p.y>=b.minY&&p.y<=b.maxY,'An earlier branch fell outside the scroll bounds')}
   assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Parent branch failed to finish growing');
   scene.setView({type:'menu',group:'life',count:7,item:-1});
   assert(scene.state.branches.find(b=>b.key==='projects').growth===1,'Another limb erased the existing project branch');
   advance(55);attached('life');attached('projects');
+  assert(scene.state.stories.length===1,'Opening another branch hid earlier content');
   scene.setView({type:'home',group:'',count:0,item:-1});
   advance(90);
   assert(scene.state.branches.every(b=>b.growth===0&&!b.open),'Reset failed to retract expanded branches');

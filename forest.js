@@ -62,7 +62,7 @@ function updateTextMask(){
  cancelAnimationFrame(maskFrame);
  maskFrame=requestAnimationFrame(()=>{
   const origin=viewport.getBoundingClientRect(),areas=[];
-  for(const root of [nav,story]){
+  for(const root of [nav,story,document.querySelector('.music-note')]){
    if(root.hidden)continue;
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
    let node;while((node=walker.nextNode())){
@@ -71,7 +71,13 @@ function updateTextMask(){
     for(const box of range.getClientRects())if(box.width&&box.height)areas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.scrollOrigin.top,w:box.width,h:box.height});
    }
   }
-  textHitAreas=areas;window.forestScene.setTextAreas(areas);
+  textHitAreas=areas;
+  const softAreas=[...areas];
+  if(!story.hidden)for(const block of story.querySelectorAll('.story-entry:not([hidden]) p, .story-entry:not([hidden]) h2, .story-entry:not([hidden]) h3, .story-entry:not([hidden]) li')){
+   const box=block.getBoundingClientRect();
+   if(box.width&&box.height)softAreas.push({x:box.left-origin.left,y:box.top-origin.top+viewport.scrollTop-window.forestScene.scrollOrigin.top,w:box.width,h:box.height});
+  }
+  window.forestScene.setTextAreas(softAreas);
  });
 }
 const primaryLinks=new Map(),leafLinks=new Map(),articleViews=new Map();
@@ -94,26 +100,32 @@ function layout(){
  const include=(x,y,width,height)=>{bounds.minX=Math.min(bounds.minX,x);bounds.maxX=Math.max(bounds.maxX,x+width);bounds.minY=Math.min(bounds.minY,y);bounds.maxY=Math.max(bounds.maxY,y+height)};
  for(const [key,a] of primaryLinks){
   const p=scene.primaryGeometry(key),x=p.x+p.side*10,align=p.side<0?'left':'right';
-  a.style.opacity=mode==='home'||key===state.view.group?'1':'.5';
+  const growth=state.branches.find(b=>b.key===key)?.growth||0;
+  a.style.opacity=String(Math.max(0,1-growth*5));a.style.visibility=growth>=.2?'hidden':'visible';
+  a.style.pointerEvents=growth>=.2?'none':'auto';a.tabIndex=growth>=.2?-1:0;
   placements.push({a,x,y:p.y,align});
-  include(x-(align==='left'?a.offsetWidth:0)-8,p.y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
+  if(growth<.2)include(x-(align==='left'?a.offsetWidth:0)-8,p.y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
  }
  for(const [key,links] of leafLinks){
   links.forEach((a,i)=>{
    const p=scene.nodeGeometry(key,i,links.length);
-   a.hidden=p.opacity<=0;a.style.width=mobile?'145px':'';
-   a.style.opacity=String(p.opacity*(mode==='story'&&a.dataset.route!==route?.5:1));
-   let x=p.x+p.side*(mobile?17:30);
-   if(mobile){const width=a.offsetWidth;x=p.side<0?Math.max(width+8,Math.min(w-8,x)):Math.min(w-width-8,Math.max(8,x));}
-   const align=p.side<0?'left':'right',y=p.y-12;
-   placements.push({a,x,y,align});scene.setLabelAnchor(key,i,{x:x-p.side*3,y});
-   if(!a.hidden)include(x-(align==='left'?a.offsetWidth:0)-8,y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
+   a.hidden=p.opacity<=0;a.style.width=mobile?'150px':'202px';
+   const sprouted=state.stories.some(s=>s.key===a.dataset.route);
+   a.style.opacity=String(sprouted?0:p.opacity);a.style.visibility=sprouted?'hidden':'visible';a.tabIndex=sprouted?-1:0;
+   const x=p.label?.x||p.x,y=p.label?.y||p.y;
+   placements.push({a,x,y,align:'center'});
+   if(!a.hidden)include(x-a.offsetWidth/2-8,y-a.offsetHeight/2-8,a.offsetWidth+16,a.offsetHeight+16);
   });
  }
- let articlePoint=null;
- if(!story.hidden){
-  articlePoint=scene.storyGeometry();story.style.width=mobile?(w-52)+'px':(route==='me'?340:440)+'px';
-  include(articlePoint.x-20,articlePoint.y-20,story.offsetWidth+(route==='me'&&!mobile?300:40),story.offsetHeight+170);
+ const articlePlacements=[];
+ for(const [key,node] of articleViews){
+  if(node.hidden)continue;
+  const entry=entries[key],group=entry.parent||'me',item=menus[group]?.items.findIndex(x=>x[1]===key)??-1;
+  const width=mobile?w-52:key==='me'?340:440;
+  node.style.width=width+'px';
+  const footprint=width+(key==='me'&&!mobile?290:0);
+  const p=scene.placeStory(key,group,item,footprint,Math.max(node.offsetHeight, key==='me'?500:180)+60);
+  if(p){articlePlacements.push({node,p});include(p.x-25,p.y-25,footprint+50,node.offsetHeight+110)}
  }
  const oldOrigin=scene.scrollOrigin,effective={left:viewport.scrollLeft-oldOrigin.left,top:viewport.scrollTop-oldOrigin.top};
  const atDefault=mode==='home'&&state.branches.every(b=>b.growth===0)&&Math.abs(state.camera.x-w*(mobile?.48:.40))+Math.abs(state.camera.y)<.2&&Math.abs(effective.left)+Math.abs(effective.top)<1;
@@ -126,8 +138,9 @@ function layout(){
  world.style.height=Math.ceil(Math.max(h,bounds.maxY+origin.top))+'px';
  world.style.minHeight=h+'px';
  scene.setScrollOrigin(origin);
+ window.forestRoots?.layout({width:w,camera:state.camera,ground:h-4+state.camera.y,origin});
  for(const p of placements)at(p.a,p.x+origin.left,p.y+origin.top,p.align);
- if(articlePoint){story.style.left=(articlePoint.x+origin.left)+'px';story.style.top=(articlePoint.y+origin.top)+'px';}
+ for(const {node,p} of articlePlacements){node.style.left=(p.x+origin.left)+'px';node.style.top=(p.y+origin.top)+'px';}
  if(origin.left!==oldOrigin.left||origin.top!==oldOrigin.top)viewport.scrollTo({left:origin.left+effective.left,top:origin.top+effective.top,behavior:'instant'});
  scene.syncScroll();
  updateTextMask();
@@ -208,12 +221,11 @@ async function buildStory(entry){
  return result;
 }
 async function showStory(key){
- for(const [id,node] of articleViews)node.hidden=id!==key;
  let node=articleViews.get(key);
- if(node)return;
- node=document.createElement('div');node.className='story-entry';node.dataset.story=key;
+ if(node){node.hidden=false;return;}
+ node=document.createElement('div');node.className='story-entry'+(key==='me'?' about-story':'');node.dataset.story=key;node.tabIndex=-1;
  node.innerHTML='<p>following the branch…</p>';node.setAttribute('aria-busy','true');
- articleViews.set(key,node);story.append(node);
+ articleViews.set(key,node);story.append(node);new ResizeObserver(layout).observe(node);
  try{
   node.replaceChildren(await buildStory(entries[key]));
   transformLinks(node);initPhotos(node);
@@ -223,7 +235,7 @@ async function showStory(key){
   retry.addEventListener('click',()=>{articleViews.delete(key);node.remove();showStory(key)});
   const fallback=document.createElement('a');fallback.href=entries[key].path;fallback.textContent='open the original page ↗';
   node.append(retry,document.createTextNode(' · '),fallback);
- }finally{node.removeAttribute('aria-busy');if(key===route)layout()}
+ }finally{node.removeAttribute('aria-busy');if(!node.hidden)layout()}
 }
 async function renderRoute(raw){
  const key=aliases[raw]||raw;
@@ -235,18 +247,19 @@ async function renderRoute(raw){
  mode=!key?'home':menus[key]?'menu':'story';
  const group=mode==='home'?'':menus[key]?key:entries[key].parent||'me';
  activeMenu=menus[group]||null;
- story.hidden=mode!=='story';story.className=key==='me'?'about-story':'';
+ if(mode==='home')for(const node of articleViews.values())node.hidden=true;
+ story.hidden=mode==='home';story.className='';
  back.hidden=!key;back.setAttribute('aria-label','Return to the default tree');
  for(const a of nav.querySelectorAll('.branch-link')){
   const selected=a.dataset.route===key;
   a.classList.toggle('selected',selected);
   if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
  }
- window.forestScene.setView({type:mode,group,count:activeMenu?.items.length||0,item:activeMenu?.items.findIndex(x=>x[1]===key)??-1});
+ window.forestScene.setView({type:mode,key,group,count:activeMenu?.items.length||0,item:activeMenu?.items.findIndex(x=>x[1]===key)??-1});
  if(mode==='story')await showStory(key);
  if(id!==request)return;
  layout();
- if(keyboardNavigation&&mode==='story')story.focus({preventScroll:true});
+ if(keyboardNavigation&&mode==='story')articleViews.get(key)?.focus({preventScroll:true});
  else if(keyboardNavigation&&returnTo)primaryLinks.get(returnTo.split('/')[0])?.focus({preventScroll:true});
 }
 let keyboardNavigation=false;
@@ -269,7 +282,7 @@ document.addEventListener('keydown',event=>{
 });
 window.addEventListener('popstate',()=>renderRoute(location.hash.slice(1)));
 window.addEventListener('hashchange',()=>{if(location.hash.slice(1)!==route)renderRoute(location.hash.slice(1))});
-window.addEventListener('forest-resize',layout);
+window.addEventListener('forest-resize',()=>{layout();viewport.scrollTo({...window.forestScene.scrollOrigin,behavior:'instant'});window.forestScene.syncScroll()});
 new ResizeObserver(layout).observe(story);
 new ResizeObserver(updateTextMask).observe(nav);
 document.fonts.ready.then(()=>{layout();updateTextMask()});

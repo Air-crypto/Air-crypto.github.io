@@ -10,7 +10,9 @@ const INK='#b8bbc3',BG='#2a282c';
 let W=0,H=0,DPR=1,scroll=0,panX=0,clock=0,last=0,frame=0,paused=reduced.matches;
 let view={type:'home',group:'',item:-1},current={x:0,y:0},target={x:0,y:0},initialized=false;
 const branches=new Map(['work','projects','life','me'].map(key=>[key,{key,open:false,growth:0,count:0}]));
-let layoutCallback=()=>{},connector=0;
+let layoutCallback=()=>{},connector=0,resetting=false;
+const planner=window.createForestLayout(),storyGrowth=new Map();
+const scenerySeed=Math.floor(Math.random()*4294967295);
 const labelAnchors=new Map();
 let scrollOrigin={left:0,top:0};
 let rng=2943;
@@ -27,10 +29,15 @@ function roughBlob(c,x,y,rx,ry,rotation=0){
  c.restore();
 }
 const treeArt=surface(600,1050),tc=treeArt.getContext('2d');
-rng=29137;
+rng=scenerySeed;
 // A narrow, asymmetric canopy with open pockets and ragged, stippled edges.
 const spine=[[300,1030],[299,905],[305,790],[300,680],[294,570],[305,450],[295,330],[303,205],[289,90]];
-for(let i=0;i<spine.length-1;i++)line(tc,[spine[i],spine[i+1]],7.5-i*.62);
+// A broad root flare narrows into an uneven, gently curved trunk.
+const trunkPhase=r(-.5,.5),trunkPoints=Array.from({length:110},(_,i)=>{
+ const t=i/109;return [300+Math.sin(t*4+trunkPhase)*7+Math.sin(t*8)*2,1035-t*945];
+});
+for(let i=1;i<trunkPoints.length;i++)line(tc,[trunkPoints[i-1],trunkPoints[i]],Math.max(2,23*Math.pow(1-i/110,.9)),.95);
+for(let i=0;i<8;i++)line(tc,[[300+r(-5,5),995],[300+r(-12,12),1030],[300+r(-31,31),1048]],r(1.2,4),.75);
 const crowns=[
 [286,91,27,43,-.25],[310,150,48,40,.4],[257,177,36,37,.2],[341,192,41,32,-.2],
 [303,230,31,36,.1],[346,285,43,42,.3],[250,299,46,32,-.35],[213,329,26,32,-.2],
@@ -41,16 +48,13 @@ const crowns=[
 [258,713,38,35,-.3],[228,752,26,25,.1],[303,742,23,31,.1]
 ];
 crowns.forEach(([x,y,rx,ry,a],i)=>{
+ x+=r(-13,13);y+=r(-10,10);rx*=r(.72,1.14);ry*=r(.75,1.18);a+=r(-.3,.3);
  const at=[300+Math.sin(y*.012)*5,y+30];
  line(tc,[at,[x+(300-x)*.35,y+12],[x,y]],r(1.8,4));
  roughBlob(tc,x,y,rx,ry,a);
  for(let j=0;j<3;j++)roughBlob(tc,x+r(-rx*.7,rx*.7),y+r(-ry*.7,ry*.7),rx*r(.2,.44),ry*r(.2,.45),r(-1,1));
 });
-// Long, bare twigs are the landing points for the labels.
-line(tc,[[297,265],[237,257],[170,247],[150,241]],3);
-line(tc,[[302,345],[355,344],[415,331],[450,323]],2.7);
-line(tc,[[299,487],[240,489],[160,482],[120,477]],3);
-line(tc,[[304,590],[363,586],[417,572],[447,565]],2.6);
+// Navigation twigs are drawn live so they can thicken into new limbs.
 tc.globalCompositeOperation='source-atop';
 for(let i=0;i<69000;i++){tc.globalAlpha=r(.08,.7);tc.fillStyle=BG;tc.fillRect(r(130,420),r(40,1030),r(.4,1.7),r(.4,1.5))}
 tc.globalAlpha=1;tc.globalCompositeOperation='source-over';
@@ -58,16 +62,23 @@ const brush=surface(140,120),bc=brush.getContext('2d');roughBlob(bc,70,60,51,40,
 bc.globalCompositeOperation='source-atop';for(let i=0;i<4800;i++){bc.globalAlpha=r(.15,.7);bc.fillStyle=BG;bc.fillRect(r(0,140),r(0,120),r(.4,1.2),r(.4,1.5))}bc.globalAlpha=1;
 const ground=surface(1,1);
 const rootArt=surface(1800,2600),rc=rootArt.getContext('2d');
-rng=44271;
-function root(x,y,len,angle,thick,depth){
- angle=Math.max(.25,Math.min(Math.PI-.25,angle));
- if(depth<4)angle+=(Math.PI/2-angle)*.15;
- const ex=x+Math.cos(angle)*len,ey=y+Math.sin(angle)*len;
- const mid=[x+(ex-x)*.5+r(-12,12),y+(ey-y)*.5+r(-12,12)];
- line(rc,[[x,y],mid,[ex,ey]],thick,.9);
- if(depth>0){root(ex,ey,len*r(.56,.76),angle+r(-.4,.4),thick*.63,depth-1);root(mid[0],mid[1],len*r(.43,.7),angle+r(-.9,.9),thick*.54,depth-1)}
+rng=scenerySeed^44271;
+function root(x,y,len,angle,thick,depth,initial=angle){
+ angle=Math.max(.22,Math.min(Math.PI-.22,angle));
+ if(depth<4)angle+=(Math.PI/2-angle)*.12;
+ const turn=r(-.32,.32),points=[[x,y]],steps=14;
+ for(let i=1;i<=steps;i++){
+  const t=i/steps,a=initial+(angle-initial)*(t*t*(3-2*t))+Math.sin(t*Math.PI)*turn+Math.sin(t*6)*.07;
+  x+=Math.cos(a)*len/steps;y+=Math.sin(a)*len/steps;points.push([x,y]);
+  line(rc,[points[i-1],points[i]],Math.max(.18,thick*(1-t*.45)),Math.min(.84,.3+thick*.12));
+ }
+ const mid=points[7],end=points[steps];
+ if(depth>0){
+  root(end[0],end[1],len*r(.57,.76),angle+turn+r(-.32,.32),thick*r(.54,.72),depth-1,angle+Math.sin(6)*.07);
+  if(random()>.13)root(mid[0],mid[1],len*r(.35,.65),angle+r(-.85,.85),thick*r(.32,.52),depth-1,initial+(angle-initial)*.5+turn);
+ }
 }
-for(let i=0;i<11;i++)root(900+r(-12,12),0,r(380,650),r(.35,2.79),r(2.8,5.5),7);
+for(let i=0;i<9;i++)root(900+r(-13,13),0,r(270,470),r(.35,2.79),r(5,13),7);
 const rocks=Array.from({length:5},(_,i)=>{const c=surface(100,80),g=c.getContext('2d');roughBlob(g,50,40,35+r(-8,8),22+r(-5,6),r(-.4,.4));g.globalCompositeOperation='source-atop';for(let j=0;j<2400;j++){g.globalAlpha=r(.2,.8);g.fillStyle=BG;g.fillRect(r(0,100),r(0,80),r(.3,1),r(.3,1))}g.globalAlpha=1;line(g,[[45,28],[41,37],[44,51]],.8,.5);return c});
 const grain=surface(256,256),gc=grain.getContext('2d');
 for(let i=0;i<6000;i++){gc.fillStyle=random()>.5?'rgba(255,255,255,.022)':'rgba(0,0,0,.04)';gc.fillRect(random()*256,random()*256,1,1)}
@@ -81,9 +92,9 @@ fade.addColorStop(.6,'rgba(42,40,44,.86)');
 fade.addColorStop(1,'rgba(42,40,44,0)');
 fc.fillStyle=fade;fc.fillRect(0,0,256,256);
 function drawGroundArt(){
- ground.width=Math.ceil(W*DPR);ground.height=Math.ceil(170*DPR);
+ ground.width=Math.ceil(W*DPR);ground.height=Math.ceil(235*DPR);
  const g=ground.getContext('2d');g.setTransform(DPR,0,0,DPR,0,0);
- rng=47213;const bottom=136;
+ rng=scenerySeed^47213;const bottom=136;
  for(let i=0;i<W*1.5;i++){
   const x=random()*W,tall=r(3,24)*(1+Math.pow(Math.sin(x*.014),7)*.9)*(x>W*.67?.45:1),bend=r(-11,11);
   line(g,[[x,bottom+r(-3,5)],[x+bend*.35,bottom-tall*.5],[x+bend,bottom-tall]],r(.45,1.25),r(.35,.9));
@@ -98,52 +109,52 @@ function drawGroundArt(){
   }
   if(i%3===0)roughBlob(g,x+bend,bottom-tall,4.5,4,0);
  }
- for(let i=0;i<W*2.8;i++){g.fillStyle=INK;g.globalAlpha=r(.3,.8);g.fillRect(r(0,W),bottom+r(-2,20),r(.5,1.5),r(.7,1.5))}
+ for(let i=0;i<W*5;i++){const depth=Math.pow(random(),2)*90;g.fillStyle=INK;g.globalAlpha=r(.05,.5)*(1-depth/100);g.fillRect(r(0,W),bottom+depth-8,r(.4,1.6),r(.4,1.6))}
  g.globalAlpha=1;
 }
 // All coordinates belong to one tree. Only the camera and branch growth change.
 const anchorSpecs={work:[150,241,-1],projects:[450,323,1],life:[120,477,-1],me:[447,565,1]};
-function treeSize(){const sy=H*1.10/990;return {sy,sx:W<700?Math.min(sy,W*1.05/600):sy*2.3}}
-function anchor(key){
- const [x,y,side]=anchorSpecs[key],{sx,sy}=treeSize();
- return {x:(x-300)*sx,y:H-4-(1050-y)*sy,side};
+const baseSpecs={work:[297,265],projects:[302,345],life:[299,487],me:[304,590]};
+function treeSize(){const sy=H*.95/990;return {sy,sx:W<700?Math.min(sy,W*1.15/600):sy*2.8}}
+function rawPoint(x,y){const {sx,sy}=treeSize();return {x:(x-300)*sx,y:H-4-(1050-y)*sy}}
+function anchor(key){const [x,y,side]=anchorSpecs[key];return {...rawPoint(x,y),side}}
+function baseAnchor(key){return rawPoint(...baseSpecs[key])}
+function project(p){return {...p,x:p.x+current.x,y:p.y+current.y}}
+function ensureBranch(key,count){
+ return planner.openBranch({key,base:baseAnchor(key),label:anchor(key),count,width:W,height:H,side:anchorSpecs[key][2],down:key==='life'||key==='me'?1:-1});
 }
-function project(p){return {x:p.x+current.x,y:p.y+current.y,side:p.side}}
-function curve(key,t){
- const a=anchor(key);
- if(key==='me'){
-  const endX=W<700?26-W*.12-10:W*.24-10;
-  return {x:a.x+(endX-a.x)*t,y:a.y+(H*.59+8-a.y)*t+Math.sin(t*Math.PI)*7};
- }
- const length=W*.62,ex=a.x+a.side*length,ey=a.y-H*.54;
- const u=1-t,wave=Math.sin(Math.PI*t);
- return {x:u*u*u*a.x+3*u*u*t*(a.x+a.side*length*.27)+3*u*t*t*(ex-a.side*length*.28)+t*t*t*ex+wave*Math.sin(t*13)*5,
- y:u*u*u*a.y+3*u*u*t*(a.y+(ey-a.y)*.33)+3*u*t*t*(a.y+(ey-a.y)*.66)+t*t*t*ey+wave*(Math.sin(t*11)*7+Math.sin(t*23)*2)};
-}
+function curve(key,t){return planner.branches.get(key)?.point(t)||baseAnchor(key)}
 function nodeGeometry(key,i,count){
- const t=.12+(i+.5)/count*.82,p=project(curve(key,t)),side=i%2===0?-1:1;
- return {...p,side,t,opacity:Math.max(0,Math.min(1,(branches.get(key).growth-t)*10))};
+ const n=planner.branches.get(key)?.nodes[i];
+ if(!n)return {x:0,y:0,t:1,opacity:0,side:1};
+ return {...project(n.branch),label:project(n),t:n.t,side:n.direction.x<0?-1:1,opacity:Math.max(0,Math.min(1,(branches.get(key).growth-n.t)*12))};
 }
 function primaryGeometry(key){return project(anchor(key))}
-function storyGeometry(){
- const mobile=W<700,side=anchorSpecs[view.group||'me'][2];
- const cameraX=W*(side>0?(mobile?.12:.12):.88);
- const screenX=mobile?26:side>0?(view.group==='me'?.36:.415)*W:W*.09;
- return {x:screenX-cameraX+current.x,y:H*.59+current.y};
+function storyGeometry(key=view.key){const p=planner.stories.get(key);return p?project(p.rect):{x:W*.35,y:H*.3}}
+function placeStory(key,group,item,width,height){
+ const previous=planner.stories.get(key),p=planner.placeStory({key,group,item,width,height});
+ if(p&&p!==previous){if(!previous)storyGrowth.set(key,0);setTarget();refresh()}
+ return p?project(p.rect):null;
 }
 function setTarget(){
  if(view.type==='home')target={x:W*(W<700?.48:.40),y:0};
- else {const side=anchorSpecs[view.group][2];target={x:W*(side>0?.12:.88),y:H*(view.type==='story'?-.26:.34)};}
+ else if(view.type==='story'&&planner.stories.has(view.key)){
+  const p=planner.stories.get(view.key).rect;
+  target={x:(W<700?26:Math.max(60,(W-Math.min(p.w,640))*.5))-p.x,y:H*.20-p.y};
+ }else{
+  const p=planner.branches.get(view.group)?.point(.45)||anchor(view.group);
+  target={x:W*.5-p.x,y:H*.48-p.y};
+ }
  if(!initialized&&W&&H){current={x:W*(W<700?.48:.40),y:0};initialized=true}
  if(paused)current={...target};
 }
-function drawPath(points,reach,size){
- const end=Math.max(1,Math.ceil((points.length-1)*reach));
- const hash=i=>{const n=Math.sin(i*12.9898+size*78.233)*43758.5453;return n-Math.floor(n)};
+function drawPath(points,reach,size,thickness=5,seed=0){
+ const end=Math.max(1,Math.floor((points.length-1)*reach)+1);
+ const hash=i=>{const n=Math.sin(i*12.9898+seed*3.71+size*78.233)*43758.5453;return n-Math.floor(n)};
  const screen=p=>[p.x+current.x,p.y+current.y-scroll];
  // A tapering stem carries uneven forks and foliage, rather than a row of stamps.
  for(let i=1;i<end;i++){
-  const t=i/(points.length-1),width=Math.max(.55,size*.15*Math.pow(1-t,.8));
+  const t=i/(points.length-1),width=Math.max(.4,thickness*Math.pow(1-t,1.1)*(1+Math.sin(t*19+seed)*.13)*Math.min(1,reach*4));
   line(ctx,[screen(points[i-1]),screen(points[i])],width,.94);
  }
  for(let i=2;i<end-1;i++){
@@ -167,51 +178,38 @@ function drawPath(points,reach,size){
  }
 }
 function renderBoughs(){
- for(const branch of branches.values()){
-  if(branch.growth<=0)continue;
-  const points=Array.from({length:55},(_,i)=>curve(branch.key,i/54));
-  drawPath(points,branch.growth,W<700?18:32);
-  for(let i=0;i<branch.count;i++){
-   const n=nodeGeometry(branch.key,i,branch.count);
-   if(n.opacity<=0)continue;
-   const label=labelAnchors.get(branch.key+'/'+i);
-   const end=label?project(label):{x:n.x+n.side*(W<700?16:28),y:n.y-12};
-   line(ctx,[[n.x,n.y-scroll],[end.x,end.y-scroll]],1,n.opacity);
+ for(const b of branches.values()){
+  const base=project(baseAnchor(b.key)),label=project(anchor(b.key));
+  if(b.growth<.25)line(ctx,[[base.x,base.y-scroll],[label.x,label.y-scroll]],1.7,1-b.growth*4);
+  const plan=planner.branches.get(b.key);
+  if(!plan||b.growth<=0)continue;
+  if(b.key!=='me')drawPath(plan.points,b.growth,plan.foliage,plan.thickness,plan.seed);
+  for(let i=0;i<b.count;i++){
+   const n=nodeGeometry(b.key,i,b.count);if(n.opacity<=0)continue;
+   line(ctx,[[n.x,n.y-scroll],[n.label.x,n.label.y-scroll]],Math.max(.5,1.5*(1-n.t)),n.opacity*.72);
   }
  }
- if(view.type==='story'&&view.group&&view.group!=='me'&&connector>0){
-  const branch=branches.get(view.group);
-  const from=view.item>=0?curve(view.group,.12+(view.item+.5)/branch.count*.82):curve(view.group,.72);
-  const to=storyGeometry(),end={x:to.x-current.x-10,y:to.y-current.y+8};
-  const points=Array.from({length:35},(_,i)=>{
-   const t=i/34,u=1-t;
-   return {x:u*u*from.x+2*u*t*(from.x+(end.x-from.x)*.75)+t*t*end.x,y:u*u*from.y+2*u*t*(end.y-H*.13)+t*t*end.y};
-  });
-  drawPath(points,connector,W<700?8:12);
- }
+ for(const [key,p] of planner.stories)drawPath(p.points,storyGrowth.get(key)||0,p.foliage,p.thickness,p.seed);
 }
 function drawSoil(groundY){
  if(groundY>H+30)return;
  ctx.drawImage(rootArt,current.x-450,groundY-3,900,1800);
- const top=Math.max(0,scroll-H),bottom=scroll+H+100;
- // Deterministic layers make scrolling continuous instead of regenerating the earth.
- for(let level=0;level<Math.ceil((scroll+H)/220)+1;level++){
-  rng=8721+level*331;
-  const worldY=H+current.y+level*220+100,y=worldY-scroll;
-  if(y < -100 || y>H+100)continue;
-  for(let x=-W;x<W*2;x+=r(4,12)){
-   const wave=Math.sin(x*.012+level)*11+Math.sin(x*.033)*3;
-   ctx.globalAlpha=r(.35,.85);ctx.fillStyle=INK;ctx.beginPath();ctx.ellipse(x,y+wave,r(.6,1.6),r(.5,1.2),r(-.3,.3),0,6.28);ctx.fill();
+ for(let band=Math.max(0,Math.floor((scroll-H-current.y)/120)-1);band<Math.ceil((scroll+H-current.y)/120);band++){
+  rng=(scenerySeed^8721)+band*331;
+  for(let i=0;i<W*.7;i++){
+   const x=r(-W,W*2),depth=band*120+r(0,120),y=H+current.y+depth-scroll;
+   if(y<groundY||y>H+20||y<-20)continue;
+   const fade=depth<100?.5*(1-depth/140):.16;
+   ctx.globalAlpha=r(.04,fade);ctx.fillStyle=INK;ctx.fillRect(x,y,r(.4,1.4),r(.4,1.4));
   }
-  ctx.globalAlpha=1;
- }
+ }ctx.globalAlpha=1;
  const first=Math.max(0,Math.floor((scroll-H)/150)-1),lastBand=Math.ceil((scroll+H)/150);
  for(let band=first;band<=lastBand;band++){
   rng=4599+band*177;
   for(let j=0;j<Math.ceil(W/30);j++){
    const x=(r(0,W)+current.x-W*.40+W)%W,y=H+current.y+band*150+r(0,150)-scroll;
    if(y<groundY+12||y<-60||y>H+60)continue;
-   const big=j%19===0,size=big?r(30,68):r(2,10);
+   const big=j%29===0,size=big?r(12,32):r(1.2,6);
    for(const offset of [-W,0,W])ctx.drawImage(rocks[(j+band)%rocks.length],x+offset,y,size,size*.8);
   }
  }
@@ -227,11 +225,12 @@ function render(){
  }ctx.globalAlpha=1;
  const groundY=H-4+current.y-scroll;
  drawSoil(groundY);
+ window.forestRoots?.draw(ctx,{width:W,height:H,camera:current,ground:H-4+current.y,scroll,clock,paused});
  const {sx,sy}=treeSize(),tw=600*sx,th=1050*sy;
  ctx.drawImage(treeArt,current.x-tw*.5,H-4+current.y-scroll-th,tw,th);
  renderBoughs();
  const groundShift=(current.x-W*(W<700?.48:.40))%W;
- for(const x of [groundShift-W,groundShift,groundShift+W])ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,170);
+ for(const x of [groundShift-W,groundShift,groundShift+W])ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,235);
  ctx.restore();
  ctx.fillStyle=pattern;ctx.fillRect(0,0,W,H);
  // Thin the ink only where it passes behind text; the landscape stays continuous.
@@ -240,7 +239,7 @@ function render(){
 function isMoving(){
  return Math.abs(current.x-target.x)+Math.abs(current.y-target.y)>.05||
  [...branches.values()].some(b=>Math.abs(b.growth-(b.open?1:0))>.001)||
- (view.type==='story'&&connector<1);
+ (view.type==='story'&&connector<1)||Boolean(window.forestRoots?.moving)||[...storyGrowth.values()].some(v=>v<1);
 }
 function tick(now){
  frame=0;
@@ -252,7 +251,9 @@ function tick(now){
    const goal=b.open?1:0;
    b.growth=paused?goal:goal>b.growth?Math.min(goal,b.growth+dt*.75):Math.max(goal,b.growth-dt*1.5);
   }
-  if(view.type==='story')connector=paused?1:Math.min(1,connector+dt*.85);
+  for(const [key,growth] of storyGrowth)storyGrowth.set(key,paused?1:Math.min(1,growth+dt*.8));
+  if(resetting&&[...branches.values()].every(b=>b.growth===0)){planner.reset();resetting=false}
+  window.forestRoots?.tick(dt,paused);
   if(moving)layoutCallback();
   render();
  }
@@ -260,17 +261,22 @@ function tick(now){
 }
 function refresh(){cancelAnimationFrame(frame);frame=0;render();if(!document.hidden)frame=requestAnimationFrame(tick)}
 function resize(){
- W=viewport.clientWidth;H=viewport.clientHeight;DPR=Math.min(devicePixelRatio||1,2);
+ const changed=W!==viewport.clientWidth||H!==viewport.clientHeight;
+ W=viewport.clientWidth;H=viewport.clientHeight;
+ if(changed&&initialized){planner.reset();storyGrowth.clear();for(const b of branches.values())if(b.open)ensureBranch(b.key,b.count)}DPR=Math.min(devicePixelRatio||1,2);
  canvas.width=Math.ceil(W*DPR);canvas.height=Math.ceil(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';
  ctx.setTransform(DPR,0,0,DPR,0,0);pattern=ctx.createPattern(grain,'repeat');drawGroundArt();setTarget();layoutCallback();refresh();
  window.dispatchEvent(new CustomEvent('forest-resize'));
 }
 function setView(next){
- const was=view;view=next;
- if(next.type==='home')for(const b of branches.values())b.open=false;
- else {const b=branches.get(next.group);b.open=true;b.count=next.count||0;}
- // Opening a leaf never restarts its parent branch.
- if(next.type==='story'&&(was.group!==next.group||was.item!==next.item||was.type!=='story'))connector=0;
+ view=next;
+ if(next.type==='home'){
+  for(const b of branches.values())b.open=false;
+  planner.resetStories();storyGrowth.clear();resetting=true;
+ }else{
+  if(resetting){planner.reset();for(const b of branches.values()){b.growth=0;b.open=false}resetting=false}
+  const b=branches.get(next.group);b.open=true;b.count=next.count||0;ensureBranch(b.key,b.count);
+ }
  if(paused)for(const b of branches.values())b.growth=b.open?1:0;
  setTarget();layoutCallback();refresh();
 }
@@ -285,12 +291,13 @@ function worldBounds(){
  const include=(p,margin=32)=>{box.minX=Math.min(box.minX,p.x-margin);box.maxX=Math.max(box.maxX,p.x+margin);box.minY=Math.min(box.minY,p.y-margin);box.maxY=Math.max(box.maxY,p.y+margin)};
  include({x:current.x-300*sx,y:groundY-1050*sy});include({x:current.x+300*sx,y:groundY});
  for(const b of branches.values())if(b.growth>0)for(let i=0;i<=40;i++)include(project(curve(b.key,b.growth*i/40)),W<700?48:80);
- if(view.type==='story')include(storyGeometry());
+ for(const p of planner.stories.values()){include(project({x:p.rect.x,y:p.rect.y}));include(project({x:p.rect.x+p.rect.w,y:p.rect.y+p.rect.h}));for(const q of p.points)include(project(q),45)}
  return box;
 }
 function syncScroll(){scroll=viewport.scrollTop-scrollOrigin.top;panX=viewport.scrollLeft-scrollOrigin.left}
 window.forestScene={
- setView,nodeGeometry,primaryGeometry,storyGeometry,
+ setView,nodeGeometry,primaryGeometry,storyGeometry,placeStory,wake:refresh,
+ branchBase(key){return project(baseAnchor(key))},
  branchPoint(key,t){return project(curve(key,t))},
  setLabelAnchor(key,i,p){labelAnchors.set(key+'/'+i,{x:p.x-current.x,y:p.y-current.y})},
  onLayout(callback){layoutCallback=callback},
@@ -299,7 +306,7 @@ window.forestScene={
  get scrollOrigin(){return {...scrollOrigin}},
  setScrollOrigin(next){scrollOrigin={...next}},syncScroll,
  get bounds(){return worldBounds()},
- get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b}))}},
+ get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b})),stories:[...planner.stories.values()].map(p=>({key:p.key,rect:{...p.rect}}))}},
  render
 };
 new ResizeObserver(resize).observe(viewport);

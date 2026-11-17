@@ -129,3 +129,20 @@ body{font-size:14px}#forest-viewport{inset:9px}#landscape{left:9px;top:9px}.pape
 @media(max-width:700px){#story,#story.about-story{margin:0;padding:0 0 120px;max-width:none}.about-photos{top:0}}
 
 .story-entry>section{margin:0 0 60px}.story-entry>section:last-child{margin-bottom:0}
+
+/* Root memories have no visible interface; the ink is drawn in the landscape. */
+.root-memory{position:absolute;width:80px;height:80px;padding:0;border:0;border-radius:50%;background:transparent;transform:translate(-50%,-50%);z-index:1;touch-action:manipulation}
+.root-memory:focus-visible{outline:1px dotted #b8bbc370;outline-offset:4px;text-decoration:none}
+
+/* Every opened story occupies its own place in the shared landscape. */
+#story,#story.about-story{position:absolute;inset:0;width:100%;max-width:none;height:100%;margin:0;padding:0;pointer-events:none}
+.story-entry{position:absolute;padding:0 0 60px;pointer-events:auto;outline:none}
+.story-entry.about-story .about-photos{left:calc(100% + 35px);top:0}
+.branch-leaf{white-space:normal;text-align:center;max-width:none;line-height:1.4}
+.music-note{margin-left:0;margin-right:42px;text-align:right}
+.music-note>span{left:auto;right:-31px;top:18px;transform:scaleX(-1) rotate(10deg)}
+@media(max-width:700px){.story-entry.about-story .about-photos{left:0;top:0}}
+
+.story-entry p,.story-entry li,.story-entry h2,.story-entry h3{ text-shadow:0 0 4px #2a282c,0 0 9px #2a282c,0 0 15px #2a282c }
+
+.back{display:grid;place-items:center;padding:0;font-size:0;line-height:1}.back[hidden]{display:none}.back svg{display:block;width:28px;height:20px}

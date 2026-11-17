@@ -23,7 +23,7 @@ flowchart TB
 ## Controls
 
 - **Overview:** scroll or pinch to zoom, drag to pan, right-drag or shift-drag to orbit. Click a region or its label, or zoom all the way in, to enter it.
-- **Standing in a region:** drag to look around. Click a card for its panel; ← → step through the group. Click anywhere off the panel to close it. Scroll out, pinch out, Esc or "← Overview" to leave.
+- **Standing in a region:** drag to look around. Click a card for its panel; ← → step through the group. Click anywhere off the panel to close it. Click empty space, scroll out, pinch out, Esc or "← Overview" to leave.
 - **Index** (`/`) searches everything.
 
 ## Files

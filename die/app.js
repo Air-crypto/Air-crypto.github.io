@@ -152,7 +152,7 @@ function setBodyView() {
     $('#region-head').style.setProperty('--accent', GROUPS[g].hue);
   }
   $('#hud-line').textContent = state.view === 'ground'
-    ? (isMobile() ? 'Swipe to look · tap a card · pinch out to leave' : 'Drag to look around · click a card · scroll out to leave')
+    ? (isMobile() ? 'Swipe to look · tap a card · tap empty space to leave' : 'Drag to look around · click a card · click empty space to leave')
     : (isMobile() ? 'Pinch to zoom · drag to move · tap a region' : 'Scroll to zoom · drag to move · click a region');
 }
 function enterRegion(g, opts = {}) {
@@ -269,6 +269,7 @@ function endPointer(e) {
     const p = groundAt(e.clientX, e.clientY), g = p && w.regionAt(p.x, p.z);
     if (g) enterRegion(g);
   } else if (state.panel) closePanel();
+  else if (clock() > state.cooldown) exitRegion(); // click empty space to go back up
 }
 canvas.addEventListener('pointerup', endPointer);
 canvas.addEventListener('pointercancel', endPointer);

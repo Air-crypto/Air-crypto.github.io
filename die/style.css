@@ -331,3 +331,4 @@ body.panel-open #rl-stat{opacity:0}
 
 .hud-r .mono,.wordmark .mono{white-space:nowrap}
 @media (max-width:600px){.env-k,.hud kbd{display:none}.wordmark .mono{letter-spacing:.08em;font-size:9px}.hud-r .frame-btn{padding:9px 12px 8px}}
+body.env-rl .edge.bot{height:122px}

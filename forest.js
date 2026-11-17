@@ -37,7 +37,7 @@ const aliases={about:'me',experience:'work',studentlife:'me',hardware:'projects/
 const routeForOpen={about:'me',experience:'work',projects:'projects',life:'life',contact:'contact',studentlife:'me',hardware:'projects/systems',littlethings:'life/little',flights:'life/flights',madison:'life/madison',aurora:'life/aurora',eclipse:'life/eclipse',sanfrancisco:'life/sf',skating:'life/skating',gallery:'life',swimming:'life/madison'};
 async function loadPage(path){
  const file=path.split('#')[0];
- if(!cache.has(file))cache.set(file,fetch(file+'?v=forest2').then(r=>{if(!r.ok)throw Error('Could not load '+file);return r.text()}).then(text=>new DOMParser().parseFromString(text,'text/html')).catch(e=>{cache.delete(file);throw e}));
+ if(!cache.has(file))cache.set(file,fetch(file+'?v=forest3').then(r=>{if(!r.ok)throw Error('Could not load '+file);return r.text()}).then(text=>new DOMParser().parseFromString(text,'text/html')).catch(e=>{cache.delete(file);throw e}));
  return cache.get(file);
 }
 function hrefFor(key){
@@ -142,7 +142,7 @@ async function buildStory(entry){
  const result=document.createDocumentFragment();
  if(entry.kind==='contact'){
   const section=document.createElement('section');
-  section.innerHTML='<p>say hello.</p><p>I’m always happy to talk about machine learning, software, hardware, or something you’re building.</p><p><a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a></p><p><a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">linkedin</a> · <a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">github</a></p><p><a href="assets/arihan-yadav-resume.pdf" target="_blank" rel="noopener noreferrer">my résumé ↗</a></p>';result.append(section);return result;
+  section.innerHTML='<p>say hello.</p><p>San Francisco/New York</p><p>I’m always happy to talk about machine learning, software, hardware, or something you’re building.</p><p><a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a></p><p><a href="https://linkedin.com/in/arihanyadav" target="_blank" rel="noopener noreferrer">linkedin</a> · <a href="https://github.com/Air-crypto" target="_blank" rel="noopener noreferrer">github</a></p><p><a href="assets/arihan-yadav-resume.pdf" target="_blank" rel="noopener noreferrer">my résumé ↗</a></p>';result.append(section);return result;
  }
  const doc=await loadPage(entry.path),all=[...doc.querySelectorAll(entry.selector)];
  const selected=entry.index===undefined?all:[all[entry.index]];

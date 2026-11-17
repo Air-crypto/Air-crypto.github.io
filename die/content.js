@@ -245,7 +245,7 @@ export const ITEMS = [
     id: 'projects/website', group: 'projects', title: 'This website', short: 'This website',
     date: '2026', year: '2026', tags: ['three.js', 'WebGL'],
     stat: { value: '1', label: 'scene, no page loads' },
-    body: ['Hand-written HTML, CSS, and JavaScript with three.js. The whole site is one silicon die: every block, trace, and marker is a piece of my work.'],
+    body: ['Hand-written HTML, CSS, and JavaScript with three.js. The whole site is one scene with two worlds: a silicon die, and a small island game where an RL agent runs value iteration and walks quest to quest. Zoom into any region to stand in it and see its items over the horizon.'],
     links: [link('Source code', 'https://github.com/Air-crypto/Air-crypto.github.io'), link('The previous version (a tree)', 'tree.html')],
   },
 

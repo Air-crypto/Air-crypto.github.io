@@ -284,7 +284,7 @@ body.view-travel #intro{opacity:0;transform:translateY(16px)}
 body.view-travel #labels{opacity:1}
 #you{position:absolute;left:0;top:0;pointer-events:none;color:#ffd27a;font-size:10px;padding:2px 6px;border:1px solid rgba(255,210,122,.5);background:rgba(5,7,13,.7);will-change:transform}
 .rlabel.done b::after{content:" ✓";font-family:var(--mono);font-size:.4em;color:var(--accent);vertical-align:middle}
-.ilabel.found{opacity:.55!important}
+.ilabel.show.found{opacity:.55}
 #game-hud{position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:30;display:none;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
 body.world-env #game-hud{display:flex}
 .gh-stats{display:flex;gap:16px;padding:8px 14px 7px;font-size:10px;color:var(--ink);background:rgba(5,7,13,.62);border:1px solid rgba(255,210,122,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);white-space:nowrap}
@@ -319,3 +319,11 @@ body.world-env #reward{top:auto;bottom:96px;text-align:center;line-height:1.7;fo
 body.world-env.view-overview #game-hud .gh-isles{display:none}
 #game-hud{flex-direction:row;flex-wrap:wrap;justify-content:center}
 .gh-stats{order:1}.gh-btns{order:2;align-self:center}.gh-isles{order:3;flex-basis:100%;justify-content:center}
+
+/* Game HUD sits at the bottom so it never covers island labels; toasts at the top. */
+#game-hud{top:auto;bottom:58px;left:auto;right:var(--pad);transform:none;align-items:flex-end;flex-direction:column-reverse;flex-wrap:nowrap}
+#game-hud .gh-row{display:flex;gap:12px;align-items:center}
+body.world-env #reward{bottom:auto;top:84px}
+body.world-env .readout{bottom:16px}
+@media (max-width:600px){#game-hud{bottom:auto;top:62px;right:auto;left:50%;transform:translateX(-50%);align-items:center}body.world-env #reward{top:auto;bottom:110px}body.world-env .readout{bottom:62px}}
+#game-hud .gh-btns button{background:rgba(5,7,13,.72);padding:4px 8px}

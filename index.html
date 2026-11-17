@@ -17,7 +17,7 @@
 <link rel="preload" href="die/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="die/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="die/three.module.min.js">
-<link rel="stylesheet" href="die/style.css?v=9">
+<link rel="stylesheet" href="die/style.css?v=10">
 </head>
 <body class="is-loading">
 <a class="skip" href="#a11y">Skip to a plain list of everything</a>
@@ -59,9 +59,9 @@
 </section>
 <div class="readout mono" aria-hidden="true"><span id="coords"></span><span id="hud-line"></span></div>
 <div id="game-hud" aria-label="Episode stats">
-  <div class="gh-stats mono"><span id="gh-ep"></span><span id="gh-step"></span><span id="gh-ret"></span><span id="gh-found"></span><span id="gh-par"></span><span id="gh-best"></span></div>
+  <div class="gh-row"><div class="gh-stats mono"><span id="gh-ep"></span><span id="gh-step"></span><span id="gh-ret"></span><span id="gh-found"></span><span id="gh-par"></span><span id="gh-best"></span></div>
+  <div class="gh-btns"><button type="button" id="gh-hint" class="mono" aria-pressed="true">Hint · on</button><button type="button" id="gh-reset" class="mono">New episode</button></div></div>
   <div class="gh-isles mono" id="gh-isles"></div>
-  <div class="gh-btns"><button type="button" id="gh-hint" class="mono" aria-pressed="true">Hint · on</button><button type="button" id="gh-reset" class="mono">New episode</button></div>
 </div>
 <div id="complete" role="dialog" aria-modal="true" aria-labelledby="cp-title" hidden>
   <div class="cp-inner">

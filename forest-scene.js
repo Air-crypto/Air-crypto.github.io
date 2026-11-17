@@ -103,8 +103,10 @@ let textAreas=[];
 const textFade=surface(256,128),fc=textFade.getContext('2d');
 fc.scale(1,.5);
 const fade=fc.createRadialGradient(128,128,0,128,128,128);
-fade.addColorStop(0,'rgba(42,40,44,.92)');
-fade.addColorStop(.6,'rgba(42,40,44,.86)');
+// Softer falloff so label halos read as mist, not holes.
+fade.addColorStop(0,'rgba(42,40,44,.9)');
+fade.addColorStop(.45,'rgba(42,40,44,.8)');
+fade.addColorStop(.75,'rgba(42,40,44,.35)');
 fade.addColorStop(1,'rgba(42,40,44,0)');
 fc.fillStyle=fade;fc.fillRect(0,0,256,256);
 function drawGroundArt(){
@@ -158,8 +160,16 @@ function setTarget(){
   const p=planner.stories.get(view.key).rect;
   target={x:(W<700?26:Math.max(60,(W/zoom-Math.min(p.w,640))*.5))-p.x,y:H/zoom*.20-p.y};
  }else{
-  const p=planner.branches.get(view.group)?.point(.45)||anchor(view.group);
+  const b=planner.branches.get(view.group),p=b?.point(.45)||anchor(view.group);
   target={x:W/zoom*.5-p.x,y:H/zoom*.48-p.y};
+  // Frame all leaf labels when they fit; otherwise keep the top ones on screen.
+  if(b?.nodes?.length){
+   let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+   for(const n of b.nodes){x0=Math.min(x0,n.x);x1=Math.max(x1,n.x);y0=Math.min(y0,n.y);y1=Math.max(y1,n.y)}
+   const vw=W/zoom,vh=H/zoom,padX=W<700?90:130,padTop=W<700?80:90,padBottom=W<700?110:120;
+   target.x=x1-x0<=vw-2*padX?vw/2-(x0+x1)/2:padX-x0;
+   target.y=y1-y0<=vh-padTop-padBottom?padTop+(vh-padTop-padBottom)/2-(y0+y1)/2:padTop-y0;
+  }
  }
  if(!initialized&&W&&H){current={x:W*(W<700?.48:.40),y:0};initialized=true}
  if(paused)current={...target};
@@ -252,7 +262,7 @@ function render(){
  ctx.restore();
  ctx.fillStyle=pattern;ctx.fillRect(0,0,visibleWidth,visibleHeight);
  // Thin the ink only where it passes behind text; the landscape stays continuous.
- for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>visibleHeight)continue;ctx.drawImage(textFade,a.x-26,y-16,a.w+52,a.h+32)}
+ for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>visibleHeight)continue;ctx.drawImage(textFade,a.x-34,y-22,a.w+68,a.h+44)}
 }
 function isMoving(){
  return Math.abs(current.x-target.x)+Math.abs(current.y-target.y)>.05||

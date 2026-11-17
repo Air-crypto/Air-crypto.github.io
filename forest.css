@@ -156,3 +156,33 @@ body{font-size:14px}#forest-viewport{inset:9px}#landscape{left:9px;top:9px}.pape
 #return-hint[hidden]{display:none}
 #return-hint:hover,#return-hint:focus-visible{opacity:1}
 @media(max-width:700px){#return-hint{top:17px;font-size:10px}}
+
+/* UX pass: name, first-visit hint, readable overlays, compact music. */
+#signature{position:fixed;top:22px;left:34px;z-index:45;font-size:13px;letter-spacing:.03em;color:var(--ink);opacity:.75;padding:4px 2px;transition:opacity .2s}
+#signature:hover,#signature:focus-visible{opacity:1}
+#home-hint{position:fixed;top:24px;left:50%;transform:translateX(-50%);margin:0;padding:4px 8px;font-size:12px;color:var(--muted);opacity:.65;z-index:44;pointer-events:none;white-space:nowrap;transition:opacity .4s}
+body:not([data-mode=home]) #home-hint,body.explored #home-hint{opacity:0}
+#return-hint{background:#2a282cc7;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:12px;padding:4px 12px}
+.branch-link{transition:color .15s}
+.story-trail{font-size:12px!important;color:var(--muted);margin:0 0 18px!important;letter-spacing:.02em}
+.story-trail a{padding-bottom:2px!important}
+.music{width:auto;display:flex;flex-direction:column;align-items:flex-end}
+.music-note{align-self:stretch}
+.music-bar{padding:0 14px 0 7px}
+.music-bar button{flex:none}
+#music-panel{right:0}
+body:not([data-mode=home]) .music-note{display:none}
+@media(max-width:700px){
+#signature{top:15px;left:22px;font-size:12px}
+#home-hint{top:42px;font-size:11px}
+#return-hint{top:40px}
+}
+@media(prefers-reduced-motion:reduce){#home-hint,#signature{transition:none}}
+/* Alignment pass: one left margin, one control height, one top line. */
+#signature{top:24px;left:54px;padding:4px 0;line-height:1.35}
+#home-hint{top:46px;left:54px;transform:none;padding:0;font-size:11px;line-height:1.35}
+.back{height:30px}
+.music-note>span{top:14px}
+.music-note{margin-bottom:15px}
+@media(max-width:700px){#signature{top:15px;left:20px}#home-hint{top:36px;left:20px}#return-hint{top:52px}}
+@media(max-width:700px){#return-hint{top:36px}}

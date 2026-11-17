@@ -62,7 +62,7 @@ function updateTextMask(){
  cancelAnimationFrame(maskFrame);
  maskFrame=requestAnimationFrame(()=>{
   const origin=viewport.getBoundingClientRect(),areas=[],scale=window.forestScene.zoom;
-  for(const root of [nav,story,document.querySelector('.music-note'),document.getElementById('return-hint')]){
+  for(const root of [nav,story,document.querySelector('.music-note'),document.getElementById('return-hint'),document.getElementById('signature'),document.getElementById('home-hint')]){
    if(root.hidden)continue;
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
    let node;while((node=walker.nextNode())){
@@ -185,7 +185,9 @@ function makePhoto(image){
    button.classList.add('dither-ready');
   }catch{button.classList.add('failed')}
  }
- if(image.complete)dither();else image.addEventListener('load',()=>{dither();updateTextMask()},{once:true});
+ // Wait for decode so the halftone never samples a blank image.
+ const ready=()=>image.decode?image.decode():new Promise((ok,no)=>image.complete?ok():(image.addEventListener('load',ok,{once:true}),image.addEventListener('error',no,{once:true})));
+ ready().then(()=>{dither();updateTextMask()},()=>{});
  image.addEventListener('error',()=>button.classList.add('failed'),{once:true});
  button.addEventListener('click',()=>{const on=button.classList.toggle('revealed');button.setAttribute('aria-pressed',String(on));});
 }
@@ -233,6 +235,12 @@ async function showStory(key){
  try{
   node.replaceChildren(await buildStory(entries[key]));
   transformLinks(node);initPhotos(node);
+  const e=entries[key];
+  if(e.parent&&menus[e.parent]){
+   const trail=document.createElement('p'),up=document.createElement('a');trail.className='story-trail';
+   up.href=hrefFor(e.parent);up.dataset.route=e.parent;up.textContent=menus[e.parent].label;
+   trail.append(up,document.createTextNode(' / '+e.title));node.prepend(trail);
+  }
  }catch{
   node.innerHTML='<p>This branch could not load.</p>';
   const retry=document.createElement('button');retry.className='retry';retry.textContent='try again';
@@ -248,6 +256,7 @@ async function renderRoute(raw){
  document.title=key?(menus[key]?.label||entries[key]?.title)+' · Arihan Yadav':'Arihan Yadav';
  story.querySelectorAll('video').forEach(v=>v.pause());
  mode=!key?'home':menus[key]?'menu':'story';
+ document.body.dataset.mode=mode;if(key)document.body.classList.add('explored');
  const group=mode==='home'?'':menus[key]?key:entries[key].parent||'me';
  activeMenu=menus[group]||null;
  for(const [id,node] of articleViews)node.hidden=mode!=='story'||id!==key;
@@ -298,5 +307,8 @@ document.querySelector('.skip-link').addEventListener('click',event=>{event.prev
 createNavigation();
 window.forestScene.onLayout(layout);
 viewport.addEventListener('scroll',()=>{if(mode==='home')layout();else updateTextMask()},{passive:true});
-renderRoute(location.hash.slice(1));
+// Deep links: settle the home tree first, then grow the linked branch as a click would.
+const initialRoute=location.hash.slice(1);
+renderRoute('');
+if(initialRoute)document.fonts.ready.then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{if(location.hash.slice(1)===initialRoute)renderRoute(initialRoute)})));
 })();

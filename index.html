@@ -17,7 +17,7 @@
 <link rel="preload" href="die/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="die/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="die/three.module.min.js">
-<link rel="stylesheet" href="die/style.css?v=1">
+<link rel="stylesheet" href="die/style.css?v=3">
 </head>
 <body class="is-loading">
 <a class="skip" href="#tour">Skip to content</a>
@@ -44,11 +44,12 @@
     <a href="#life" data-go="life">Life</a>
     <a href="#io" data-go="io">Contact</a>
   </nav>
-  <button class="frame-btn mono" id="index-open" type="button" aria-haspopup="dialog" aria-controls="index">Index <kbd>/</kbd></button>
+  <div class="hud-r"><button class="env-btn mono" id="env-toggle" type="button" aria-pressed="false" title="Switch the background between the silicon die and a live RL gridworld">Env · Silicon</button><button class="frame-btn mono" id="index-open" type="button" aria-haspopup="dialog" aria-controls="index">Index <kbd>/</kbd></button></div>
 </header>
 
 <ol class="rail" aria-hidden="true"></ol>
 <div class="readout mono" aria-hidden="true"><span id="coords">X +000.0 · Z +000.0</span><span id="layer">L0 · CORE</span><span class="hint-drag">Drag to look · click a node</span></div>
+<p id="rl-stat" class="mono" aria-live="off"></p>
 
 <main id="tour" tabindex="-1"></main>
 
@@ -89,7 +90,7 @@
 </aside>
 
 <noscript><div class="noscript"><p>This site draws its scene with JavaScript. Everything is also on plain pages:</p><p><a href="portfolio.html">About &amp; work</a> · <a href="projects.html">Projects</a> · <a href="life.html">Life</a> · <a href="gallery.html">Photos</a> · <a href="mailto:apyadav@wisc.edu">apyadav@wisc.edu</a></p></div><style>body.is-loading #loader{display:none}</style></noscript>
-<script type="module" src="die/app.js?v=1"></script>
+<script type="module" src="die/app.js?v=3"></script>
 <script src="music.js?v=3" defer></script>
 </body>
 </html>

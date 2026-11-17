@@ -2,7 +2,7 @@
 
 **Status:** live. One page and one WebGL scene. Every piece of work sits on a silicon die, and scrolling, the panels, the search and the music all move the same scene.
 
-**Verified:** desktop (1440×900) and phone (390×844) in headless Chrome with WebGL, and in Safari on macOS. Deep links like `#projects/ebike` open the right panel. The tree's old links still resolve.
+**Verified:** desktop (1440×900) and phone (390×844) in headless Chrome with WebGL, and in Safari on macOS. Pointer checks: drag rotates the view, marker click opens the panel, an off-panel click closes it, and the wheel scrolls over the scene. Deep links like `#projects/ebike` open the right panel. The tree's old links still resolve.
 
 ## How it works
 
@@ -21,7 +21,8 @@ flowchart TB
 
 - **Scroll** flies the camera block by block (About, Work, Projects, Life, I/O). A particle core above the die morphs to fit each section: chip, neural net, logic waveform, lattice, globe, beacon.
 - **Hover** a row or card and its trace lights up on the die. Hover a marker on the die and the matching row lights up.
-- **Click** anything to open its panel. The camera then frames that node and the list steps back. Use ← → to move through a group, and Esc to close.
+- **Drag** the scene to look around. **Click** a marker on the die, or any row or card, to open its panel. The scene dims so the rest of the section stays readable and clickable. Clicking anywhere off the panel, or Esc, closes it. Use ← → to move through a group.
+- **Env switch** (top right) turns the die into a live RL gridworld (`die/rl.js`). Walls follow the block outlines. Value iteration spreads out from a goal: the item you point at, a reward you click onto the die, or an automatic tour of the section. The dot grid rises into the value landscape, agents act ε-greedy on it, and a copper line draws the greedy path from the core. The readout shows sweeps, Δ, episodes and mean return. The choice is remembered; `?env=rl` links straight to it.
 - **Index** (`/`) searches everything at once.
 - **Music** playing speeds up the trace packets and pulses the core.
 - Photos are in full color and open in a lightbox. Reduced motion is respected.
@@ -31,6 +32,7 @@ flowchart TB
 - `index.html`: page shell, header, panel, index, lightbox, music.
 - `die/content.js`: all content. Edit here to add or change work, projects, or photos.
 - `die/app.js`: scene, scroll tour, panel, index, routing.
+- `die/rl.js`: gridworld, value iteration, agents, greedy path.
 - `die/style.css`: layout and type (Instrument Serif, IBM Plex Mono, Inter; OFL).
 - `die/three.module.min.js`: three.js r170 (MIT, see `die/three-LICENSE.txt`).
 - `tree.html` + `forest*.js`: the previous tree version, kept and linked from the footer.

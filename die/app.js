@@ -1,5 +1,6 @@
 import * as THREE from './three.module.min.js';
 import { PERSON, GROUPS, ITEMS, ALIASES } from './content.js';
+import { Gym } from './rl.js';
 
 // ---------- helpers ----------
 const $ = (s, r = document) => r.querySelector(s);
@@ -195,7 +196,7 @@ function routeFor(id, k) {
   return chamfer(pts);
 }
 
-let grid, gridMat, markers, markerGeo, packets, packetGeo, core, coreGeo, coreMat, traceGroup, silk;
+let grid, gridMat, markers, markerGeo, packets, packetGeo, core, coreGeo, coreMat, traceGroup, silk, gym, agents, agentGeo, beacon, pathLine;
 const traces = new Map();
 const state = {
   t: 0, mouse: new THREE.Vector2(-9, -9), mouseWorld: new THREE.Vector3(0, -999, 0), mouseIn: 0,
@@ -205,24 +206,31 @@ const state = {
 };
 
 const vertGrid = `
-attribute float aR; attribute float aZ;
-uniform float uTime,uPix,uRip; uniform vec3 uMouse; uniform vec3 uFocus; uniform float uFocusA;
-varying float vB; varying float vF;
+attribute float aR; attribute float aZ; attribute float aV; attribute float aW;
+uniform float uTime,uPix,uRip,uRL; uniform vec3 uMouse; uniform vec3 uFocus; uniform float uFocusA;
+varying float vB; varying float vF; varying float vV; varying float vW;
 void main(){
   vec3 p=position;
   float dm=length(p.xz-uMouse.xz); float m=exp(-dm*dm/140.0)*uMouse.y;
   float df=length(p.xz-uFocus.xz); float f=exp(-df*df/70.0)*uFocusA;
   float r=length(p.xz); float ring=exp(-pow(r-mod(uTime*30.0,300.0),2.0)/30.0)*uRip;
-  p.y+=m*2.0+f*1.4+ring*.9;
-  vB=.12+aR*.12+aZ*.26+m*.85+f*.7+ring*.55; vF=f+m*.6;
+  float lv=pow(aV,.55);
+  p.y+=(m*2.0+f*1.4+ring*.9)*(1.0-uRL*.6)+uRL*(lv*8.0+aW*.8);
+  float chip=.12+aR*.12+aZ*.26+m*.85+f*.7+ring*.55;
+  float rl=.05+lv*1.25+aW*.7+m*.5+ring*.25;
+  vB=mix(chip,rl,uRL); vF=(f+m*.6)*(1.0-uRL*.7); vV=lv; vW=aW;
   vec4 mv=modelViewMatrix*vec4(p,1.0);
-  gl_PointSize=uPix*(1.0+m*1.2+f*.9)*(150.0/-mv.z);
+  gl_PointSize=uPix*(1.0+m*1.2+f*.9+uRL*(lv*1.1+aW*.4))*(150.0/-mv.z);
   gl_Position=projectionMatrix*mv;
 }`;
 const fragGrid = `
-uniform vec3 uCol,uHot; varying float vB; varying float vF;
+uniform vec3 uCol,uHot; uniform float uRL; varying float vB; varying float vF; varying float vV; varying float vW;
 void main(){ vec2 c=gl_PointCoord-.5; float d=length(c); if(d>.5) discard;
-  float a=smoothstep(.5,.05,d)*clamp(vB,0.0,1.4); gl_FragColor=vec4(mix(uCol,uHot,clamp(vF,0.0,1.0)),a); }`;
+  vec3 chip=mix(uCol,uHot,clamp(vF,0.0,1.0));
+  vec3 ramp=mix(vec3(.16,.28,.62),vec3(.45,.85,1.0),smoothstep(.0,.45,vV));
+  ramp=mix(ramp,vec3(1.0,.64,.38),smoothstep(.55,.85,vV)); ramp=mix(ramp,vec3(1.0),smoothstep(.93,1.0,vV));
+  vec3 rl=mix(ramp,vec3(.78,.62,1.0),vW);
+  float a=smoothstep(.5,.05,d)*clamp(vB,0.0,1.4); gl_FragColor=vec4(mix(chip,rl,uRL),a); }`;
 const vertSprite = `
 attribute vec3 color; attribute float aS; uniform float uPix; varying vec3 vC;
 void main(){ vC=color; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=uPix*aS*(200.0/-mv.z); gl_Position=projectionMatrix*mv; }`;
@@ -399,11 +407,31 @@ function buildScene() {
   gg.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
   gg.setAttribute('aR', new THREE.Float32BufferAttribute(ar, 1));
   gg.setAttribute('aZ', new THREE.Float32BufferAttribute(az, 1));
+  gym = new Gym({ n, step, die: DIE, blocks: BLOCKS, rand });
+  gg.setAttribute('aV', new THREE.BufferAttribute(gym.shown, 1));
+  gg.setAttribute('aW', new THREE.BufferAttribute(Float32Array.from(gym.wall), 1));
   gridMat = new THREE.ShaderMaterial({
     vertexShader: vertGrid, fragmentShader: fragGrid, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uTime: { value: 0 }, uPix: { value: pix * 2.4 }, uRip: { value: 0 }, uMouse: { value: new THREE.Vector3(0, 0, 0) }, uFocus: { value: new THREE.Vector3(0, 0, 0) }, uFocusA: { value: 0 }, uCol: { value: new THREE.Color('#9fb1d6') }, uHot: { value: new THREE.Color('#73d9ff') } },
+    uniforms: { uTime: { value: 0 }, uPix: { value: pix * 2.4 }, uRip: { value: 0 }, uRL: { value: 0 }, uMouse: { value: new THREE.Vector3(0, 0, 0) }, uFocus: { value: new THREE.Vector3(0, 0, 0) }, uFocusA: { value: 0 }, uCol: { value: new THREE.Color('#9fb1d6') }, uHot: { value: new THREE.Color('#73d9ff') } },
   });
   grid = new THREE.Points(gg, gridMat); scene.add(grid);
+
+  // RL agents: a bright head and a short fading trail each.
+  const AP = gym.agents.length * 7;
+  agentGeo = new THREE.BufferGeometry();
+  agentGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(AP * 3), 3));
+  agentGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(AP * 3), 3));
+  agentGeo.setAttribute('aS', new THREE.BufferAttribute(new Float32Array(AP), 1));
+  agents = new THREE.Points(agentGeo, spriteMaterial(pix * 4.6)); agents.frustumCulled = false; agents.visible = false; scene.add(agents);
+  // Goal beacon
+  const bp = []; for (let k = 0; k < 60; k++) bp.push(0, k * .35, 0);
+  beacon = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(bp, 3))
+    .setAttribute('color', new THREE.Float32BufferAttribute(bp.map((_, k) => k % 3 === 0 ? 1 : k % 3 === 1 ? .7 : .45), 3))
+    .setAttribute('aS', new THREE.Float32BufferAttribute(bp.filter((_, k) => k % 3 === 0).map((_, k) => 1.6 - k / 60), 1)), spriteMaterial(pix * 2.6));
+  beacon.visible = false; scene.add(beacon);
+  pathLine = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(300 * 3), 3)),
+    new THREE.LineBasicMaterial({ color: 0xffb27a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  pathLine.frustumCulled = false; scene.add(pathLine);
 
   // Traces
   traceGroup = new THREE.Group(); scene.add(traceGroup);
@@ -516,6 +544,7 @@ function setSection(i) {
   if (gl && !state.panel) setShape(sec.shape, clock());
   document.documentElement.style.setProperty('--accent', sec.group ? GROUPS[sec.group].hue : '#73d9ff');
   document.body.classList.toggle('at-top', i === 0);
+  secEls.forEach((el, k) => el.classList.toggle('current', k === i));
 }
 
 // Lede word reveal, scrubbed by scroll.
@@ -603,28 +632,41 @@ canvas.addEventListener('pointerdown', e => {
 canvas.addEventListener('pointerup', e => {
   if (e.pointerType === 'touch') {
     const tp = state.tap; state.tap = null;
-    if (tp && Math.hypot(e.clientX - tp.x, e.clientY - tp.y) < 10 && performance.now() - tp.t < 400) { const id = nodeAt(e.clientX, e.clientY); if (id) activate(id); }
+    if (tp && Math.hypot(e.clientX - tp.x, e.clientY - tp.y) < 10 && performance.now() - tp.t < 400) { const id = nodeAt(e.clientX, e.clientY); if (id) activate(id); else if (state.panel) closePanel(); else if (state.env === 'rl') dropReward(e); }
     return;
   }
   const d = state.drag; state.drag = null; canvas.classList.remove('dragging');
-  if (d && !d.moved) { const id = nodeAt(e.clientX, e.clientY); if (id) activate(id); else if (state.panel) closePanel(); }
+  if (d && !d.moved) { const id = nodeAt(e.clientX, e.clientY); if (id) activate(id); else if (state.panel) closePanel(); else if (state.env === 'rl') dropReward(e); }
 });
 // Wheel on the canvas still scrolls the page (canvas does not block it).
 
 // DOM elements with data-id light their node and open the panel.
 document.addEventListener('pointerover', e => { const el = e.target.closest('[data-id]'); if (el && !el.closest('#panel')) setLit(el.dataset.id); });
 document.addEventListener('pointerout', e => { const el = e.target.closest('[data-id]'); if (el && !el.contains(e.relatedTarget) && state.lit === el.dataset.id && !state.hover) setLit(state.panel); });
-document.addEventListener('focusin', e => { const el = e.target.closest('[data-id]'); if (el) setLit(el.dataset.id); });
+document.addEventListener('focusout', e => { const el = e.target.closest('[data-id]'); if (el && state.lit === el.dataset.id && !state.hover && !state.panel) setLit(null); });
+document.addEventListener('focusin', e => { const el = e.target.closest('[data-id]'); if (el && el.matches(':focus-visible')) setLit(el.dataset.id); });
 document.addEventListener('click', e => {
   const go = e.target.closest('[data-go]');
   if (go) { e.preventDefault(); goSection(go.dataset.go); return; }
   const lb = e.target.closest('[data-lb]');
   if (lb) { openLightbox(lb.dataset.lb, +lb.dataset.lbI); return; }
   const el = e.target.closest('[data-id]');
-  if (!el || e.metaKey || e.ctrlKey) return;
+  if (!el) {
+    // Click outside the open panel closes it. The canvas handles its own clicks.
+    if (state.panel && e.target !== canvas && !e.target.closest('#panel,#lightbox,#index,.music,.hud,a,button,input,video')) closePanel();
+    return;
+  }
+  if (e.metaKey || e.ctrlKey) return;
   if (el.tagName === 'A' && el.dataset.id.startsWith('io/')) return; // real links
   e.preventDefault(); openPanel(el.dataset.id);
 });
+
+function dropReward(e) {
+  ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+  const hit = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(plane, hit) || Math.abs(hit.x) > DIE - 3 || Math.abs(hit.z) > DIE - 3) return;
+  state.rlManual = { x: hit.x, z: hit.z, until: clock() + 14 };
+}
 
 function activate(id) {
   const it = byId.get(id); if (!it) return;
@@ -772,6 +814,87 @@ addEventListener('hashchange', () => route(location.hash));
 const music = $('.music');
 new MutationObserver(() => { state.musicOn = music.classList.contains('is-playing'); }).observe(music, { attributes: true, attributeFilter: ['class'] });
 
+// ---------- RL environment ----------
+state.env = 'chip'; state.rlMix = 0; state.rlAcc = 0; state.rlTick = 0; state.rlAuto = { i: 0, next: 0 };
+try { const q = new URLSearchParams(location.search).get('env'); state.env = q === 'rl' || q === 'chip' ? q : (localStorage.getItem('die-env') || 'chip'); } catch {}
+const envBtn = $('#env-toggle'), rlStat = $('#rl-stat');
+function setEnv(mode) {
+  state.env = mode;
+  envBtn.innerHTML = `<span class="env-k">Env · </span>${mode === 'rl' ? 'RL gym' : 'Silicon'}`;
+  envBtn.setAttribute('aria-pressed', String(mode === 'rl'));
+  document.body.classList.toggle('env-rl', mode === 'rl');
+  $('.hint-drag').textContent = mode === 'rl' ? 'Drag to look · click the die to drop a reward' : 'Drag to look · click a node';
+  try { localStorage.setItem('die-env', mode); } catch {}
+}
+envBtn.addEventListener('click', () => setEnv(state.env === 'rl' ? 'chip' : 'rl'));
+setEnv(state.env);
+
+function goalLabel(id) { const it = byId.get(id); return it ? (it.short || it.title) : ''; }
+function pickGoal(now) {
+  // Priority: the item you point at or opened, then a reward you dropped, then an auto tour of this section.
+  const id = state.lit || state.panel;
+  if (id && nodes.get(id)) return { ...nodes.get(id).pos, label: goalLabel(id) };
+  if (state.rlManual && now < state.rlManual.until) return { x: state.rlManual.x, z: state.rlManual.z, label: 'Dropped reward' };
+  const g = SECTIONS[state.section].group;
+  const pool = [...nodes.values()].filter(nd => !g || g === 'io' ? nd.group !== 'io' : nd.group === g);
+  if (now > state.rlAuto.next) { state.rlAuto.i++; state.rlAuto.next = now + 9; }
+  const nd = pool[state.rlAuto.i % pool.length];
+  return { ...nd.pos, label: goalLabel(nd.id) };
+}
+function updateGym(dt, t) {
+  const on = state.rlMix > .01;
+  agents.visible = beacon.visible = pathLine.visible = on;
+  if (!on) return;
+  const now = clock(), g = pickGoal(now);
+  if (gym.setGoal(g.x, g.z)) { state.rlGoal = g; state.rlFlash = 1; }
+  // About 70 sweeps a second: the value front visibly spreads one cell per sweep.
+  state.rlAcc += dt * (reduced.matches ? 2000 : 70);
+  const k = Math.min(6, Math.floor(state.rlAcc)); state.rlAcc -= k; if (k) gym.sweep(k);
+  // Agents act every 70 ms and glide in between.
+  state.rlTick += dt;
+  const STEP = .05;
+  while (state.rlTick > STEP) { state.rlTick -= STEP; gym.act(); for (const a of gym.agents) if (a.hit) state.rlFlash = 1; }
+  gym.ease(reduced.matches ? 1 : 1 - Math.pow(.004, dt));
+  grid.geometry.attributes.aV.needsUpdate = true;
+
+  const f = state.rlTick / STEP, A = agentGeo.attributes, P = A.position.array, Cc = A.color.array, S = A.aS.array, mix = state.rlMix;
+  const hv = (i, j) => Math.pow(gym.shown[gym.idx(i, j)], .55) * 8 + .9;
+  let q = 0;
+  for (const a of gym.agents) {
+    const pts = [[lerp(a.pi, a.i, f), lerp(a.pj, a.j, f)], ...a.trail];
+    pts.forEach(([i, j], k) => {
+      const [x, z] = gym.xz(i, j);
+      P[q * 3] = x; P[q * 3 + 1] = hv(Math.round(i), Math.round(j)) * mix + .6; P[q * 3 + 2] = z;
+      const fade = mix * (k === 0 ? 1.15 : .55 * (1 - k / 7));
+      const c = k === 0 ? [1, .72, .45] : [.45, .85, 1];
+      Cc[q * 3] = c[0] * fade; Cc[q * 3 + 1] = c[1] * fade; Cc[q * 3 + 2] = c[2] * fade;
+      S[q] = k === 0 ? 1.5 : 1.1 - k * .12; q++;
+    });
+  }
+  A.position.needsUpdate = A.color.needsUpdate = A.aS.needsUpdate = true;
+  if (t - (state.pathT || 0) > .2) {
+    state.pathT = t;
+    const path = gym.greedyPath(), L = pathLine.geometry.attributes.position.array;
+    path.forEach(([i, j], k) => { const [x, z] = gym.xz(i, j); L[k * 3] = x; L[k * 3 + 1] = hv(i, j) * mix + .5; L[k * 3 + 2] = z; });
+    pathLine.geometry.setDrawRange(0, path.length > 1 && gym.V[gym.idx(path[0][0], path[0][1])] > 0 ? path.length : 0);
+    pathLine.geometry.attributes.position.needsUpdate = true;
+  }
+  pathLine.material.opacity = .85 * mix;
+  // Goal beacon rises from the peak and flashes on each reward.
+  state.rlFlash = Math.max(0, (state.rlFlash || 0) - dt * 2.5);
+  const [gx, gz] = gym.xz(gym.gi, gym.gj);
+  beacon.position.set(gx, 8.5 * mix, gz);
+  beacon.scale.set(1, (.6 + state.rlFlash * .8) * mix, 1);
+  beacon.material.uniforms.uPix.value = (1 + state.rlFlash * 1.5) * Math.min(devicePixelRatio || 1, 1.75) * 2.6;
+  if (rlStat && (t * 6 | 0) !== state.rlStatT) {
+    state.rlStatT = t * 6 | 0;
+    rlStat.textContent = `Value iteration · γ ${gym.gamma} · sweep ${pad3(Math.min(999, gym.sweeps))} · Δ ${gym.delta.toFixed(3)} · ${gym.episodes} episodes · R̄ ${gym.meanReturn().toFixed(2)} · goal: ${state.rlGoal?.label || ''}`;
+  }
+}
+
+// Test hook: where a node sits on screen.
+window.__die = { screenOf(id) { const nd = nodes.get(id); if (!nd) return null; v3.set(nd.pos.x, 1.2, nd.pos.z).project(camera); return { x: (v3.x + 1) / 2 * innerWidth, y: (1 - v3.y) / 2 * innerHeight }; }, state, gym: () => gym };
+
 // ---------- frame loop ----------
 const look = new THREE.Vector3(), pos = new THREE.Vector3(), tmp = new THREE.Vector3(), coreTarget = new THREE.Vector3();
 let last = performance.now(), lastScroll = scrollY, scrollVel = 0;
@@ -801,7 +924,7 @@ function frame(now) {
     const intro = smooth(clamp(state.intro));
     st.pos.lerp(tmp.set(st.pos.x * .3, 330, 330), 1 - intro);
     // Drag orbit around the look point; it eases back while not dragging.
-    if (!state.drag) { state.yaw *= Math.pow(.25, dt); state.pitch *= Math.pow(.25, dt); }
+    if (!state.drag) { state.yaw *= Math.pow(.5, dt); state.pitch *= Math.pow(.5, dt); }
     tmp.copy(st.pos).sub(st.look).applyAxisAngle(new THREE.Vector3(0, 1, 0), state.yaw);
     tmp.y += state.pitch * tmp.length() * .6;
     // Mouse parallax
@@ -832,6 +955,9 @@ function frame(now) {
     mu.uMouse.value.set(state.mouseWorld?.x || 0, state.mouseIn && !state.drag ? 1 : 0, state.mouseWorld?.z || 0);
     mu.uFocusA.value = lerp(mu.uFocusA.value, state.lit ? 1 : 0, 1 - Math.pow(.01, dt));
     mu.uRip.value = rm ? 0 : (state.musicOn ? .9 : .35) * (1 - Math.exp(-state.intro * 2));
+    state.rlMix = lerp(state.rlMix, state.env === 'rl' ? 1 : 0, rm ? 1 : 1 - Math.pow(.03, dt));
+    mu.uRL.value = state.rlMix;
+    updateGym(dt, t);
 
     // Traces, markers, packets
     const ma = markerGeo.attributes.aS.array, pa = packetGeo.attributes;

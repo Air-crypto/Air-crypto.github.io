@@ -304,3 +304,30 @@ body.panel-open .scrim{background:radial-gradient(120% 90% at 30% 45%,transparen
 body.panel-open #tour{opacity:.16;filter:blur(1px)}
 body.panel-open #tour:hover{opacity:.5;filter:none}
 body.panel-open .readout,body.panel-open .rail{opacity:0}
+
+/* Text layer only catches pointers on real content, so the scene gets drags and clicks. */
+#tour,.sec{pointer-events:none}
+.sec>*{pointer-events:auto}
+.sec>.hint{pointer-events:none}
+
+/* Open panel: the scene dims and the current section's list stays readable. */
+#scene{transition:opacity .6s var(--ease)}
+body.panel-open #scene{opacity:.34}
+body.panel-open #tour{opacity:1;filter:none}
+body.panel-open #tour:hover{opacity:1}
+body.panel-open .sec:not(.current){opacity:.25}
+.sec{transition:opacity .5s var(--ease)}
+body.panel-open .scrim{background:radial-gradient(120% 90% at 30% 45%,transparent 40%,rgba(5,7,13,.7) 100%),linear-gradient(90deg,rgba(5,7,13,.6) 0%,rgba(5,7,13,.3) 60%,transparent)}
+
+/* Env switch and RL readout */
+.hud-r{display:flex;align-items:center;gap:18px}
+.env-btn{color:var(--dim);padding:8px 0;border-bottom:1px dashed var(--line);transition:color .2s,border-color .2s}
+.env-btn:hover{color:var(--ink)}
+.env-btn[aria-pressed="true"]{color:var(--copper);border-color:var(--copper)}
+#rl-stat{position:fixed;left:var(--pad);bottom:44px;z-index:46;margin:0;color:var(--dim);font-size:10px;max-width:min(860px,calc(100vw - 2*var(--pad) - 260px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .4s}
+body.env-rl #rl-stat{opacity:1}
+body.panel-open #rl-stat{opacity:0}
+@media (max-width:600px){.hud-r{gap:12px}.env-btn{font-size:10px}#rl-stat{display:none}}
+
+.hud-r .mono,.wordmark .mono{white-space:nowrap}
+@media (max-width:600px){.env-k,.hud kbd{display:none}.wordmark .mono{letter-spacing:.08em;font-size:9px}.hud-r .frame-btn{padding:9px 12px 8px}}

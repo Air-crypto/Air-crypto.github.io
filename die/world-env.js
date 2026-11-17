@@ -142,22 +142,28 @@ export function createEnvWorld({ renderer, pix, GROUPS, inGroup, byId, reduced }
   // landmarks
   const glow = (c, i = 1.6) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: i, flatShading: true });
   const stone = new THREE.MeshStandardMaterial({ color: 0x9a96a8, flatShading: true, roughness: .9 });
+  // Push a landmark out of the view cone of its island's standing spot.
+  const clear = (k, x, z) => {
+    const st = regions[k].stand, dx = x - st.eye.x, dz = z - st.eye.z, a = dx * st.dir.x + dz * st.dir.z, l = dx * -st.dir.z + dz * st.dir.x;
+    if (a > -8 && a < 50 && Math.abs(l) < 15) { const nl = (l < 0 ? -1 : 1) * 17; return [st.eye.x + st.dir.x * a - st.dir.z * nl, st.eye.z + st.dir.z * a + st.dir.x * nl]; }
+    return [x, z];
+  };
   const add = (geo, mat, x, z, y = null, rot = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, (y ?? H(x, z)), z); m.rotation.y = rot; scene.add(m); return m; };
   // spawn ring
   const A = ISLES.about, spawn = add(new THREE.TorusGeometry(4.2, .35, 6, 24), glow(0xcfd8ff, 1.2), A.x, A.z, H(A.x, A.z) + 5.2);
   add(new THREE.CylinderGeometry(4.6, 5.2, .8, 8), stone, A.x, A.z, H(A.x, A.z) + .3);
   // ridge obelisks
   const W = ISLES.work, obelisks = [];
-  for (let i = 0; i < 3; i++) { const a = -.9 + i * .9, x = W.x + Math.cos(a) * 22 + 14, z = W.z + Math.sin(a) * 22 + 18; const o = add(new THREE.BoxGeometry(2, 14, 2), glow(0x2c4c6a, .4), x, z, H(x, z) + 6); obelisks.push(o); add(new THREE.OctahedronGeometry(1.1), glow(0x73d9ff, 2), x, z, H(x, z) + 14.5); }
+  for (let i = 0; i < 3; i++) { const a = -.9 + i * .9; const [x, z] = clear('work', W.x + Math.cos(a) * 22 + 14, W.z + Math.sin(a) * 22 + 18); const o = add(new THREE.BoxGeometry(2, 14, 2), glow(0x2c4c6a, .4), x, z, H(x, z) + 6); obelisks.push(o); add(new THREE.OctahedronGeometry(1.1), glow(0x73d9ff, 2), x, z, H(x, z) + 14.5); }
   // workshop pylons and a gear
   const Pj = ISLES.projects;
-  for (let i = 0; i < 4; i++) { const a = i * 1.57 + .4, x = Pj.x + Math.cos(a) * 16, z = Pj.z + Math.sin(a) * 16; add(new THREE.CylinderGeometry(.8, 1.2, 10, 6), stone, x, z, H(x, z) + 5); add(new THREE.SphereGeometry(1.1, 8, 6), glow(0xffa565, 2.2), x, z, H(x, z) + 10.6); }
+  for (let i = 0; i < 4; i++) { const a = i * 1.57 + .4; const [x, z] = clear('projects', Pj.x + Math.cos(a) * 16, Pj.z + Math.sin(a) * 16); add(new THREE.CylinderGeometry(.8, 1.2, 10, 6), stone, x, z, H(x, z) + 5); add(new THREE.SphereGeometry(1.1, 8, 6), glow(0xffa565, 2.2), x, z, H(x, z) + 10.6); }
   const gear = add(new THREE.TorusGeometry(6, 1.1, 4, 12), glow(0xffa565, .6), Pj.x, Pj.z, H(Pj.x, Pj.z) + 12); gear.rotation.x = Math.PI / 2.4;
   // grove lanterns
   const Lf = ISLES.life, lanterns = [];
-  for (let i = 0; i < 9; i++) { const a = i * .7, r = 10 + (i % 3) * 5, x = Lf.x + 10 + Math.cos(a) * r, z = Lf.z - 6 + Math.sin(a) * r; lanterns.push(add(new THREE.SphereGeometry(.55, 8, 6), glow(0xff86b8, 2.5), x, z, Math.max(H(x, z), 0) + 3 + rand() * 2)); }
+  for (let i = 0; i < 9; i++) { const a = i * .7, r = 10 + (i % 3) * 5; const [x, z] = clear('life', Lf.x + 10 + Math.cos(a) * r, Lf.z - 6 + Math.sin(a) * r); lanterns.push(add(new THREE.SphereGeometry(.55, 8, 6), glow(0xff86b8, 2.5), x, z, Math.max(H(x, z), 0) + 3 + rand() * 2)); }
   // lighthouse
-  const Io = ISLES.io, lx = Io.x - 6, lz = Io.z + 8, ly = H(lx, lz);
+  const Io = ISLES.io, [lx, lz] = clear('io', Io.x - 6, Io.z + 8), ly = H(lx, lz);
   add(new THREE.CylinderGeometry(2.2, 3.4, 18, 10), new THREE.MeshStandardMaterial({ color: 0xe9e4dc, flatShading: true }), lx, lz, ly + 9);
   add(new THREE.CylinderGeometry(2.6, 2.6, 1.2, 10), new THREE.MeshStandardMaterial({ color: 0xb35a4a, flatShading: true }), lx, lz, ly + 12);
   add(new THREE.SphereGeometry(1.8, 10, 8), glow(0x8dffc4, 3), lx, lz, ly + 19.5);

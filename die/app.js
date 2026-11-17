@@ -466,7 +466,7 @@ new MutationObserver(() => { state.musicOn = music.classList.contains('is-playin
 const worldBtn = $('#world-toggle');
 async function getWorld(key) {
   if (!worlds[key]) {
-    if (key === 'env') { const { createEnvWorld } = await import('./world-env.js?v=5'); worlds.env = createEnvWorld(ctx); worlds.env.sim.onReward = popReward; }
+    if (key === 'env') { const { createEnvWorld } = await import('./world-env.js?v=6'); worlds.env = createEnvWorld(ctx); worlds.env.sim.onReward = popReward; }
     else worlds.die = createDieWorld(ctx);
   }
   return worlds[key];

@@ -7,7 +7,7 @@ const ctx=canvas.getContext('2d');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const motion=document.getElementById('motion-toggle');
 const INK='#b8bbc3',BG='#2a282c';
-let W=0,H=0,DPR=1,scroll=0,clock=0,last=0,frame=0,paused=reduced.matches;
+let W=0,H=0,DPR=1,scroll=0,panX=0,clock=0,last=0,frame=0,paused=reduced.matches;
 let view={type:'home',group:'',item:-1},current={x:0,y:0},target={x:0,y:0},initialized=false;
 const branches=new Map(['work','projects','life','me'].map(key=>[key,{key,open:false,growth:0,count:0}]));
 let layoutCallback=()=>{},connector=0;
@@ -180,7 +180,7 @@ function drawSoil(groundY){
   rng=8721+level*331;
   const worldY=H+current.y+level*220+100,y=worldY-scroll;
   if(y < -100 || y>H+100)continue;
-  for(let x=0;x<W;x+=r(4,12)){
+  for(let x=-W;x<W*2;x+=r(4,12)){
    const wave=Math.sin(x*.012+level)*11+Math.sin(x*.033)*3;
    ctx.globalAlpha=r(.35,.85);ctx.fillStyle=INK;ctx.beginPath();ctx.ellipse(x,y+wave,r(.6,1.6),r(.5,1.2),r(-.3,.3),0,6.28);ctx.fill();
   }
@@ -193,13 +193,14 @@ function drawSoil(groundY){
    const x=(r(0,W)+current.x-W*.40+W)%W,y=H+current.y+band*150+r(0,150)-scroll;
    if(y<groundY+12||y<-60||y>H+60)continue;
    const big=j%19===0,size=big?r(30,68):r(2,10);
-   ctx.drawImage(rocks[(j+band)%rocks.length],x,y,size,size*.8);
+   for(const offset of [-W,0,W])ctx.drawImage(rocks[(j+band)%rocks.length],x+offset,y,size,size*.8);
   }
  }
 }
 function render(){
  if(!W||!H)return;
  ctx.clearRect(0,0,W,H);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(-panX,0);
  rng=92272;
  for(let i=0;i<115;i++){
   const x=random()*W,y=(random()*H*1.8-clock*r(.1,.5)-scroll*.15)%(H+10);
@@ -212,6 +213,7 @@ function render(){
  renderBoughs();
  const groundShift=(current.x-W*(W<700?.48:.40))%W;
  for(const x of [groundShift-W,groundShift,groundShift+W])ctx.drawImage(ground,0,0,ground.width,ground.height,x,groundY-136,W,170);
+ ctx.restore();
  ctx.fillStyle=pattern;ctx.fillRect(0,0,W,H);
  // Thin the ink only where it passes behind text; the landscape stays continuous.
  for(const a of textAreas){const y=a.y-scroll;if(y+a.h<0||y>H)continue;ctx.drawImage(textFade,a.x-26,y-16,a.w+52,a.h+32)}
@@ -253,7 +255,7 @@ function setView(next){
  if(paused)for(const b of branches.values())b.growth=b.open?1:0;
  setTarget();layoutCallback();refresh();
 }
-viewport.addEventListener('scroll',()=>{scroll=viewport.scrollTop;if(paused)render()},{passive:true});
+viewport.addEventListener('scroll',()=>{scroll=viewport.scrollTop-H;panX=viewport.scrollLeft-W;if(paused)render()},{passive:true});
 document.addEventListener('visibilitychange',refresh);
 motion.addEventListener('click',()=>{paused=!paused;syncMotion()});
 function syncMotion(){motion.setAttribute('aria-pressed',String(paused));motion.setAttribute('aria-label',paused?'Resume animation':'Pause animation');motion.textContent=paused?'▷':'Ⅱ';refresh()}
@@ -265,6 +267,7 @@ window.forestScene={
  onLayout(callback){layoutCallback=callback},
  setTextAreas(areas){textAreas=areas;if(paused)render()},
  get size(){return {width:W,height:H,rootDepth:1800}},
+ get scrollOrigin(){return {left:W,top:H}},
  get state(){return {view:{...view},camera:{...current},branches:[...branches.values()].map(b=>({...b}))}},
  render
 };

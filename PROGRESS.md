@@ -18,3 +18,5 @@ Local Safari in the macOS VM: persistent desktop tree → projects → eBike art
 `osascript -l JavaScript tests/forest-scene.test.js`: PASS at 1250×540 and 302×856. Checks camera continuity, original twig attachment, progressive growth, no growth reset when opening an article, retention of another open limb, default reset, root extent, and canvas identity. Drawing is stubbed in this state regression; Safari supplies visual acceptance.
 
 Static site, no build step. Local preview: `python3 -m http.server 8765 --bind 127.0.0.1`. Publish to main through GitHub Pages and verify the deployed files and interactions.
+
+The world includes scrollable space above and on both sides of the default view. Vertical and horizontal scrolling can revisit earlier limbs after an article opens; content is not clipped at the current camera position. Empty background, including gaps between paragraphs, resets to the default view. Local Safari verified upward access to all project leaves after opening eBike content, horizontal scrolling, and reset from the panned view.

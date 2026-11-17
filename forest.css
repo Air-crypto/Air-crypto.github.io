@@ -11,7 +11,7 @@ a:focus-visible,button:focus-visible{outline:none;color:#e6e8ed;text-decoration:
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .skip-link{position:fixed;left:25px;top:-90px;z-index:100;padding:10px;background:var(--bg)}
 .skip-link:focus{top:20px}
-#forest-viewport{position:absolute;inset:13px 14px 12px;overflow:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;outline:none}
+#forest-viewport{position:absolute;inset:13px 14px 12px;overflow:auto;scrollbar-width:none;touch-action:pan-x pan-y;overscroll-behavior:contain;outline:none}
 #forest-viewport::-webkit-scrollbar{display:none}
 #landscape{position:fixed;left:14px;top:13px;pointer-events:none;z-index:0}
 #world{position:relative;min-height:100%;isolation:isolate;z-index:1}

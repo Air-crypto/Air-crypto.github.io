@@ -39,6 +39,7 @@ function run(){
   assert(scene.state.branches.every(b=>b.growth===0&&!b.open),'Reset failed to retract expanded branches');
   assert(Math.abs(scene.state.camera.y)<.1,'Reset failed to return the ground');
   assert(scene.size.rootDepth===1800,'Deep scrollable roots were lost');
+  assert(scene.scrollOrigin.left===dims[0]&&scene.scrollOrigin.top===dims[1],'World lacks scrollable space above or beside the default view');
   assert(document.getElementById('landscape')===canvas,'Landscape canvas was replaced');
   results.push(dims.join('x')+': connected branches, continuous camera, no growth restart, retained limbs, reset, deep roots PASS');
  }

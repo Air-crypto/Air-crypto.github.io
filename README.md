@@ -40,3 +40,5 @@ GitHub Pages serves the static site from `main`.
 ## Regression check
 
 On macOS, from the repository root: `osascript -l JavaScript tests/forest-scene.test.js`. This runs the actual scene code with drawing stubs and checks continuous camera motion, twig attachment, retained branch growth, flat reset behavior, and deep-root extent at desktop and mobile dimensions. Visual acceptance is performed separately in Safari.
+
+The world includes scrollable space above and on both sides of the default view. Vertical and horizontal scrolling can revisit earlier limbs after an article opens; content is not clipped at the current camera position. Empty background, including gaps between paragraphs, resets to the default view. Local Safari verified upward access to all project leaves after opening eBike content, horizontal scrolling, and reset from the panned view.

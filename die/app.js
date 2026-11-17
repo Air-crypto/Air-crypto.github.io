@@ -89,7 +89,7 @@ function buildA11y() {
 // ---------- cards in the sky ----------
 const cardState = { list: [], region: null, k: 1 };
 function buildCards(g) {
-  const items = inGroup(g), st = w.regions[g].stand;
+  const items = inGroup(g), st = w.regions[g].stand; cardState.arc = null;
   cards.innerHTML = items.map(cardHTML).join('');
   cards.style.setProperty('--accent', GROUPS[g].hue);
   const els = $$('.card3d', cards);
@@ -139,10 +139,13 @@ function buildCardsGame(g, items, els, st) {
   const f = st.dir, r = new THREE.Vector3(-f.z, 0, f.x), R = 60;
   cardState.list = items.map((it, i) => {
     const az = (i - (n - 1) / 2) * stepAz;
-    const anchor = st.eye.clone().addScaledVector(f, R * Math.cos(el) * Math.cos(az)).addScaledVector(r, R * Math.cos(el) * Math.sin(az)).add(new THREE.Vector3(0, R * Math.sin(el), 0));
+    // Lower outer cards so the row projects flat instead of curving up at the edges.
+    const e = Math.atan(Math.tan(el) * Math.cos(az));
+    const anchor = st.eye.clone().addScaledVector(f, R * Math.cos(e) * Math.cos(az)).addScaledVector(r, R * Math.cos(e) * Math.sin(az)).add(new THREE.Vector3(0, R * Math.sin(e), 0));
     els[i].style.setProperty('--d', (i * .05 + .35) + 's');
-    return { id: it.id, el: els[i], anchor, i };
+    return { id: it.id, el: els[i], anchor, i, az };
   });
+  cardState.arc = { eye: st.eye.clone(), f: f.clone(), r, R, el };
   const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
   state.gd.maxYaw = Math.max(0, ((n - 1) * stepAz + cw / ppr) / 2 - hfov / 2 + (mob ? .12 : .06));
   state.gd.lookElev = lookElev;
@@ -160,7 +163,13 @@ function refreshCardStatus() {
     q.textContent = found ? '✓ Found · open anytime' : `◆ +1.00 reward · ${d} step${d === 1 ? '' : 's'} away`;
   }
 }
-function clearCards() { cards.classList.remove('in'); cardState.region = null; setTimeout(() => { if (!cardState.region) { cards.innerHTML = ''; beams.innerHTML = ''; cardState.list = []; } }, 500); }
+// Edge hints when cards sit outside the view.
+const more = ['l', 'r'].map(s => { const b = document.createElement('button'); b.type = 'button'; b.className = 'more-hint mono more-' + s; b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); state.gd.yaw = clamp(state.gd.yaw + (s === 'r' ? .35 : -.35), -state.gd.maxYaw - .25, state.gd.maxYaw + .25); }); document.body.appendChild(b); return b; });
+function moreHint(l, r, y) {
+  const on = state.view === 'ground' && !state.panel;
+  [[more[0], l, `‹ ${l} more`], [more[1], r, `${r} more ›`]].forEach(([b, n, s]) => { b.classList.toggle('on', on && n > 0); if (n) { b.textContent = s; if (y) b.style.top = y + 'px'; } });
+}
+function clearCards() { cardState.arc = null; more.forEach(b => b.classList.remove('on')); cards.classList.remove('in'); cardState.region = null; setTimeout(() => { if (!cardState.region) { cards.innerHTML = ''; beams.innerHTML = ''; cardState.list = []; } }, 500); }
 
 // ---------- camera ----------
 const tmpV = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
@@ -551,7 +560,7 @@ new MutationObserver(() => { state.musicOn = music.classList.contains('is-playin
 const worldBtn = $('#world-toggle');
 async function getWorld(key) {
   if (!worlds[key]) {
-    if (key === 'env') { const { createEnvWorld } = await import('./world-env.js?v=9'); worlds.env = createEnvWorld(ctx); hookGame(worlds.env); }
+    if (key === 'env') { const { createEnvWorld } = await import('./world-env.js?v=10'); worlds.env = createEnvWorld(ctx); hookGame(worlds.env); }
     else worlds.die = createDieWorld(ctx);
   }
   return worlds[key];
@@ -686,10 +695,16 @@ function frame(now) {
     }
     // Ground cards and beams
     if (cardState.list.length) {
-      const ls = beams.children;
+      const ls = beams.children; let offL = 0, offR = 0, rowY = 0;
       cardState.list.forEach((cd, i) => {
+        if (cardState.arc && cd.az !== undefined) {
+          // Keep the row flat relative to where the camera looks now.
+          const A = cardState.arc, e = Math.atan(Math.tan(A.el) * Math.cos(cd.az - state.gd.yaw - state.gd.look));
+          cd.anchor.copy(A.eye).addScaledVector(A.f, A.R * Math.cos(e) * Math.cos(cd.az)).addScaledVector(A.r, A.R * Math.cos(e) * Math.sin(cd.az)); cd.anchor.y += A.R * Math.sin(e);
+        }
         tmpV.copy(cd.anchor); if (!rm) tmpV.y += Math.sin(t * 1.1 + i * .9) * .35;
-        const p = project(tmpV), vis = p.ok && p.x > -300 && p.x < innerWidth + 300;
+        const p = project(tmpV), vis = p.ok && p.x > -300 && p.x < innerWidth + 300, hw = cd.el.offsetWidth * cardState.k / 2;
+        if (p.ok) { if (p.x + hw * .4 < 0) offL++; else if (p.x - hw * .4 > innerWidth) offR++; else rowY = Math.max(rowY, p.y + cd.el.offsetHeight * cardState.k / 2 + 26); }
         cd.el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(${cardState.k})`;
         cd.el.style.visibility = vis ? '' : 'hidden';
         const line = ls[i * 2], dot = ls[i * 2 + 1], m = w.markerPos(cd.id), q = m && project(m);
@@ -700,6 +715,7 @@ function frame(now) {
           line.style.display = dot.style.display = '';
         } else if (line) line.style.display = dot.style.display = 'none';
       });
+      moreHint(offL, offR, rowY);
     }
     if ((t * 8 | 0) !== state.coT) {
       state.coT = t * 8 | 0; const L = state.cam.look;
@@ -710,7 +726,7 @@ function frame(now) {
 }
 
 // Test hook
-window.__site = { state, screenOf: id => w && project(w.markerPos(id)), regionScreen: g => w && project(w.regions[g].center), cards: () => cardState.list.map(c => ({ id: c.id, ...c.el.getBoundingClientRect().toJSON() })), world: () => w, setWorld };
+window.__site = { state, go: (g, o) => enterRegion(g, o), screenOf: id => w && project(w.markerPos(id)), regionScreen: g => w && project(w.regions[g].center), cards: () => cardState.list.map(c => ({ id: c.id, ...c.el.getBoundingClientRect().toJSON() })), world: () => w, setWorld };
 
 // ---------- boot ----------
 async function boot() {

@@ -327,3 +327,7 @@ body.world-env #reward{bottom:auto;top:84px}
 body.world-env .readout{bottom:16px}
 @media (max-width:600px){#game-hud{bottom:auto;top:62px;right:auto;left:50%;transform:translateX(-50%);align-items:center}body.world-env #reward{top:auto;bottom:110px}body.world-env .readout{bottom:62px}}
 #game-hud .gh-btns button{background:rgba(5,7,13,.72);padding:4px 8px}
+.more-hint{position:fixed;top:50%;z-index:24;transform:translateY(-50%);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:rgba(5,7,13,.78);border:1px solid var(--line);padding:7px 10px;opacity:0;pointer-events:none;transition:opacity .4s}
+.more-hint.on{opacity:1;pointer-events:auto}
+.more-hint:hover{border-color:var(--soft)}
+.more-l{left:10px}.more-r{right:10px}

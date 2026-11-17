@@ -239,7 +239,7 @@ export function createEnvWorld({ renderer, pix, GROUPS, inGroup, byId, reduced }
 
   // ---------- landmarks ----------
   const add = (geo, mat, x, z, y = null, ry = 0, shadow = true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y ?? H(x, z), z); m.rotation.y = ry; m.castShadow = shadow; m.receiveShadow = true; scene.add(m); return m; };
-  const clearSpot = (x, z) => { if (!inView(x, z, 4)) return [x, z]; for (let a = 0; a < 6.28; a += .3) for (let r = 8; r < 40; r += 4) { const nx = x + Math.cos(a) * r, nz = z + Math.sin(a) * r; if (!inView(nx, nz, 4) && H(nx, nz) > 1.5 && !nearBridge(nx, nz)) return [nx, nz]; } return [x, z]; };
+  const clearSpot = (x, z, pad = 4) => { if (!inView(x, z, pad)) return [x, z]; for (let a = 0; a < 6.28; a += .3) for (let r = 8; r < 40; r += 4) { const nx = x + Math.cos(a) * r, nz = z + Math.sin(a) * r; if (!inView(nx, nz, pad) && H(nx, nz) > 1.5 && !nearBridge(nx, nz)) return [nx, nz]; } return [x, z]; };
   const wall = flat(0xe8e0d0), roof = flat(0x9a4e3c), wood = flat(0x7a5a3e), stoneM = flat(0x9a96a8);
   function house(x, z, ry = 0, s = 1) {
     const y = H(x, z);
@@ -271,7 +271,8 @@ export function createEnvWorld({ renderer, pix, GROUPS, inGroup, byId, reduced }
   add(new THREE.BoxGeometry(9, 5, 7), flat(0xc9a27c), wx, wz, wy + 2.5, .3); const sr = add(new THREE.BoxGeometry(10, .6, 8), flat(0x5b5f6e), wx, wz, wy + 5.6, .3); sr.rotation.z = .12;
   add(new THREE.CylinderGeometry(.6, .7, 4, 6), flat(0x7d6a5c), wx + 2.4, wz - 1.4, wy + 7.4);
   const chimney = new THREE.Vector3(wx + 2.4, wy + 9.6, wz - 1.4);
-  const gear = add(new THREE.TorusGeometry(6, 1.1, 4, 12), glow(0xffa565, .6), Pj.x + 14, Pj.z + 14, H(Pj.x + 14, Pj.z + 14) + 12, 0, true); gear.rotation.x = Math.PI / 2.4;
+  const [gX, gZ] = clearSpot(Pj.x + 14, Pj.z + 14, 10);
+  const gear = add(new THREE.TorusGeometry(6, 1.1, 4, 12), glow(0xffa565, .6), gX, gZ, Math.max(H(gX, gZ), 0) + 12, 0, true); gear.rotation.x = Math.PI / 2.4;
   for (let i = 0; i < 4; i++) { const a = i * 1.57 + .4, [x, z] = clearSpot(Pj.x + Math.cos(a) * 16, Pj.z + Math.sin(a) * 16); add(new THREE.CylinderGeometry(.8, 1.2, 9, 6), stoneM, x, z, H(x, z) + 4.5); add(new THREE.SphereGeometry(1.1, 8, 6), glow(0xffa565, 2.2), x, z, H(x, z) + 9.6, 0, false); }
   // grove: lanterns, a torii-like gate, fireflies
   const Lf = ISLES.life, lanterns = [];
